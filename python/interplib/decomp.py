@@ -70,6 +70,8 @@ class SingularLU:
                 # Column i of U
                 ci = mem[:j, i].flatten()
                 v = mtx[j, i] - np.dot(lj, ci)
+                if np.abs(v) < rcrit or np.abs(v) < acrit:
+                    v = 0.0
                 mem[j, i] = v
 
         self._mem = mem
@@ -164,7 +166,7 @@ class SingularLU:
             s = np.sum(self._mem[i, i + 1 :][:, None] * out[i + 1 :, :], axis=0)
             pv = self._mem[i, i]
             if pv == 0:
-                if np.abs(s) >= acrit or np.abs(s) > rcrit:
+                if np.any(np.abs(s) >= acrit) or np.any(np.abs(s) > rcrit):
                     raise RuntimeWarning(
                         "Solving a system where the RHS has components in the nullspace"
                         " of the system."

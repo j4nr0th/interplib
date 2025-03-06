@@ -23,6 +23,7 @@ from interplib._mimetic import (
     compute_element_matrices_2,
     #     continuity,
 )
+from interplib.decomp import SingularLU
 from interplib.kforms.eval import _ctranslate, translate_equation
 from interplib.kforms.kform import KBoundaryProjection
 from interplib.mimetic.mimetic2d import BasisCache, Element2D, Mesh2D, element_rhs
@@ -87,6 +88,8 @@ class ElementTree:
     n_dof_leaves: int
     # Indices of elements on the highest level
     top_indices: npt.NDArray[np.intp]
+    # Level of each element
+    levels: npt.NDArray[np.uint32]
 
     def __init__(
         self,
@@ -124,6 +127,7 @@ class ElementTree:
             all_elems += check_refinement(predicate, e, 0, max_levels)
 
         levels = np.array([e.level for e in all_elems], np.uint32)
+        self.levels = levels
 
         self.elements = tuple(all_elems)
         del all_elems
@@ -266,6 +270,53 @@ class ElementTree:
     def n_elements(self) -> int:
         """Number of elements in the ElementTree."""
         return len(self.elements)
+
+    def get_children(self, i: int, /) -> tuple[int, int, int, int]:
+        """Get children of a non-leaf element.
+
+        Children are in the following order:
+
+        1. bottom left
+        2. bottom right
+        3. top left
+        4. top right
+        """
+        if not self.children[i]:
+            raise ValueError("Leaf element has no children.")
+        indices = np.flatnonzero(self.levels[i:] == self.levels[i] + 1)[:4] + i
+        assert len(indices) == 4
+
+        return int(indices[0]), int(indices[1]), int(indices[2]), int(indices[3])
+
+    # def get_next_sibling(self, i: int, /) -> int:
+    #     """Get the index of the next sibling.
+
+    #     If there are no more elements left, the index after the current one is returned.
+    #     """
+    #     nmax = self.n_elements
+    #     if i + 1 == nmax:
+    #         return nmax
+    #     lvl = self.levels[i]
+    #     pos = np.argmax(self.levels[i + 1 :] == lvl) + i + 1
+    #     if self.levels[pos] != lvl:
+    #         return nmax
+
+    #     return int(pos)
+
+    def get_next_nonchild(self, i: int, /) -> int:
+        """Get the index of the next sibling.
+
+        If there are no more elements left, the index after the current one is returned.
+        """
+        nmax = self.n_elements
+        if i + 1 == nmax:
+            return nmax
+        lvl = self.levels[i]
+        pos = np.argmax(self.levels[i + 1 :] <= lvl) + i + 1
+        if self.levels[pos] != lvl:
+            return nmax
+
+        return int(pos)
 
 
 @dataclass(frozen=True)
@@ -590,7 +641,9 @@ def solve_system_2d(
     del bl, br, tr, tl, orde, c_ser
 
     if timed:
-        base_timer.stop("Computing element matrices took {} seconds.")
+        base_timer.stop(
+            f"Computing {len(element_matrix)}" + " element matrices took {} seconds."
+        )
         base_timer.set()
 
     element_vectors: list[npt.NDArray[np.float64]] = list(
@@ -637,6 +690,16 @@ def solve_system_2d(
     if timed:
         base_timer.stop("Assembling the main matrix took {} seconds.")
         base_timer.set()
+
+    inverted = {
+        element_tree.leaf_indices[i]: SingularLU(mat)
+        for i, mat in enumerate(element_matrix)
+    }
+
+    if timed:
+        base_timer.stop("Decomposing element matrices {} seconds.")
+        base_timer.set()
+
     assert len(reverse_matrices) == 0 and len(reverse_vectors) == 0
     # Apply lagrange multipliers for continuity
     continuity_equations: list[ConstraintEquation] = list()
@@ -916,16 +979,13 @@ def solve_system_2d(
         base_timer.stop("Boundary conditions took {} seconds.")
         base_timer.set()
 
-    # TODO: Assemble the system matrix
-
     n_lagrange_eq = len(continuity_equations)
+    n_current = int(mat.shape[0])
     if continuity_equations:
         lag_rows: list[npt.NDArray[np.uint32]] = list()
         lag_cols: list[npt.NDArray[np.uint32]] = list()
         lag_vals: list[npt.NDArray[np.float64]] = list()
         lag_rhs: list[np.float64] = list()
-        n_current: int
-        n_current = int(mat.shape[0])
 
         for i, lag_eq in enumerate(continuity_equations):
             ieq = i + n_current
@@ -952,11 +1012,10 @@ def solve_system_2d(
                 f"Adding {n_lagrange_eq} lagrange multipliers" + " took {} seconds."
             )
             base_timer.set()
-        del continuity_equations
     else:
         matrix = sp.csr_array(mat)
     vector = np.concatenate(vec, dtype=np.float64)
-    del mat, vec
+    # del mat, vec
 
     # from matplotlib import pyplot as plt
 
@@ -971,6 +1030,56 @@ def solve_system_2d(
         base_timer.set()
 
     solution = sla.spsolve(matrix, vector)
+
+    solutions2: list[npt.NDArray[np.float64]] = list()
+    for i, itop in enumerate(element_tree.top_indices):
+        neighbor = element_tree.get_next_nonchild(itop)
+        solutions2.append(
+            invert_element_matrix(
+                cont_indices_edges,
+                cont_indices_nodes,
+                element_tree,
+                itop,
+                element_offsets,
+                element_tree.dof_offsets[-1],
+                inverted,
+                vector[element_offsets[itop] : element_offsets[neighbor]],
+            )
+        )
+    sol2 = np.concatenate(solutions2)
+    if continuity_equations:
+        # TODO
+        # Create the N matrix
+        lagrange_mat = np.zeros((len(continuity_equations), n_current))
+        phi = np.zeros(len(continuity_equations))
+        for i_lag, ceq in enumerate(continuity_equations):
+            lagrange_mat[i_lag, ceq.indices] = ceq.values
+            phi[i] = ceq.rhs
+
+        # Apply A^{-1} to N^T
+        lagrange_mat_t = lagrange_mat.T
+        for i, itop in enumerate(element_tree.top_indices):
+            neighbor = element_tree.get_next_nonchild(itop)
+            sol = invert_element_matrix(
+                cont_indices_edges,
+                cont_indices_nodes,
+                element_tree,
+                itop,
+                element_offsets,
+                element_tree.dof_offsets[-1],
+                inverted,
+                lagrange_mat_t[element_offsets[itop] : element_offsets[neighbor], :],
+            )
+
+            lagrange_mat_t[element_offsets[itop] : element_offsets[neighbor], :] = sol
+        b_mtx = lagrange_mat_t
+        decomp = SingularLU(lagrange_mat @ b_mtx)
+        lambda_vals = decomp.solve(lagrange_mat @ sol2 - phi)
+        sol2 -= b_mtx @ lambda_vals
+        sol2 = np.concatenate((sol2, lambda_vals))
+
+    assert np.allclose(sol2, solution)
+    del sol2, continuity_equations, mat, vec
     del matrix, vector
 
     if timed:
@@ -1068,6 +1177,128 @@ def solve_system_2d(
     )
 
     return (x, y, out, grid, stats)
+
+
+def invert_element_matrix(
+    cont_indices_edges: list[int],
+    cont_indices_nodes: list[int],
+    element_tree: ElementTree,
+    i: int,
+    element_offsets: npt.NDArray[np.uint32],
+    element_sizes: npt.NDArray[np.uint32],
+    inverses: dict[int, SingularLU],
+    rhs: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
+    """Add element matrix of the element with index to the matrix."""
+    # Check if leaf element
+    if (
+        i + 1 == element_tree.n_elements
+        or element_tree.elements[i].level >= element_tree.elements[i + 1].level
+    ):
+        # Leaf element, meaning only the element matrix is added
+        return inverses[i].solve(rhs)
+
+    # A non-leaf element, meaning its four children must be found
+
+    child_indices = element_tree.get_children(i)
+    offset_sibling = element_offsets[element_tree.get_next_nonchild(i)]
+
+    cont = parent_child_equations(
+        cont_indices_edges,
+        cont_indices_nodes,
+        element_offsets,
+        element_tree,
+        i,
+        *child_indices,
+    )
+    n_cont = len(cont)
+
+    begin_indices = (
+        element_offsets[child_indices[0]] - element_offsets[i],
+        element_offsets[child_indices[1]] - element_offsets[i],
+        element_offsets[child_indices[2]] - element_offsets[i],
+        element_offsets[child_indices[3]] - element_offsets[i],
+    )
+    end_indices = (
+        element_offsets[child_indices[1]] - element_offsets[i],
+        element_offsets[child_indices[2]] - element_offsets[i],
+        element_offsets[child_indices[3]] - element_offsets[i],
+        offset_sibling - element_offsets[i] - n_cont,
+    )
+    size = element_sizes[i]
+    offset = element_offsets[i]
+
+    lhs_bl, lhs_br, lhs_tl, lhs_tr = (
+        invert_element_matrix(
+            cont_indices_edges,
+            cont_indices_nodes,
+            element_tree,
+            c_idx,
+            element_offsets,
+            element_sizes,
+            inverses,
+            rhs[begin_indices[j] : end_indices[j]],
+        )
+        for j, c_idx in enumerate(child_indices)
+    )
+
+    # Compute w = A^{-1} v
+    if rhs.ndim == 2:
+        lhs = np.concatenate(
+            (np.zeros((size, rhs.shape[1])), lhs_bl, lhs_br, lhs_tl, lhs_tr)
+        )
+    else:
+        lhs = np.concatenate((np.zeros(size), lhs_bl, lhs_br, lhs_tl, lhs_tr))
+
+    lag_mat = np.zeros((n_cont, lhs.shape[0]))
+    lag_vec = np.zeros(n_cont)
+    for ie, eq in enumerate(cont):
+        lag_mat[ie, eq.indices - offset] = eq.values
+        lag_vec[ie] = eq.rhs
+
+    # if i not in inverses:
+    lag_mat_t = lag_mat.T
+
+    lhs_lag = (
+        invert_element_matrix(
+            cont_indices_edges,
+            cont_indices_nodes,
+            element_tree,
+            c_idx,
+            element_offsets,
+            element_sizes,
+            inverses,
+            lag_mat_t[begin_indices[j] : end_indices[j], :],
+        )
+        for j, c_idx in enumerate(child_indices)
+    )
+
+    # Compute B = A^{-1} N^T
+    for j, lv in enumerate(lhs_lag):
+        lag_mat_t[begin_indices[j] : end_indices[j], :] = lv
+    sm = lag_mat @ lag_mat_t
+    # Invert N A^{-1} N^T
+    sm_decomp = SingularLU(sm)
+    # else:
+    #     sm_decomp = inverses[i]
+
+    # Compute Lagrange multipliers
+    if rhs.ndim == 2:
+        mul_rhs = lag_mat @ lhs - lag_vec[:, None]
+    else:
+        mul_rhs = lag_mat @ lhs - lag_vec
+
+    lagrange_multipliers = np.astype(
+        sm_decomp.solve(mul_rhs),
+        np.float64,
+        copy=False,
+    )
+
+    # Update with the Lagrange multipliers to the real system
+
+    lhs -= lag_mat_t @ lagrange_multipliers
+
+    return np.concatenate((lhs, lagrange_multipliers))
 
 
 def add_element_matrix(
