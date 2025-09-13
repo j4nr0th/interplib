@@ -4,6 +4,7 @@ if (NOT DEFINED SKBUILD_PROJECT_NAME)
     set(SKBUILD_PROJECT_NAME "InterpLib")
 endif ()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C)
 find_package(Python COMPONENTS Interpreter Development.Module Development.SABIModule REQUIRED)
 
@@ -16,125 +17,112 @@ execute_process(
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+set(BASIS_SOURCE_FILES
+        src/basis/basis_set.c
+        src/basis/basis_bernstein.c
+        src/basis/basis_lagrange.c
+        src/basis/basis_legendre.c
+        src/basis/de_rham_sequence.c
+)
+set(BASIS_HEADER_FILES
+        src/basis/basis_set.h
+        src/basis/basis_bernstein.h
+        src/basis/basis_lagrange.h
+        src/basis/basis_legendre.h
+        src/basis/de_rham_sequence.h
+)
 set(COMMON_SOURCE_FILES
-        src/common.c
-        src/error.c
+        src/common/allocator.c
+        src/common/error.c
+        src/common/rw_lock.c
 )
 set(COMMON_HEADER_FILES
-        src/common.h
-        src/common_defines.h
-        src/error.h
+        src/common/allocator.h
+        src/common/common_defines.h
+        src/common/error.h
+        src/common/rw_lock.h
 )
 
-set(INTERP_SOURCE_FILES
-        src/interp/_module.c
-        src/interp/lagrange.c
-        src/interp/cubic_splines.c
-        src/interp/basis1d.c
-        src/interp/polynomial1d.c
-        src/interp/spline1d.c
-        src/interp/bernstein.c
-        src/interp/gausslobatto.c
-)
-set(INTERP_HEADER_FILES
-        src/interp/lagrange.h
-        src/interp/cubic_splines.h
-        src/interp/basis1d.h
-        src/interp/polynomial1d.h
-        src/interp/spline1d.h
-        src/interp/bernstein.h
-        src/interp/gausslobatto.h
+
+set(INTEGRATION_SOURCE_FILES
+        src/integration/integration_rules.c
+        src/integration/gauss_legendre.c
+        src/integration/gauss_lobatto.c
 )
 
-set(MIMETIC_SOURCE_FILES
-        src/mimetic/_module.c
-        src/mimetic/geoidobject.c
-        src/mimetic/lineobject.c
-        src/mimetic/surfaceobject.c
-        src/mimetic/manifold.c
-        src/mimetic/manifold1d.c
-        src/mimetic/manifold2d.c
-)
-set(MIMETIC_HEADER_FILES
-        src/mimetic/module.h
-        src/mimetic/geoidobject.h
-        src/mimetic/lineobject.h
-        src/mimetic/surfaceobject.h
-        src/mimetic/manifold.h
-        src/mimetic/manifold1d.h
-        src/mimetic/manifold2d.h
+set(INTEGRATION_HEADER_FILES
+        src/integration/integration_rules.h
+        src/integration/gauss_legendre.h
+        src/integration/gauss_lobatto.h
 )
 
-set(EVAL_SOURCE_FILES
-        src/mimetic/eval/allocator.c
-        src/mimetic/eval/error.c
-        src/mimetic/eval/evaluation.c
-        src/mimetic/eval/incidence.c
-        src/mimetic/eval/precomp.c
-        src/mimetic/eval/bytecode.c
-        src/mimetic/eval/matrix.c
-        src/mimetic/eval/connectivity.c
-)
-set(EVAL_HEADER_FILES
-        src/mimetic/eval/error.h
-        src/mimetic/eval/allocator.h
-        src/mimetic/eval/evaluation.h
-        src/mimetic/eval/incidence.h
-        src/mimetic/eval/precomp.h
-        src/mimetic/eval/bytecode.h
-        src/mimetic/eval/matrix.h
-        src/mimetic/eval/connectivity.h
+set(POLYNOMIALS_SOURCE_FILES
+        src/polynomials/bernstein.c
+        src/polynomials/lagrange.c
+        src/polynomials/legendre.c
 )
 
-set(MAT_HEADER_FILES
-        src/mimetic/solve/qr_solve.h
-        src/mimetic/solve/svector.h
-        src/mimetic/solve/givens.h
-        src/mimetic/solve/lil_matrix.h
+set(POLYNOMIALS_HEADER_FILES
+        src/polynomials/bernstein.h
+        src/polynomials/lagrange.h
+        src/polynomials/legendre.h
 )
 
-set(MAT_SOURCE_FILES
-        src/mimetic/solve/qr_solve.c
-        src/mimetic/solve/svector.c
-        src/mimetic/solve/givens.c
-        src/mimetic/solve/lil_matrix.c
+set(TOPOLOGY_SOURCE_FILES
+        src/topology/topology.c
 )
 
-Python_add_library(_interp MODULE ${INTERP_SOURCE_FILES} ${COMMON_SOURCE_FILES} WITH_SOABI)# USE_SABI 3.10) STABLE API HATE!
-Python_add_library(_mimetic
-        MODULE
-        ${MIMETIC_SOURCE_FILES}
-        ${EVAL_SOURCE_FILES}
-        ${MAT_SOURCE_FILES}
+set(TOPOLOGY_HEADER_FILES
+        src/topology/topology.h
+)
+
+add_library(interp STATIC
+        ${BASIS_SOURCE_FILES}
         ${COMMON_SOURCE_FILES}
-        WITH_SOABI
-)# USE_SABI 3.10) STABLE API HATE!
-# Python_add_library(_eval MODULE ${EVAL_SOURCE_FILES} ${COMMON_SOURCE_FILES} WITH_SOABI)# USE_SABI 3.10) STABLE API HATE!
-install(TARGETS _interp _mimetic DESTINATION ${SKBUILD_PROJECT_NAME})
+        ${INTEGRATION_SOURCE_FILES}
+        ${TOPOLOGY_SOURCE_FILES}
+        ${POLYNOMIALS_SOURCE_FILES}
+)
 
-#if (CMAKE_BUILD_TYPE EQUAL Debug)
+set_property(TARGET interp PROPERTY C_STANDARD 17)
+target_compile_definitions(interp PRIVATE INTERPLIB_ASSERTS)
+if (CMAKE_C_COMPILER_ID EQUAL "GNU")
+    target_compile_options(interp PRIVATE -Wall -Wextra -fanalyzer -Werror)
+endif ()
+
+set(PYTHON_TOPOLOGY_SOURCE_FILES
+        src/python/topology/geoid_object.c
+        src/python/topology/line_object.c
+        src/python/topology/manifold1d_object.c
+        src/python/topology/manifold2d_object.c
+        src/python/topology/manifold_object.c
+        src/python/topology/surface_object.c
+)
+
+set(PYTHON_NUMERICS_SOURCE_FILES
+        src/python/integration_rule_object.c
+        src/python/basis_set_object.c
+)
+
+Python_add_library(_interp MODULE
+        src/python/module.c
+        ${PYTHON_TOPOLOGY_SOURCE_FILES}
+        ${PYTHON_NUMERICS_SOURCE_FILES}
+        WITH_SOABI)
+target_link_libraries(_interp PRIVATE interp)
+set_property(TARGET _interp PROPERTY C_STANDARD 17)
+install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
 target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS)
-target_compile_definitions(_mimetic PRIVATE INTERPLIB_ASSERTS)
-# target_compile_definitions(_eval PRIVATE INTERPLIB_ASSERTS)
-#endif()
+
 if ("${NumPy_INCLUDE_DIRS}" STREQUAL "")
     message(FATAL_ERROR "NumPy_INCLUDE_DIRS was empty.")
 endif ()
 target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS})
-target_include_directories(_mimetic PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS})
-# target_include_directories(_eval PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS})
 
 if (CMAKE_C_COMPILER_ID EQUAL "GNU")
-    target_compile_options(_interp PRIVATE -Wall -Wextra)
-    target_compile_options(_mimetic PRIVATE -Wall -Wextra -fwhole-program -flto=auto)# -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -g)
-    # target_compile_options(_eval PRIVATE -Wall -Wextra -fwhole-program -flto=auto)# -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -g)
+    target_compile_options(_interp PRIVATE -Wall -Wextra -fwhole-program -flto=auto)
 endif ()
 
-if (OPENMP_FOUND)
-    target_compile_options(_mimetic PRIVATE ${OpenMP_C_FLAGS})
-    target_include_directories(_mimetic PRIVATE ${OpenMP_C_INCLUDE_DIRS})
-    target_link_libraries(_mimetic PRIVATE ${OpenMP_C_LIBRARIES})
-endif ()
 
 enable_testing()
-add_test(NAME pytest COMMAND ${Python_EXECUTABLE} -m pytest WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+include(test_c/CMakeLists.txt)
