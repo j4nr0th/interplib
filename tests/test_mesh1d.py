@@ -1,7 +1,6 @@
 """Test that the 1D mesh and manifold works as would be expected."""
 
-import numpy as np
-from interplib.mimetic import GeoID, Manifold, Manifold1D, Mesh1D
+from interplib._interp import GeoID, Manifold, Manifold1D
 
 
 def test_manifold1d():
@@ -40,32 +39,3 @@ def test_manifold1d():
     except IndexError:
         caught = True
     assert caught, "How did you get a line that far off?"
-
-
-def test_mesh1d():
-    """Check that the mesh works correctly."""
-    n = 30
-    pos = np.linspace(-1, +1, n)
-
-    caught = False
-    try:
-        _ = Mesh1D(pos, np.random.randint(1, 5, pos.size))
-    except ValueError:
-        caught = True
-    assert caught
-
-    caught = False
-    try:
-        _ = Mesh1D(pos, np.random.randint(1, 5, pos.size - 2))
-    except ValueError:
-        caught = True
-    assert caught
-
-    orders = np.random.randint(1, 5, pos.size - 1)
-    msh = Mesh1D(pos, orders)
-
-    for i in range(n - 1):
-        elem = msh.get_element(i)
-        assert elem.order == orders[i]
-        assert elem.xleft == pos[i]
-        assert elem.xright == pos[i + 1]

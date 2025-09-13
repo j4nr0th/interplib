@@ -4,7 +4,7 @@ version = "0.0.1a"
 authors = [{ name = "Jan Roth", email = "r0th.j4n@gmail.com" }]
 description = "Interpolation library designed to handle different topologies."
 requires-python = ">=3.10"
-dependencies = ["numpy>=2.0.0", "scipy", "jax"]
+dependencies = ["numpy>=2.0.0", "scipy"]
 
 
 [build-system]
@@ -59,7 +59,7 @@ docs = [
 
 [tool.mypy]
 mypy_path = "python/interplib"
-plugins = ["npt_promote", "numpy.typing.mypy_plugin"]
+plugins = ["npt_promote"]
 ignore_missing_imports = true
 warn_unused_configs = true
 warn_unused_ignores = true

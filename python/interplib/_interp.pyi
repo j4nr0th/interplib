@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Self
+from collections.abc import Sequence
+from typing import Self, final
 
 import numpy as np
 import numpy.typing as npt
 
-def test() -> str: ...
+from interplib.enum_type import _BasisTypeHint, _IntegrationMethodHint
+
 def lagrange1d(
     roots: npt.ArrayLike, x: npt.ArrayLike, out: npt.NDArray[np.double] | None = None, /
 ) -> npt.NDArray[np.double]:
@@ -241,11 +243,6 @@ def dlagrange1d(
 def d2lagrange1d(
     x: npt.NDArray[np.float64], xp: npt.NDArray[np.float64]
 ) -> npt.NDArray[np.float64]: ...
-def hermite(
-    x: npt.NDArray[np.float64],
-    bc1: tuple[float, float, float],
-    bc2: tuple[float, float, float],
-) -> npt.NDArray[np.float64]: ...
 def bernstein1d(n: int, x: npt.ArrayLike) -> npt.NDArray[np.float64]:
     """Compute Bernstein polynomials of given order at given locations.
 
@@ -303,205 +300,347 @@ def compute_gll(
        Array of integration weights which correspond to the nodes.
     """
     ...
-
-class Basis1D:
-    def __call__(self, x: npt.ArrayLike, /) -> npt.NDArray[np.float64]: ...
-    @property
-    def derivative(self) -> Basis1D: ...
-    @property
-    def antiderivative(self) -> Basis1D: ...
-
-class Polynomial1D(Basis1D):
-    r"""Function with increasing integer power basis.
-
-    Given a set of coefficients :math:`\left\{ a_0, \dots, a_n \right\}`,
-    the resulting polynomial will be:
-
-    .. math::
-
-        p(x) = \sum\limits_{k=0}^n a_k x^k
+@final
+class IntegrationRule:
+    """Type that describes an integration rule.
 
     Parameters
     ----------
-    coefficients : (N,) array_like
-        Coefficients of the polynomial, starting at the constant term, up to the
-        term with the highest power.
+    order : int
+        Order of the integration rule.
+
+    method : interplib.IntegrationMethod, default: "gauss"
+        Method used for integration.
     """
 
-    def __new__(cls, coefficients: npt.ArrayLike, /) -> Self: ...
+    def __new__(cls, order: int, /, method: _IntegrationMethodHint = "gauss") -> Self: ...
     @property
-    def coefficients(self) -> npt.NDArray[np.float64]:
-        """Coefficients of the polynomial."""
-        ...
-
-    def __add__(self, other: Polynomial1D | float) -> Polynomial1D: ...
-    def __radd__(self, other: Polynomial1D | float) -> Polynomial1D: ...
-    def __neg__(self) -> Polynomial1D: ...
-    def __mul__(self, other: Polynomial1D | float) -> Polynomial1D: ...
-    def __rmul__(self, other: Polynomial1D | float) -> Polynomial1D: ...
-    def __pos__(self) -> Polynomial1D: ...
-    def __pow__(self, i: int) -> Polynomial1D: ...
-    @property
-    def derivative(self) -> Polynomial1D:
-        """Return the derivative of the polynomial."""
+    def order(self) -> int:
+        """Order of the integration rule."""
         ...
 
     @property
-    def antiderivative(self) -> Polynomial1D:
-        """Return the antiderivative of the polynomial."""
+    def accuracy(self) -> int:
+        """Highest order of polynomial that is integrated exactly."""
+        ...
+
+    @property
+    def nodes(self) -> npt.NDArray[np.double]:
+        """Integration points on the reference domain."""
+        ...
+
+    @property
+    def weights(self) -> npt.NDArray[np.double]:
+        """Weights associated with the integration nodes."""
+        ...
+
+    @property
+    def pointer(self) -> int:
+        """Pointer of the integration rule."""
+        ...
+
+@final
+class BasisSet:
+    """Type that describes a set of basis functions.
+
+    Parameters
+    ----------
+    basis_type : interplib._typing.BasisType
+        Type of the basis used for the set.
+
+    order : int
+        Order of the basis in the set.
+
+    integration_rule : IntegrationRule
+        Integration rule used with the basis set.
+    """
+
+    def __new__(
+        cls, basis_type: _BasisTypeHint, order: int, integration_rule: IntegrationRule, /
+    ) -> Self: ...
+    @property
+    def values(self) -> npt.NDArray[np.double]:
+        """Values of all basis at integration points."""
         ...
 
     @property
     def order(self) -> int:
-        """Order of the polynomial."""
+        """Order of the basis set."""
         ...
 
-    def __setitem__(self, key: int, value: float | np.floating) -> None: ...
-    @classmethod
-    def lagrange_nodal_basis(cls, nodes: npt.ArrayLike, /) -> tuple[Polynomial1D, ...]:
-        """Return Lagrange nodal polynomial basis on the given set of nodes.
-
-        Parameters
-        ----------
-        nodes : (N,) array_like
-            Nodes used for Lagrange polynomials.
-
-        Returns
-        -------
-        tuple of ``N`` :class:`Polynomial1D`
-            Lagrange basis polynomials, which are one at the node of their index
-         and zero at all other.
-        """
+    @property
+    def pointer(self) -> int:
+        """Pointer of the basis set."""
         ...
 
-    @classmethod
-    def lagrange_nodal_fit(
-        cls, nodes: npt.ArrayLike, values: npt.ArrayLike, /
-    ) -> Polynomial1D:
-        """Use Lagrange nodal polynomial basis to fit a function.
-
-        Equivalent to calling::
-
-            sum(b * y for (b, y) in zip(Polynomial1D.lagrange_nodal_basis(nodes), values)
-
-        Parameters
-        ----------
-        nodes : (N,) array_like
-            Nodes used for Lagrange polynomials.
-        values : (N,) array_like
-            Values of the function at the nodes.
-
-        Returns
-        -------
-        Polynomial1D
-            Polynomial of order ``N`` which matches function exactly at the nodes.
-        """
-        ...
-
-    def offset_by(self, t: float | np.floating, /) -> Polynomial1D:
-        r"""Compute polynomial offset by specified amount.
-
-        The offset polynomial :math:`p^\prime(t)` is such that:
-
-        .. math::
-
-            p^\prime(t) = p(t + t_0),
-
-        where :math:`p(t)` is the original polynomial and :math:`t_0` is the offset.
-
-        Parameters
-        ----------
-        t : float
-           Amount by which to offset the polynomial by.
-
-        Returns
-        -------
-        Polynomial1D
-           Polynomial which has been offset by the specified amount.
-
-        """
-        ...
-
-    def scale_by(self, a: float | np.floating, /) -> Polynomial1D:
-        r"""Compute polynomial scale by specified amount.
-
-        The offset polynomial :math:`p^\prime(t)` is such that:
-
-        .. math::
-
-            p^\prime(t) = p(a \cdot t),
-
-        where :math:`p(t)` is the original polynomial and :math:`a` is the scaling
-        parameter.
-
-        Parameters
-        ----------
-        a : float
-           Amount by which to scale the polynomial by.
-
-        Returns
-        -------
-        Polynomial1D
-           Polynomial which has been scaled by the specified amount.
-
-        """
-        ...
-
-class Spline1D(Basis1D):  # TODO: implement other methods of Poylnomial1D
-    r"""Piecewise polynomial function, defined between nodes.
-
-    Given the set of nodes :math:`\left\{x_0, \dots, x_n \right\}` and sets of
-    coefficients :math:`\left\{A_0, \dots A_{n-1} \right\}`, the polynomial evaluated
-    between nodes :math:`x_i` and :math:`x_{i + 1}` will be:
-
-    .. math::
-
-        p(x) = \sum\limits_{k=0}^M A_i^k \left( 2 \frac{x - x_i}{x_{i+1} - x_{i}} - 1
-        \right)^k ,
-
-    where :math:`A_i^k` is the k-th coefficient of the set :math:`A_i`.
-
-    These splines thus allow for simple stitching of solutions of different 1D elements
-    together, as those are typically defined on a reference element, where the
-    computational space :math:`\xi \in \left[-1, +1\right]` is then mapped to
-    physical space.
+@final
+class GeoID:
+    """Type used to identify a geometrical object with an index and orientation.
 
     Parameters
     ----------
-    nodes : (N + 1,) array_like
-        Sequence of :math:`N + 1` values, which mark where a different set of
-        coefficients is to be used.
-    coefficients : (N, M) array_like
-        Sequence of :math:`M` coefficients for each of the :math:`N` elements.
+    index : int
+        Index of the geometrical object.
+    reversed : any, default: False
+        The object's orientation should be reversed.
     """
 
-    def __new__(cls, nodes: npt.ArrayLike, coefficients: npt.ArrayLike, /) -> Self: ...
+    def __new__(cls, index: int, reverse: object = False) -> Self: ...
     @property
-    def nodes(self) -> npt.NDArray[np.float64]:
-        """Nodes of the spline."""
+    def index(self) -> int:
+        """Index of the object referenced by id."""
         ...
     @property
-    def coefficients(self) -> npt.NDArray[np.float64]:
-        """Coefficients of the polynomials."""
-        ...
-    def __call__(self, x: npt.ArrayLike, /) -> npt.NDArray[np.float64]: ...
-    @property
-    def derivative(self) -> Spline1D:
-        """Return derivative of the spline."""
-        ...
-    @property
-    def antiderivative(self) -> Spline1D:
-        """Return antiderivative of the spline."""
+    def reversed(self) -> bool:
+        """Is the orientation of the object reversed."""
         ...
 
-class Spline1Di(Spline1D):  # TODO: implement other methods of Poylnomial1D
-    def __new__(cls, coefficients: npt.ArrayLike, /) -> Self: ...
+    def __bool__(self) -> bool: ...
+    def __eq__(self, value) -> bool: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __neg__(self) -> GeoID: ...
+
+@final
+class Line:
+    """Geometrical object, which connects two points.
+
+    Parameters
+    ----------
+    begin : GeoID or int
+        ID of the point where the line beings.
+    end : GeoID or int
+        ID of the point where the line ends.
+    """
+
+    def __new__(cls, begin: GeoID | int, end: GeoID | int) -> Self: ...
     @property
-    def nodes(self) -> npt.NDArray[np.float64]: ...
+    def begin(self) -> GeoID:
+        """ID of the point where the line beings."""
+        ...
     @property
-    def coefficients(self) -> npt.NDArray[np.float64]: ...
-    def __call__(self, x: npt.ArrayLike, /) -> npt.NDArray[np.float64]: ...
+    def end(self) -> GeoID:
+        """ID of the point where the line ends."""
+        ...
+
+    def __array__(self, dtype=None, copy=None) -> npt.NDArray: ...
+    def __eq__(self, value) -> bool: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+
+@final
+class Surface:
+    """Two dimensional geometrical object, which is bound by lines.
+
+    Parameters
+    ----------
+    *ids : GeoID or int
+        Ids of the lines which are the boundary of the surface.
+    """
+
+    def __new__(cls, *ids: GeoID | int) -> Self: ...
+    def __array__(self, dtype=None, copy=None) -> npt.NDArray: ...
+    def __getitem__(self, idx: int) -> GeoID: ...
+    def __len__(self) -> int: ...
+    def __eq__(self, value) -> bool: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+
+class Manifold:
+    """A manifold of a finite number of dimensions."""
+
     @property
-    def derivative(self) -> Spline1D: ...
+    def dimension(self) -> int:
+        """Dimension of the manifold."""
+        ...
+
+@final
+class Manifold1D(Manifold):
+    """One dimensional manifold."""
+
     @property
-    def antiderivative(self) -> Spline1D: ...
+    def n_lines(self) -> int:
+        """Number of lines in the manifold."""
+        ...
+
+    @property
+    def n_points(self) -> int:
+        """Number of points in the manifold."""
+        ...
+
+    def get_line(self, index: GeoID | int, /) -> Line:
+        """Get the line of the specified ID."""
+        ...
+
+    def find_line(self, line: Line) -> GeoID:
+        """Find the ID of the specified line."""
+        ...
+
+    @classmethod
+    def line_mesh(cls, segments: int, /) -> Manifold1D:
+        """Create a new Manifold1D which represents a line.
+
+        Parameters
+        ----------
+        segments : int
+            Number of segments the line is split into. There will be one more point.
+
+        Returns
+        -------
+        Manifold1D
+            Manifold that represents the topology of the line.
+        """
+        ...
+
+    def compute_dual(self) -> Manifold1D:
+        """Compute the dual to the manifold.
+
+        Returns
+        -------
+        Manifold1D
+            The dual to the manifold.
+        """
+        ...
+
+class Manifold2D(Manifold):
+    """A manifold of a finite number of dimensions."""
+
+    @property
+    def dimension(self) -> int:
+        """Dimension of the manifold."""
+        ...
+
+    @property
+    def n_points(self) -> int:
+        """Number of points in the mesh."""
+        ...
+
+    @property
+    def n_lines(self) -> int:
+        """Number of lines in the mesh."""
+        ...
+
+    @property
+    def n_surfaces(self) -> int:
+        """Number of surfaces in the mesh."""
+        ...
+
+    def get_line(self, index: int | GeoID, /) -> Line:
+        """Get the line from the mesh.
+
+        Parameters
+        ----------
+        index : int or GeoID
+           Id of the line to get in 1-based indexing or GeoID. If negative, the
+           orientation will be reversed.
+
+        Returns
+        -------
+        Line
+           Line object corresponding to the ID.
+        """
+        ...
+
+    def get_surface(self, index: int | GeoID, /) -> Surface:
+        """Get the surface from the mesh.
+
+        Parameters
+        ----------
+        index : int or GeoID
+           Id of the surface to get in 1-based indexing or GeoID. If negative,
+           the orientation will be reversed.
+
+        Returns
+        -------
+        Surface
+           Surface object corresponding to the ID.
+        """
+
+    @classmethod
+    def from_irregular(
+        cls,
+        n_points: int,
+        line_connectivity: Sequence[npt.ArrayLike] | npt.ArrayLike,
+        surface_connectivity: Sequence[npt.ArrayLike] | npt.ArrayLike,
+    ) -> Self:
+        """Create Manifold2D from surfaces with non-constant number of lines.
+
+        Parameters
+        ----------
+        n_points : int
+            Number of points in the mesh.
+        line_connectivity : (N, 2) array_like
+            Connectivity of points which form lines in 0-based indexing.
+        surface_connectivity : Sequence of array_like
+            Sequence of arrays specifying connectivity of mesh surfaces in 1-based
+            indexing, where a negative value means that the line's orientation is
+            reversed.
+
+        Returns
+        -------
+        Self
+            Two dimensional manifold.
+        """
+        ...
+
+    @classmethod
+    def from_regular(
+        cls,
+        n_points: int,
+        line_connectivity: Sequence[npt.ArrayLike] | npt.ArrayLike,
+        surface_connectivity: Sequence[npt.ArrayLike] | npt.ArrayLike,
+    ) -> Self:
+        """Create Manifold2D from surfaces with constant number of lines.
+
+        Parameters
+        ----------
+        n_points : int
+            Number of points in the mesh.
+        line_connectivity : (N, 2) array_like
+            Connectivity of points which form lines in 0-based indexing.
+        surface_connectivity : array_like
+            Two dimensional array-like object specifying connectivity of mesh
+            surfaces in 1-based indexing, where a negative value means that
+            the line's orientation is reversed.
+
+        Returns
+        -------
+        Self
+            Two dimensional manifold.
+        """
+        ...
+
+    def compute_dual(self) -> Manifold2D:
+        """Compute the dual to the manifold.
+
+        A dual of each k-dimensional object in an n-dimensional space is a
+        (n-k)-dimensional object. This means that duals of surfaces are points,
+        duals of lines are also lines, and that the duals of points are surfaces.
+
+        A dual line connects the dual points which correspond to surfaces which
+        the line was a part of. Since the change over a line is computed by
+        subtracting the value at the beginning from that at the end, the dual point
+        which corresponds to the primal surface where the primal line has a
+        positive orientation is the end point of the dual line and conversely the end
+        dual point is the one corresponding to the surface which contained the primal
+        line in the negative orientation. Since lines may only be contained in a
+        single primal surface, they may have an invalid ID as either their beginning or
+        their end. This can be used to determine if the line is actually a boundary of
+        the manifold.
+
+        A dual surface corresponds to a point and contains dual lines which correspond
+        to primal lines, which contained the primal point of which the dual surface is
+        the result of. The orientation of dual lines in this dual surface is positive if
+        the primal line of which they are duals originated in the primal point in question
+        and negative if it was their end point.
+
+        Returns
+        -------
+        Manifold2D
+            Dual manifold.
+        """
+        ...
+
+    def __eq__(self, value) -> bool: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
