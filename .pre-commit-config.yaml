@@ -8,12 +8,14 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+        exclude: "glad/"
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: "v20.1.5"
     hooks:
       - id: clang-format
-        args: ["--style=Microsoft", "-i"]
+        args: [ "--style=Microsoft", "-i" ]
+        exclude: "glad/"
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
@@ -33,4 +35,4 @@ repos:
     rev: "v1.15.0" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
-        additional_dependencies: [npt-promote]
+        additional_dependencies: [ npt-promote ]
