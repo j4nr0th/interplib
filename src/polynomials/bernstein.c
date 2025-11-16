@@ -13,8 +13,8 @@ void bernstein_from_power_series(unsigned n, double INTERPLIB_ARRAY_ARG(coeffs, 
         const double beta = coeffs[k];
 
         // Update the remaining entries
-        const unsigned diff = n - k - 1;
-        int local = (int)(diff);
+        const int diff = (int)(n - k - 1);
+        int local = diff;
         for (int i = 1; i < diff + 1; ++i)
         {
             coeffs[k + i] += beta * (double)local;

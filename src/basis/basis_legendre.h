@@ -7,8 +7,7 @@
 #include "basis_set.h"
 
 INTERPLIB_INTERNAL
-void legendre_basis_values(unsigned n_pts, const double INTERPLIB_ARRAY_ARG(nodes, n_pts), unsigned order,
-                           double INTERPLIB_ARRAY_ARG(values, restrict(order + 1) * n_pts),
-                           double INTERPLIB_ARRAY_ARG(derivatives, restrict(order + 1) * n_pts));
+interp_result_t legendre_basis_create(basis_set_t **out, basis_spec_t spec, const integration_rule_t *rule,
+                                      const allocator_callbacks *allocator);
 
 #endif // INTERPLIB_BASIS_LEGENDRE_H

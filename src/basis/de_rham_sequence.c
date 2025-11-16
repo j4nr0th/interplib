@@ -159,3 +159,7 @@ unsigned differential_form_element_degrees_of_freedom_count(const differential_f
     ASSERT(index < this->collection->element_count, "Index of the element was out of bounds.");
     return offsets->offsets[index + 1] - offsets->offsets[index];
 }
+const manifold_t *differential_form_manifold(const differential_form_t *this)
+{
+    return this->collection->manifold;
+}

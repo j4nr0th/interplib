@@ -33,12 +33,12 @@ typedef struct
 
 static inline const double *basis_set_values_all(const basis_set_t *this)
 {
-    return this->_data + 0;
+    return this->_data;
 }
 
 static inline const double *basis_set_basis_values(const basis_set_t *this, const unsigned index)
 {
-    ASSERT(index < this->spec.order + 1, "Index of the basis_sets was out of bounds.");
+    ASSERT(index <= this->spec.order, "Index was out of bounds.");
     return this->_data + index * (this->integration_spec.order + 1);
 }
 
@@ -49,8 +49,8 @@ static inline const double *basis_set_derivatives_all(const basis_set_t *this)
 
 static inline const double *basis_set_basis_derivatives(const basis_set_t *this, const unsigned index)
 {
-    ASSERT(index < this->spec.order + 1, "Index of the basis_sets was out of bounds.");
-    return this->_data + (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
+    ASSERT(index <= this->spec.order, "Index was out of bounds.");
+    return this->_data + index * (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
 }
 
 typedef struct basis_set_registry_t basis_set_registry_t;

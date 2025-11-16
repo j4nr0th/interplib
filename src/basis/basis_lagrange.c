@@ -9,47 +9,53 @@
 #include <math.h>
 
 INTERPLIB_INTERNAL
-interp_result_t lagrange_basis_values(const unsigned n_pts, const double INTERPLIB_ARRAY_ARG(nodes, n_pts),
-                                      const unsigned order,
-                                      double INTERPLIB_ARRAY_ARG(values, restrict(order + 1) * n_pts),
-                                      double INTERPLIB_ARRAY_ARG(derivatives, restrict(order + 1) * n_pts),
-                                      double INTERPLIB_ARRAY_ARG(buffer, restrict 3 * (order + 1)),
-                                      const basis_set_type_t type)
+interp_result_t lagrange_basis_create(basis_set_t **out, const basis_spec_t spec, const integration_rule_t *rule,
+                                      const allocator_callbacks *allocator)
 {
+    basis_set_t *const this =
+        allocate(allocator, sizeof *this + sizeof(*this->_data) * (spec.order + 1) * (2 * (rule->spec.order + 1) + 1));
+    if (!this)
+        return INTERP_ERROR_FAILED_ALLOCATION;
+
+    double *const roots = this->_data + 2 * (spec.order + 1) * (rule->spec.order + 1);
+
+    this->integration_spec = rule->spec;
+    this->spec = spec;
     // Find roots for Lagrange polynomials
-    double *roots = buffer;
-    switch (type)
+    switch (spec.type)
     {
     case BASIS_LAGRANGE_UNIFORM:
-        for (unsigned i = 0; i < order + 1; ++i)
+        for (unsigned i = 0; i < spec.order + 1; ++i)
         {
-            roots[i] = (2.0 * i) / (double)(order)-1.0;
+            roots[i] = (2.0 * i) / (double)(spec.order) - 1.0;
         }
         break;
 
     case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
-        for (unsigned i = 0; i < order + 1; ++i)
+        for (unsigned i = 0; i < spec.order + 1; ++i)
         {
-            roots[i] = cos(M_PI * (double)(2 * i + 1) / (double)(2 * (order + 1)));
+            roots[i] = cos(M_PI * (double)(2 * i + 1) / (double)(2 * (spec.order + 1)));
         }
         break;
 
     case BASIS_LAGRANGE_GAUSS:
-        gauss_legendre_nodes_weights(order + 1, 1e-12, 100, roots, buffer + order + 1);
+        gauss_legendre_nodes_weights(spec.order + 1, 1e-12, 100, roots, this->_data);
         break;
 
     case BASIS_LAGRANGE_GAUSS_LOBATTO:
-        gauss_lobatto_nodes_weights(order + 1, 1e-12, 100, roots, buffer + order + 1);
+        gauss_lobatto_nodes_weights(spec.order + 1, 1e-12, 100, roots, this->_data);
         break;
 
     default:
         return INTERP_ERROR_INVALID_ENUM;
     }
 
-    double *const work_buffer_1 = buffer + 1 * (order + 1);
-    double *const work_buffer_2 = buffer + 2 * (order + 1);
-    lagrange_polynomial_values_transposed(n_pts, nodes, order + 1, roots, values, work_buffer_1);
-    lagrange_polynomial_first_derivative_transposed(n_pts, nodes, order + 1, roots, derivatives, work_buffer_1,
-                                                    work_buffer_2);
+    lagrange_polynomial_values_transposed_2(rule->n_nodes, integration_rule_nodes_const(rule), spec.order + 1, roots,
+                                            (double *)basis_set_values_all(this));
+    lagrange_polynomial_first_derivative_transposed_2(rule->n_nodes, integration_rule_nodes_const(rule), spec.order + 1,
+                                                      roots, (double *)basis_set_derivatives_all(this));
+    this->spec = spec;
+    this->integration_spec = rule->spec;
+    *out = this;
     return INTERP_SUCCESS;
 }

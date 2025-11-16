@@ -87,7 +87,7 @@ void legendre_eval_bonnet_all(const unsigned n, const double x, double INTERPLIB
 INTERPLIB_INTERNAL
 
 INTERPLIB_INTERNAL
-void legendre_eval_bonnet_all_stride(const unsigned n, const double x, unsigned stride, const unsigned offset,
+void legendre_eval_bonnet_all_stride(const unsigned n, const double x, const unsigned stride, const unsigned offset,
                                      double INTERPLIB_ARRAY_ARG(out, (n + 1) * stride))
 {
     out += offset;

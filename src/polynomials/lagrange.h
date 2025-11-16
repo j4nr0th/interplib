@@ -35,19 +35,19 @@ void lagrange_polynomial_coefficients(unsigned n, unsigned j,
  * mesh by taking the inner product of the weight matrix with the function
  * values.
  *
- * @param n_in Number of points where polynomials should be evaluated.
- * @param pos Points where the Lagrange polynomials should be evaluated at.
- * @param n_nodes Number or roots of Lagrange polynomials, which is also the order of the polynomials.
- * @param x Roots of the lagrange polynomials.
- * @param weights Array which receives the values of Lagrange polynomials.
+ * @param n_pos Number of points where polynomials should be evaluated.
+ * @param p_pos Points where the Lagrange polynomials should be evaluated at.
+ * @param n_roots Number or roots of Lagrange polynomials, which is also the order of the polynomials.
+ * @param p_roots Roots of the lagrange polynomials.
+ * @param values Array which receives the values of Lagrange polynomials.
  * @param work Array used to store intermediate results.
  *
  */
 INTERPLIB_INTERNAL
-void lagrange_polynomial_values(unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in), unsigned n_nodes,
-                                const double INTERPLIB_ARRAY_ARG(x, static n_nodes),
-                                double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),
-                                double INTERPLIB_ARRAY_ARG(work, restrict n_nodes));
+void lagrange_polynomial_values(unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos), unsigned n_roots,
+                                const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos),
+                                double INTERPLIB_ARRAY_ARG(work, restrict n_roots));
 
 INTERPLIB_INTERNAL
 void lagrange_polynomial_values_transposed(unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
@@ -55,26 +55,32 @@ void lagrange_polynomial_values_transposed(unsigned n_in, const double INTERPLIB
                                            double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),
                                            double INTERPLIB_ARRAY_ARG(work, restrict n_nodes));
 
+INTERPLIB_INTERNAL
+void lagrange_polynomial_values_transposed_2(unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                             unsigned n_roots,
+                                             const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                             double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos));
+
 /**
  * @brief Compute the first derivative of Lagrange polynomials with given nodes at
  * specified locations. The interpolation can be computed for any function on
  * the same mesh by taking the inner product of the weight matrix with the
  * function values.
  *
- * @param n_in Number of points where polynomials should be evaluated.
- * @param pos Points where the Lagrange polynomials should be evaluated at.
- * @param n_nodes Number or roots of Lagrange polynomials, which is also the order of the polynomials.
- * @param x Roots of the lagrange polynomials.
+ * @param n_pos Number of points where polynomials should be evaluated.
+ * @param p_pos Points where the Lagrange polynomials should be evaluated at.
+ * @param n_roots Number or roots of Lagrange polynomials, which is also the order of the polynomials.
+ * @param p_roots Roots of the lagrange polynomials.
  * @param weights Array which receives the values of Lagrange polynomials.
  * @param work1 Array used to store intermediate results.
  * @param work2 Array used to store intermediate results.
  */
 INTERPLIB_INTERNAL
-void lagrange_polynomial_first_derivative(unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
-                                          unsigned n_nodes, const double INTERPLIB_ARRAY_ARG(x, static n_nodes),
-                                          double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),
-                                          double INTERPLIB_ARRAY_ARG(work1, restrict n_nodes),
-                                          double INTERPLIB_ARRAY_ARG(work2, restrict n_nodes));
+void lagrange_polynomial_first_derivative(unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                          unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                          double INTERPLIB_ARRAY_ARG(weights, restrict n_roots *n_pos),
+                                          double INTERPLIB_ARRAY_ARG(work1, restrict n_roots),
+                                          double INTERPLIB_ARRAY_ARG(work2, restrict n_roots));
 
 INTERPLIB_INTERNAL
 void lagrange_polynomial_first_derivative_transposed(unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
@@ -85,6 +91,13 @@ void lagrange_polynomial_first_derivative_transposed(unsigned n_in, const double
                                                      double INTERPLIB_ARRAY_ARG(work1, restrict n_nodes),
                                                      /* cache for differences (once per node) */
                                                      double INTERPLIB_ARRAY_ARG(work2, restrict n_nodes));
+
+INTERPLIB_INTERNAL
+void lagrange_polynomial_first_derivative_transposed_2(unsigned n_pos,
+                                                       const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                                       unsigned n_roots,
+                                                       const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                                       double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos));
 
 /**
  * @brief Compute second derivative of Lagrange polynomials with given nodes at

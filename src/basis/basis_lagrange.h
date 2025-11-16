@@ -7,10 +7,15 @@
 #include "basis_set.h"
 
 INTERPLIB_INTERNAL
-interp_result_t lagrange_basis_values(unsigned n_pts, const double INTERPLIB_ARRAY_ARG(nodes, n_pts), unsigned order,
-                                      double INTERPLIB_ARRAY_ARG(values, restrict(order + 1) * n_pts),
-                                      double INTERPLIB_ARRAY_ARG(derivatives, restrict(order + 1) * n_pts),
-                                      double INTERPLIB_ARRAY_ARG(buffer, restrict 3 * (order + 1)),
-                                      basis_set_type_t type);
+interp_result_t lagrange_basis_create(basis_set_t **out, basis_spec_t spec, const integration_rule_t *rule,
+                                      const allocator_callbacks *allocator);
+
+static inline const double *lagrange_basis_roots(const basis_set_t *this)
+{
+    ASSERT(this->spec.type == BASIS_LAGRANGE_UNIFORM || this->spec.type == BASIS_LAGRANGE_GAUSS ||
+               this->spec.type == BASIS_LAGRANGE_GAUSS_LOBATTO || this->spec.type == BASIS_LAGRANGE_CHEBYSHEV_GAUSS,
+           "This function is only valid for Lagrange basis functions.");
+    return this->_data + (this->spec.order + 1) * (2 * (this->integration_spec.order + 1));
+}
 
 #endif // INTERPLIB_BASIS_LAGRANGE_H

@@ -43,7 +43,6 @@ set(COMMON_HEADER_FILES
         src/common/rw_lock.h
 )
 
-
 set(INTEGRATION_SOURCE_FILES
         src/integration/integration_rules.c
         src/integration/gauss_legendre.c
@@ -86,7 +85,8 @@ add_library(interp STATIC
 
 set_property(TARGET interp PROPERTY C_STANDARD 17)
 target_compile_definitions(interp PRIVATE INTERPLIB_ASSERTS)
-if (CMAKE_C_COMPILER_ID EQUAL "GNU")
+target_link_libraries(interp PRIVATE m)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(interp PRIVATE -Wall -Wextra -fanalyzer -Werror)
 endif ()
 
@@ -125,4 +125,6 @@ endif ()
 
 
 enable_testing()
-include(test_c/CMakeLists.txt)
+add_subdirectory(test_c)
+
+# add_subdirectory(src/visualization)

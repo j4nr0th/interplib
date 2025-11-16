@@ -11,7 +11,7 @@ INTERPLIB_INTERNAL
 void bernstein_from_power_series(unsigned n, double INTERPLIB_ARRAY_ARG(coeffs, static n));
 
 INTERPLIB_INTERNAL
-void bernstein_interpolation_vector(double t, unsigned n, double INTERPLIB_ARRAY_ARG(out, restrict n));
+void bernstein_interpolation_vector(double t, unsigned n, double INTERPLIB_ARRAY_ARG(out, restrict n + 1));
 
 INTERPLIB_INTERNAL
 void bernstein_interpolation_value_derivative_matrix(

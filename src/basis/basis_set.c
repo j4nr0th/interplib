@@ -97,55 +97,29 @@ static inline interp_result_t basis_set_bucket_itype_init(basis_bucket_itype_t *
 static inline interp_result_t basis_set_create(basis_set_t **out, const integration_rule_t *integration_rule,
                                                const basis_spec_t spec, const allocator_callbacks *allocator)
 {
-    basis_set_t *const this = allocate(allocator, sizeof *this + 2 * sizeof(*this->_data) * (spec.order + 1) *
-                                                                     (integration_rule->spec.order + 1));
-    if (!this)
-        return INTERP_ERROR_FAILED_ALLOCATION;
-    this->integration_spec = integration_rule->spec;
-    this->spec = spec;
-
-    double *buffer;
+    interp_result_t res;
     switch (spec.type)
     {
     case BASIS_LEGENDRE:
-        legendre_basis_values(integration_rule->spec.order + 1, integration_rule_nodes_const(integration_rule),
-                              spec.order, (double *)basis_set_values_all(this),
-                              (double *)basis_set_derivatives_all(this));
+        res = legendre_basis_create(out, spec, integration_rule, allocator);
         break;
 
     case BASIS_LAGRANGE_GAUSS:
     case BASIS_LAGRANGE_UNIFORM:
     case BASIS_LAGRANGE_GAUSS_LOBATTO:
     case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
-        buffer = allocate(allocator, 3 * (spec.order + 1) * sizeof(*buffer));
-        if (!buffer)
-        {
-            deallocate(allocator, this);
-            return INTERP_ERROR_FAILED_ALLOCATION;
-        }
-        const interp_result_t res = lagrange_basis_values(
-            integration_rule->spec.order + 1, integration_rule_nodes_const(integration_rule), spec.order,
-            (double *)basis_set_values_all(this), (double *)basis_set_derivatives_all(this), buffer, spec.type);
-        deallocate(allocator, buffer);
-        if (res != INTERP_SUCCESS)
-        {
-            deallocate(allocator, this);
-            return res;
-        }
+        res = lagrange_basis_create(out, spec, integration_rule, allocator);
         break;
 
     case BASIS_BERNSTEIN:
-        bernstein_basis_values(integration_rule->spec.order + 1, integration_rule_nodes_const(integration_rule),
-                               spec.order, (double *)basis_set_values_all(this),
-                               (double *)basis_set_derivatives_all(this));
+        res = bernstein_basis_create(out, spec, integration_rule, allocator);
         break;
 
     default:
         return INTERP_ERROR_INVALID_ENUM;
     }
-    *out = this;
 
-    return INTERP_SUCCESS;
+    return res;
 }
 
 static inline interp_result_t basis_set_registry_add_btype_bucket(basis_set_registry_t *this,

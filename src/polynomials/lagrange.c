@@ -58,46 +58,46 @@ void lagrange_polynomial_coefficients(unsigned n, unsigned j,
 }
 
 INTERPLIB_INTERNAL
-void lagrange_polynomial_values(const unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
-                                const unsigned n_nodes, const double INTERPLIB_ARRAY_ARG(x, static n_nodes),
-                                double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),
-                                double INTERPLIB_ARRAY_ARG(work, restrict n_nodes))
+void lagrange_polynomial_values(const unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                const unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos),
+                                double INTERPLIB_ARRAY_ARG(work, restrict n_roots))
 {
-    lagrange_polynomial_denominators(n_nodes, x, work);
+    lagrange_polynomial_denominators(n_roots, p_roots, work);
 
     //  Invert the denominator
-    for (unsigned i = 0; i < n_nodes; ++i)
+    for (unsigned i = 0; i < n_roots; ++i)
     {
         work[i] = 1.0 / work[i];
     }
 
     //  Compute the numerator now
-    for (unsigned k = 0; k < n_in; ++k)
+    for (unsigned k = 0; k < n_pos; ++k)
     {
-        double *const row = weights + n_nodes * k;
+        double *const row = values + n_roots * k;
         //  First loop can be used to initialize the row
         {
-            const double dif = pos[k] - x[0];
+            const double dif = p_pos[k] - p_roots[0];
             row[0] = 1.0;
-            for (unsigned j = 1; j < n_nodes; ++j)
+            for (unsigned j = 1; j < n_roots; ++j)
             {
                 row[j] = +dif;
             }
         }
-        for (unsigned i = 1; i < n_nodes; ++i)
+        for (unsigned i = 1; i < n_roots; ++i)
         {
-            const double dif = pos[k] - x[i];
+            const double dif = p_pos[k] - p_roots[i];
             for (unsigned j = 0; j < i; ++j)
             {
                 row[j] *= +dif;
             }
-            for (unsigned j = i + 1; j < n_nodes; ++j)
+            for (unsigned j = i + 1; j < n_roots; ++j)
             {
                 row[j] *= +dif;
             }
         }
         //  Multiply by 1/denominator
-        for (unsigned i = 0; i < n_nodes; ++i)
+        for (unsigned i = 0; i < n_roots; ++i)
         {
             row[i] *= work[i];
         }
@@ -152,37 +152,123 @@ void lagrange_polynomial_values_transposed(const unsigned n_in, const double INT
 }
 
 INTERPLIB_INTERNAL
-void lagrange_polynomial_first_derivative(const unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
-                                          const unsigned n_nodes, const double INTERPLIB_ARRAY_ARG(x, static n_nodes),
-                                          double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),
+void lagrange_polynomial_denominators_stride(
+    const unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, restrict static n_roots), const unsigned stride,
+    double INTERPLIB_ARRAY_ARG(denominators, restrict(n_roots - 1) * stride + 1))
+{
+    // Initialize the first denominator manually
+    denominators[0] = 1.0;
+
+    // Compute the first denominator directly and initialize the rest
+    for (unsigned j = 1; j < n_roots; ++j)
+    {
+        const double dif = p_roots[0] - p_roots[j];
+        denominators[0] *= dif;
+        denominators[j * stride] = -dif;
+    }
+
+    //  Compute the rest as a loop now that all entries are initialized
+    for (unsigned i = 1; i < n_roots; ++i)
+    {
+        for (unsigned j = i + 1; j < n_roots; ++j)
+        {
+            const double dif = p_roots[i] - p_roots[j];
+            denominators[i * stride] *= +dif;
+            denominators[j * stride] *= -dif;
+        }
+    }
+}
+
+INTERPLIB_INTERNAL
+void lagrange_polynomial_denominators_apply_stride(
+    const unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, restrict static n_roots), const unsigned stride,
+    double INTERPLIB_ARRAY_ARG(denominators, restrict(n_roots - 1) * stride + 1))
+{
+    for (unsigned i = 0; i < n_roots; ++i)
+    {
+        for (unsigned j = i + 1; j < n_roots; ++j)
+        {
+            const double dif = p_roots[i] - p_roots[j];
+            denominators[i * stride] /= +dif;
+            denominators[j * stride] /= -dif;
+        }
+    }
+}
+
+INTERPLIB_INTERNAL
+void lagrange_polynomial_values_transposed_2(const unsigned n_pos,
+                                             const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                             const unsigned n_roots,
+                                             const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                             double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos))
+{
+    // Stores denominators as the last element of each row
+    lagrange_polynomial_denominators_stride(n_roots, p_roots, n_pos, values + (n_pos - 1));
+
+    //  Compute the numerator now
+    for (unsigned k = 0; k < n_pos; ++k)
+    {
+        //  The first loop can be used to initialize the column
+        {
+            const double dif = p_pos[k] - p_roots[0];
+            // We avoid extra storage for denominators by placing them as the last
+            // element of each row. This allows for them to stay there until the
+            // last column is computed, at which point the result of the calculation
+            // they're needed for is used.
+            values[k + 0 * n_pos] = 1.0 / values[(n_pos - 1) + n_pos * 0];
+            for (unsigned j = 1; j < n_roots; ++j)
+            {
+                values[k + n_pos * j] = +dif / values[(n_pos - 1) + n_pos * j];
+            }
+        }
+        for (unsigned i = 1; i < n_roots; ++i)
+        {
+            const double dif = p_pos[k] - p_roots[i];
+            for (unsigned j = 0; j < i; ++j)
+            {
+                values[k + n_pos * j] *= +dif;
+            }
+            for (unsigned j = i + 1; j < n_roots; ++j)
+            {
+                values[k + n_pos * j] *= +dif;
+            }
+        }
+    }
+}
+
+INTERPLIB_INTERNAL
+void lagrange_polynomial_first_derivative(const unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                          const unsigned n_roots,
+                                          const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                          double INTERPLIB_ARRAY_ARG(weights, restrict n_roots *n_pos),
                                           /* cache for denominators (once per fn) */
-                                          double INTERPLIB_ARRAY_ARG(work1, restrict n_nodes),
+                                          double INTERPLIB_ARRAY_ARG(work1, restrict n_roots),
                                           /* cache for differences (once per node) */
-                                          double INTERPLIB_ARRAY_ARG(work2, restrict n_nodes))
+                                          double INTERPLIB_ARRAY_ARG(work2, restrict n_roots))
 {
     // compute denominators
-    lagrange_polynomial_denominators(n_nodes, x, work1);
+    lagrange_polynomial_denominators(n_roots, p_roots, work1);
 
     //  Invert the denominator
-    for (unsigned i = 0; i < n_nodes; ++i)
+    for (unsigned i = 0; i < n_roots; ++i)
     {
         work1[i] = 1.0 / work1[i];
     }
 
     //  Now loop per node
-    for (unsigned ipos = 0; ipos < n_in; ++ipos)
+    for (unsigned ipos = 0; ipos < n_pos; ++ipos)
     {
-        const double v = pos[ipos];
-        for (unsigned j = 0; j < n_nodes; ++j)
+        const double v = p_pos[ipos];
+        for (unsigned j = 0; j < n_roots; ++j)
         {
             //  Compute the differences
-            work2[j] = v - x[j];
+            work2[j] = v - p_roots[j];
             //  Initialize the row of weights about to be computed
-            weights[n_nodes * ipos + j] = 0.0;
+            weights[n_roots * ipos + j] = 0.0;
         }
 
         //  Compute term d (L_i^j) / d x
-        for (unsigned i = 0; i < n_nodes; ++i)
+        for (unsigned i = 0; i < n_roots; ++i)
         {
             for (unsigned j = 0; j < i; ++j)
             {
@@ -197,20 +283,20 @@ void lagrange_polynomial_first_derivative(const unsigned n_in, const double INTE
                 {
                     dlijdx *= work2[k];
                 }
-                for (unsigned k = i + 1; k < n_nodes; ++k)
+                for (unsigned k = i + 1; k < n_roots; ++k)
                 {
                     dlijdx *= work2[k];
                 }
                 //  L_i^j and L_j^i have same numerators
-                weights[n_nodes * ipos + j] += dlijdx;
-                weights[n_nodes * ipos + i] += dlijdx;
+                weights[n_roots * ipos + j] += dlijdx;
+                weights[n_roots * ipos + i] += dlijdx;
             }
         }
 
-        for (unsigned j = 0; j < n_nodes; ++j)
+        for (unsigned j = 0; j < n_roots; ++j)
         {
             //  Initialize the row of weights about to be computed
-            weights[n_nodes * ipos + j] *= work1[j];
+            weights[n_roots * ipos + j] *= work1[j];
         }
     }
 }
@@ -278,6 +364,152 @@ void lagrange_polynomial_first_derivative_transposed(const unsigned n_in,
             //  Initialize the row of weights about to be computed
             weights[ipos + j * n_in] *= work1[j];
         }
+    }
+}
+
+INTERPLIB_INTERNAL
+void lagrange_polynomial_first_derivative_transposed_2(const unsigned n_pos,
+                                                       const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                                       const unsigned n_roots,
+                                                       const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                                       double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos))
+{
+    // Ideally, we would have two extra arrays - one to store denominators and another
+    // to use as per-node storage for numerator terms. Since that would require extra buffers,
+    // we instead re-use the `values` array up until the last two positions that have to be
+    // computed. At that point we compute the numerator on-the-go and apply the denominators
+    // to the result.
+
+    // compute denominators (if necessary
+    if (n_pos > 2)
+        lagrange_polynomial_denominators_stride(n_roots, p_roots, n_pos, values + (n_pos - 1));
+
+    //  Now loop per node (until the last two)
+    for (unsigned i_pos = 0; i_pos + 2 < n_pos; ++i_pos)
+    {
+        const double v = p_pos[i_pos];
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Compute the differences
+            values[i_pos + 1 + j * n_pos] = v - p_roots[j];
+            //  Initialize the row of weights about to be computed
+            values[i_pos + j * n_pos] = 0.0;
+        }
+
+        //  Compute term d (L_i^j) / d x
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            for (unsigned j = 0; j < i; ++j)
+            {
+                double dlijdx = 1.0;
+                //  Loop split into three parts to enforce k != {i,
+                //  j}
+                for (unsigned k = 0; k < j; ++k)
+                {
+                    dlijdx *= values[i_pos + 1 + k * n_pos];
+                }
+                for (unsigned k = j + 1; k < i; ++k)
+                {
+                    dlijdx *= values[i_pos + 1 + k * n_pos];
+                }
+                for (unsigned k = i + 1; k < n_roots; ++k)
+                {
+                    dlijdx *= values[i_pos + 1 + k * n_pos];
+                }
+                //  L_i^j and L_j^i have same numerators
+                values[i_pos + j * n_pos] += dlijdx;
+                values[i_pos + i * n_pos] += dlijdx;
+            }
+        }
+
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Divide by the denominator
+            values[i_pos + j * n_pos] /= values[n_pos - 1 + j * n_pos];
+        }
+    }
+
+    //  Second to last node
+    if (n_pos > 1)
+    {
+        const unsigned i_pos = n_pos - 2;
+        const double v = p_pos[i_pos];
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Compute the differences
+            values[i_pos + 1 + j * n_pos] = v - p_roots[j];
+            //  Initialize the row of weights about to be computed
+            values[i_pos + j * n_pos] = 0.0;
+        }
+
+        //  Compute term d (L_i^j) / d x
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            for (unsigned j = 0; j < i; ++j)
+            {
+                double dlijdx = 1.0;
+                //  Loop split into three parts to enforce k != {i,
+                //  j}
+                for (unsigned k = 0; k < j; ++k)
+                {
+                    dlijdx *= values[i_pos + 1 + k * n_pos];
+                }
+                for (unsigned k = j + 1; k < i; ++k)
+                {
+                    dlijdx *= values[i_pos + 1 + k * n_pos];
+                }
+                for (unsigned k = i + 1; k < n_roots; ++k)
+                {
+                    dlijdx *= values[i_pos + 1 + k * n_pos];
+                }
+                //  L_i^j and L_j^i have same numerators
+                values[i_pos + j * n_pos] += dlijdx;
+                values[i_pos + i * n_pos] += dlijdx;
+            }
+        }
+
+        // Apply the denominator
+        lagrange_polynomial_denominators_apply_stride(n_roots, p_roots, n_pos, values + (n_pos - 2));
+    }
+
+    // The last node
+    if (n_pos > 0)
+    {
+        const double v = p_pos[n_pos - 1];
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Initialize the row of weights about to be computed
+            values[n_pos - 1 + j * n_pos] = 0.0;
+        }
+
+        //  Compute term d (L_i^j) / d x
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            for (unsigned j = 0; j < i; ++j)
+            {
+                double dlijdx = 1.0;
+                //  Loop split into three parts to enforce k != {i,
+                //  j}
+                for (unsigned k = 0; k < j; ++k)
+                {
+                    dlijdx *= v - p_roots[k];
+                }
+                for (unsigned k = j + 1; k < i; ++k)
+                {
+                    dlijdx *= v - p_roots[k];
+                }
+                for (unsigned k = i + 1; k < n_roots; ++k)
+                {
+                    dlijdx *= v - p_roots[k];
+                }
+                //  L_i^j and L_j^i have same numerators
+                values[n_pos - 1 + j * n_pos] += dlijdx;
+                values[n_pos - 1 + i * n_pos] += dlijdx;
+            }
+        }
+
+        // Apply the denominator
+        lagrange_polynomial_denominators_apply_stride(n_roots, p_roots, n_pos, values + (n_pos - 1));
     }
 }
 

@@ -125,4 +125,7 @@ const double *differential_form_element_degrees_of_freedom_const(const different
 INTERPLIB_INTERNAL
 unsigned differential_form_element_degrees_of_freedom_count(const differential_form_t *this, unsigned index);
 
+INTERPLIB_INTERNAL
+const manifold_t *differential_form_manifold(const differential_form_t *this);
+
 #endif // INTERPLIB_DE_RHAM_SEQUENCE_H

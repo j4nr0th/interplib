@@ -4,6 +4,7 @@
 
 #include "../../src/integration/integration_rules.h"
 #include "../common/common.h"
+#include <X11/Xlib.h>
 #include <math.h>
 
 /**
