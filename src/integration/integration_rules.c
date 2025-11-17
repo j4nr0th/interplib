@@ -340,3 +340,50 @@ void integration_rule_registry_release_all_rules(integration_rule_registry_t *th
     }
     rw_lock_release_write(&this->lock);
 }
+
+unsigned integration_rule_get_rules(integration_rule_registry_t *this, const unsigned max_count,
+                                    integration_rule_spec_t INTERPLIB_ARRAY_ARG(specs, max_count))
+{
+    rw_lock_acquire_read(&this->lock);
+    unsigned count = 0;
+    for (unsigned i = 0; i < this->n_buckets; ++i)
+    {
+        const integration_rule_type_bucket_t *const bucket = this->buckets + i;
+        for (unsigned j = 0; j < bucket->count; ++j)
+        {
+            if (count < max_count)
+            {
+                specs[count] = bucket->rules[j]->spec;
+                count += 1;
+            }
+        }
+    }
+    rw_lock_release_read(&this->lock);
+
+    return count;
+}
+unsigned integration_rule_spec_get_accuracy(const integration_rule_spec_t spec)
+{
+    switch (spec.type)
+    {
+    case INTEGRATION_RULE_TYPE_GAUSS_LEGENDRE:
+        return 2 * spec.order - 1;
+    case INTEGRATION_RULE_TYPE_GAUSS_LOBATTO:
+        return 2 * spec.order - 3;
+    default:
+        return 0;
+    }
+}
+
+const char *integration_rule_type_to_str(const integration_rule_type_t type)
+{
+    switch (type)
+    {
+    case INTEGRATION_RULE_TYPE_GAUSS_LEGENDRE:
+        return "gauss";
+    case INTEGRATION_RULE_TYPE_GAUSS_LOBATTO:
+        return "gauss-lobatto";
+    default:
+        return "unknown";
+    }
+}

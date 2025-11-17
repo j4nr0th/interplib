@@ -301,7 +301,21 @@ def compute_gll(
     """
     ...
 @final
-class IntegrationRule:
+class IntegrationRegistry:
+    """Registry for integration rules.
+
+    This registry contains all available integration rules and caches them for
+    efficient retrieval.
+    """
+
+    def __new__(cls) -> Self: ...
+    def usage(self) -> tuple[tuple[str, int], ...]: ...
+    def clear(self) -> None: ...
+
+DEFAULT_INTEGRATION_REGISTRY: IntegrationRegistry = ...
+
+@final
+class IntegrationSpecs:
     """Type that describes an integration rule.
 
     Parameters
@@ -313,7 +327,12 @@ class IntegrationRule:
         Method used for integration.
     """
 
-    def __new__(cls, order: int, /, method: _IntegrationMethodHint = "gauss") -> Self: ...
+    def __new__(
+        cls,
+        order: int,
+        /,
+        method: _IntegrationMethodHint = "gauss",
+    ) -> Self: ...
     @property
     def order(self) -> int:
         """Order of the integration rule."""
@@ -325,23 +344,13 @@ class IntegrationRule:
         ...
 
     @property
-    def nodes(self) -> npt.NDArray[np.double]:
-        """Integration points on the reference domain."""
-        ...
-
-    @property
-    def weights(self) -> npt.NDArray[np.double]:
-        """Weights associated with the integration nodes."""
-        ...
-
-    @property
-    def pointer(self) -> int:
-        """Pointer of the integration rule."""
+    def method(self) -> _IntegrationMethodHint:
+        """Method used for integration."""
         ...
 
 @final
-class BasisSet:
-    """Type that describes a set of basis functions.
+class BasisSpecs:
+    """Type that describes specifications for a basis set.
 
     Parameters
     ----------
@@ -350,27 +359,17 @@ class BasisSet:
 
     order : int
         Order of the basis in the set.
-
-    integration_rule : IntegrationRule
-        Integration rule used with the basis set.
     """
 
-    def __new__(
-        cls, basis_type: _BasisTypeHint, order: int, integration_rule: IntegrationRule, /
-    ) -> Self: ...
+    def __new__(cls, basis_type: _BasisTypeHint, order: int) -> Self: ...
     @property
-    def values(self) -> npt.NDArray[np.double]:
-        """Values of all basis at integration points."""
+    def basis_type(self) -> _BasisTypeHint:
+        """Type of the basis used for the set."""
         ...
 
     @property
     def order(self) -> int:
-        """Order of the basis set."""
-        ...
-
-    @property
-    def pointer(self) -> int:
-        """Pointer of the basis set."""
+        """Order of the basis in the set."""
         ...
 
 @final

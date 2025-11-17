@@ -14,6 +14,9 @@ typedef enum
     INTEGRATION_RULE_TYPE_GAUSS_LOBATTO,
 } integration_rule_type_t;
 
+INTERPLIB_INTERNAL
+const char *integration_rule_type_to_str(integration_rule_type_t type);
+
 typedef struct
 {
     integration_rule_type_t type; // Type of the integration rule
@@ -188,5 +191,12 @@ void integration_rule_registry_release_unused_rules(integration_rule_registry_t 
  */
 INTERPLIB_INTERNAL
 void integration_rule_registry_release_all_rules(integration_rule_registry_t *this);
+
+INTERPLIB_INTERNAL
+unsigned integration_rule_get_rules(integration_rule_registry_t *this, unsigned max_count,
+                                    integration_rule_spec_t INTERPLIB_ARRAY_ARG(specs, max_count));
+
+INTERPLIB_INTERNAL
+unsigned integration_rule_spec_get_accuracy(integration_rule_spec_t spec);
 
 #endif // INTERPLIB_INTEGRATION_RULES_H

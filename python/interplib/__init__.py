@@ -1,8 +1,8 @@
 """Package dedicated to interpolation using data defined on different topologies."""
 
 # C base types
-from interplib._interp import BasisSet as BasisSet
-from interplib._interp import IntegrationRule as IntegrationRule
+from interplib._interp import BasisSpecs as BasisSpecs
+from interplib._interp import IntegrationSpecs as IntegrationSpecs
 from interplib._interp import bernstein1d as bernstein1d
 from interplib._interp import bernstein_coefficients as bernstein_coefficients
 from interplib._interp import compute_gll as compute_gll

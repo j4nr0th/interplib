@@ -109,7 +109,10 @@ Python_add_library(_interp MODULE
         ${PYTHON_TOPOLOGY_SOURCE_FILES}
         ${PYTHON_NUMERICS_SOURCE_FILES}
         WITH_SOABI)
-target_link_libraries(_interp PRIVATE interp)
+
+add_subdirectory(cpyutl)
+
+target_link_libraries(_interp PRIVATE interp cpyutl)
 set_property(TARGET _interp PROPERTY C_STANDARD 17)
 install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
 target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS)
@@ -117,7 +120,7 @@ target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS)
 if ("${NumPy_INCLUDE_DIRS}" STREQUAL "")
     message(FATAL_ERROR "NumPy_INCLUDE_DIRS was empty.")
 endif ()
-target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS})
+target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} cpyutl/src)
 
 if (CMAKE_C_COMPILER_ID EQUAL "GNU")
     target_compile_options(_interp PRIVATE -Wall -Wextra -fwhole-program -flto=auto)

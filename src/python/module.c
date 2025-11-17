@@ -779,15 +779,6 @@ static void free_module_state(void *module)
     *module_state = (interplib_module_state_t){};
 }
 
-PyModuleDef interplib_module = {
-    .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = "interplib._interp",
-    .m_doc = "Internal C-extension implementing interpolation functions",
-    .m_size = sizeof(interplib_module_state_t),
-    .m_methods = module_methods,
-    .m_free = free_module_state,
-};
-
 static PyObject *add_type_from_spec_to_module(PyObject *module, PyType_Spec *spec, const char *name, PyObject *bases)
 {
     PyObject *const type = PyType_FromMetaclass(NULL, module, spec, bases);
@@ -804,16 +795,13 @@ static PyObject *add_type_from_spec_to_module(PyObject *module, PyType_Spec *spe
     return type;
 }
 
-PyMODINIT_FUNC PyInit__interp(void)
+static int interplib_add_types(PyObject *mod)
 {
-    import_array();
-    PyObject *const mod = PyModule_Create(&interplib_module);
     PyObject *integration_rule_type, *basis_set_type, *geo_id_type, *line_type, *surf_type, *manifold_type,
         *manifold1d_type, *manifold2d_type;
-    if (!mod ||
-        (integration_rule_type =
-             add_type_from_spec_to_module(mod, &integration_rule_type_spec, "IntegrationRule", NULL)) == NULL ||
-        (basis_set_type = add_type_from_spec_to_module(mod, &basis_set_type_spec, "BasisSet", NULL)) == NULL ||
+    if ((integration_rule_type =
+             add_type_from_spec_to_module(mod, &integration_specs_type_spec, "IntegrationRule", NULL)) == NULL ||
+        (basis_set_type = add_type_from_spec_to_module(mod, &basis_specs_type_spec, "BasisSet", NULL)) == NULL ||
         (geo_id_type = add_type_from_spec_to_module(mod, &geo_id_type_spec, "GeoID", NULL)) == NULL ||
         (line_type = add_type_from_spec_to_module(mod, &line_type_spec, "Line", NULL)) == NULL ||
         (surf_type = add_type_from_spec_to_module(mod, &surface_type_spec, "Surface", NULL)) == NULL ||
@@ -823,48 +811,49 @@ PyMODINIT_FUNC PyInit__interp(void)
         (manifold2d_type = add_type_from_spec_to_module(mod, &manifold2d_type_spec, "Manifold2D", manifold_type)) ==
             NULL)
     {
-        Py_XDECREF(mod);
-        return NULL;
+        return -1;
     }
 
     interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
     if (!module_state)
     {
-        Py_DECREF(mod);
-        return NULL;
+        return -1;
     }
 
-    Py_INCREF(integration_rule_type);
     module_state->integration_rule_type = (PyTypeObject *)integration_rule_type;
-    Py_INCREF(basis_set_type);
     module_state->basis_set_type = (PyTypeObject *)basis_set_type;
-    Py_INCREF(geo_id_type);
     module_state->geoid_type = (PyTypeObject *)geo_id_type;
-    Py_INCREF(line_type);
     module_state->line_type = (PyTypeObject *)line_type;
-    Py_INCREF(surf_type);
     module_state->surf_type = (PyTypeObject *)surf_type;
-    Py_INCREF(manifold_type);
     module_state->man_type = (PyTypeObject *)manifold_type;
-    Py_INCREF(manifold1d_type);
     module_state->man1d_type = (PyTypeObject *)manifold1d_type;
-    Py_INCREF(manifold2d_type);
     module_state->man2d_type = (PyTypeObject *)manifold2d_type;
 
-    // Add integration registry
-    {
-        integration_rule_registry_t *integration_registry;
-        const interp_result_t res = integration_rule_registry_create(&integration_registry, 1, &SYSTEM_ALLOCATOR);
-        if (res != INTERP_SUCCESS)
-        {
-            Py_DECREF(mod);
-            PyErr_Format(PyExc_RuntimeError, "Could not initialize integration rule registry: %s (%s)",
-                         interp_error_str(res), interp_error_msg(res));
-            return NULL;
-        }
+    return 0;
+}
 
-        module_state->integration_rule_registry = integration_registry;
+static int module_add_steal(PyObject *mod, const char *name, PyObject *obj)
+{
+    if (!obj)
+        return -1;
+    const int res = PyModule_AddObjectRef(mod, name, obj);
+    Py_XDECREF(obj);
+    return res;
+}
+
+static int interplib_add_registries(PyObject *mod)
+{
+    interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
+    if (!module_state)
+    {
+        return -1;
     }
+
+    // Add integration registry
+    if (module_add_steal(mod, "integration_registry",
+                         (module_state->registry_integration = (PyObject *)integration_registry_object_create(
+                              module_state->integration_registry_type))) < 0)
+        return -1;
 
     // Add basis registry
     {
@@ -872,14 +861,44 @@ PyMODINIT_FUNC PyInit__interp(void)
         const interp_result_t res = basis_set_registry_create(&basis_registry, 1, &SYSTEM_ALLOCATOR);
         if (res != INTERP_SUCCESS)
         {
-            Py_DECREF(mod);
             PyErr_Format(PyExc_RuntimeError, "Could not initialize basis registry: %s (%s)", interp_error_str(res),
                          interp_error_msg(res));
-            return NULL;
+            return -1;
         }
 
         module_state->basis_registry = basis_registry;
     }
 
-    return mod;
+    return 0;
+}
+
+PyModuleDef interplib_module = {
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "interplib._interp",
+    .m_doc = "Internal C-extension implementing interpolation functions",
+    .m_size = sizeof(interplib_module_state_t),
+    .m_methods = module_methods,
+    .m_free = free_module_state,
+    .m_slots =
+        (PyModuleDef_Slot[]){
+            {.slot = Py_mod_exec, .value = interplib_add_types},
+            {.slot = Py_mod_exec, .value = interplib_add_registries},
+            {.slot = Py_mod_multiple_interpreters, .value = Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED},
+            {},
+        },
+};
+
+PyMODINIT_FUNC PyInit__interp(void)
+{
+    import_array();
+    if (PyArray_ImportNumPyAPI() < 0)
+        return NULL;
+
+    return PyModuleDef_Init(&interplib_module);
+}
+
+int heap_type_traverse_type(PyObject *self, const visitproc visit, void *arg)
+{
+    Py_VISIT(Py_TYPE(self));
+    return 0;
 }

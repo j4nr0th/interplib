@@ -43,8 +43,8 @@ extern allocator_callbacks OBJECT_ALLOCATOR;
 typedef struct
 {
     // Integration
-    integration_rule_registry_t *integration_rule_registry;
     PyTypeObject *integration_rule_type;
+    PyTypeObject *integration_registry_type;
 
     // Basis
     basis_set_registry_t *basis_registry;
@@ -57,19 +57,27 @@ typedef struct
     PyTypeObject *man_type;
     PyTypeObject *man1d_type;
     PyTypeObject *man2d_type;
+
+    // Default Registries
+    PyObject *registry_integration;
 } interplib_module_state_t;
 
 INTERPLIB_INTERNAL
 extern PyModuleDef interplib_module;
 
-static inline integration_rule_registry_t *interplib_get_integration_registry(PyTypeObject *type)
+static inline const interplib_module_state_t *interplib_get_module_state(PyTypeObject *type)
 {
     PyObject *const mod = PyType_GetModuleByDef(type, &interplib_module);
     if (!mod)
     {
         return NULL;
     }
-    const interplib_module_state_t *const state = PyModule_GetState(mod);
+    return PyModule_GetState(mod);
+}
+
+static inline integration_rule_registry_t *interplib_get_integration_registry(PyTypeObject *type)
+{
+    const interplib_module_state_t *const state = interplib_get_module_state(type);
     if (!state)
     {
         return NULL;
@@ -79,17 +87,15 @@ static inline integration_rule_registry_t *interplib_get_integration_registry(Py
 
 static inline basis_set_registry_t *interplib_get_basis_registry(PyTypeObject *type)
 {
-    PyObject *const mod = PyType_GetModuleByDef(type, &interplib_module);
-    if (!mod)
-    {
-        return NULL;
-    }
-    const interplib_module_state_t *const state = PyModule_GetState(mod);
+    const interplib_module_state_t *const state = interplib_get_module_state(type);
     if (!state)
     {
         return NULL;
     }
     return state->basis_registry;
 }
+
+INTERPLIB_INTERNAL
+int heap_type_traverse_type(PyObject *self, visitproc visit, void *arg);
 
 #endif // INTERPLIB_MODULE_H
