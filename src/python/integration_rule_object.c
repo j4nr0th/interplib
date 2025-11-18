@@ -30,8 +30,9 @@ static PyObject *integration_registry_new(PyTypeObject *type, PyObject *args, Py
     return (PyObject *)self;
 }
 
-static int ensure_integration_state(PyObject *self, PyTypeObject *defining_class, integration_registry_object **p_this,
-                                    const interplib_module_state_t **p_state)
+static int ensure_integration_registry_state(PyObject *self, PyTypeObject *defining_class,
+                                             integration_registry_object **p_this,
+                                             const interplib_module_state_t **p_state)
 {
     const interplib_module_state_t *const state =
         defining_class ? PyType_GetModuleState(defining_class) : interplib_get_module_state(Py_TYPE(self));
@@ -53,7 +54,7 @@ static PyObject *integration_registry_repr(PyObject *self)
 {
     const interplib_module_state_t *state;
     integration_registry_object *this;
-    if (ensure_integration_state(self, NULL, &this, &state) < 0)
+    if (ensure_integration_registry_state(self, NULL, &this, &state) < 0)
         return NULL;
 
     return PyUnicode_FromFormat("<%s at %p>", state->integration_registry_type->tp_name, this->registry);
@@ -84,7 +85,7 @@ static PyObject *integration_registry_usage(PyObject *self, PyTypeObject *defini
 
     const interplib_module_state_t *state;
     integration_registry_object *this;
-    if (ensure_integration_state(self, defining_class, &this, &state) < 0)
+    if (ensure_integration_registry_state(self, defining_class, &this, &state) < 0)
         return NULL;
 
     unsigned count = integration_rule_get_rules(this->registry, 0, NULL);
@@ -126,7 +127,7 @@ static PyObject *integration_registry_clear(PyObject *self, PyTypeObject *defini
 
     const interplib_module_state_t *state;
     integration_registry_object *this;
-    if (ensure_integration_state(self, defining_class, &this, &state) < 0)
+    if (ensure_integration_registry_state(self, defining_class, &this, &state) < 0)
         return NULL;
 
     integration_rule_registry_release_all_rules(this->registry);
@@ -134,7 +135,7 @@ static PyObject *integration_registry_clear(PyObject *self, PyTypeObject *defini
     Py_RETURN_NONE;
 }
 
-PyType_Spec integration_rule_registry_type_spec = {
+PyType_Spec integration_registry_type_spec = {
     .name = "interplib._interp.IntegrationRegistry",
     .basicsize = sizeof(integration_registry_object),
     .itemsize = 0,
@@ -251,9 +252,9 @@ static PyObject *integration_rule_repr(PyObject *self)
     {
         return NULL;
     }
-    if (!PyObject_TypeCheck(self, state->integration_rule_type))
+    if (!PyObject_TypeCheck(self, state->integration_spec_type))
     {
-        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_rule_type->tp_name,
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_spec_type->tp_name,
                      Py_TYPE(self)->tp_name);
         return NULL;
     }
@@ -288,7 +289,145 @@ static PyGetSetDef integration_rule_getset[] = {
     {},
 };
 
-PyDoc_STRVAR(integration_specs_doc,
+static int ensure_integration_spec_state(PyObject *self, PyTypeObject *defining_class,
+                                         integration_specs_object **p_this, const interplib_module_state_t **p_state)
+{
+    const interplib_module_state_t *const state =
+        defining_class ? PyType_GetModuleState(defining_class) : interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+        return -1;
+    if (!PyObject_TypeCheck(self, state->integration_spec_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_spec_type->tp_name,
+                     Py_TYPE(self)->tp_name);
+        return -1;
+    }
+    *p_this = (integration_specs_object *)self;
+    *p_state = state;
+    return 0;
+}
+
+static PyArrayObject *integration_specs_prepare_array(PyObject *self, PyTypeObject *defining_class,
+                                                      PyObject *const *args, const Py_ssize_t nargs,
+                                                      const PyObject *kwnames, const integration_rule_t **p_rule,
+                                                      integration_rule_registry_t **p_registry)
+{
+    const interplib_module_state_t *state;
+    integration_specs_object *this;
+    if (ensure_integration_spec_state(self, defining_class, &this, &state) < 0)
+        return NULL;
+
+    if (nargs > 1 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "Only one argument may be passed to the method.");
+        return NULL;
+    }
+
+    const integration_registry_object *registry_object;
+    if (nargs == 1)
+    {
+        if (!PyObject_TypeCheck(args[0], state->integration_registry_type))
+        {
+            PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_registry_type->tp_name,
+                         Py_TYPE(args[0]));
+            return NULL;
+        }
+        registry_object = (integration_registry_object *)args[0];
+    }
+    else
+    {
+        registry_object = (integration_registry_object *)state->registry_integration;
+    }
+
+    integration_rule_registry_t *const registry = registry_object->registry;
+
+    const integration_rule_t *rule;
+    const interp_result_t res = integration_rule_registry_get_rule(registry, this->spec, &rule);
+    if (res != INTERP_SUCCESS)
+    {
+        PyErr_Format(PyExc_RuntimeError, "Failed to retrieve integration rule: %s (%s).", interp_error_str(res),
+                     interp_error_msg(res));
+        return NULL;
+    }
+
+    *p_rule = rule;
+    *p_registry = registry;
+
+    const npy_intp dims[] = {rule->n_nodes};
+    return (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+}
+
+PyDoc_STRVAR(integration_specs_nodes_docstring,
+             "nodes(registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY) -> ndarray[numpy.float64_t]\n"
+             "Get the integration nodes.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+             "    Registry used to retrieve the integration rule.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of integration nodes.\n");
+
+static PyObject *integration_specs_nodes(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                         const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const integration_rule_t *rule;
+    integration_rule_registry_t *registry;
+    PyArrayObject *out = integration_specs_prepare_array(self, defining_class, args, nargs, kwnames, &rule, &registry);
+    if (out)
+    {
+        npy_double *const p_out = PyArray_DATA(out);
+        const double *const nodes = integration_rule_nodes_const(rule);
+        for (unsigned i = 0; i < rule->n_nodes; ++i)
+        {
+            p_out[i] = nodes[i];
+        }
+    }
+    const interp_result_t res = integration_rule_registry_release_rule(registry, rule);
+    (void)res;
+    ASSERT(res == INTERP_SUCCESS, "Rule from the registry had to be successfully returned.");
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(integration_specs_weights_docstring,
+             "weights(registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY) -> ndarray[numpy.float64_t]\n"
+             "Get the integration weights.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+             "    Registry used to retrieve the integration rule.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of integration weights.\n");
+
+static PyObject *integration_specs_weights(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                           const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const integration_rule_t *rule;
+    integration_rule_registry_t *registry;
+    PyArrayObject *out = integration_specs_prepare_array(self, defining_class, args, nargs, kwnames, &rule, &registry);
+    if (out)
+    {
+        npy_double *const p_out = PyArray_DATA(out);
+        const double *const weights = integration_rule_weights_const(rule);
+        for (unsigned i = 0; i < rule->n_nodes; ++i)
+        {
+            p_out[i] = weights[i];
+        }
+    }
+    const interp_result_t res = integration_rule_registry_release_rule(registry, rule);
+    (void)res;
+    ASSERT(res == INTERP_SUCCESS, "Rule from the registry had to be successfully returned.");
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(integration_specs_docstring,
              "IntegrationSpecs(order : int , /, method: typing.Literal[\"gauss\", \"gauss-lobatto\"] = \"gauss\")\n"
              "Type that describes an integration rule.\n"
              "\n"
@@ -301,17 +440,33 @@ PyDoc_STRVAR(integration_specs_doc,
              "    Method used for integration.\n");
 
 PyType_Spec integration_specs_type_spec = {
-    .name = "interplib._interp.IntegrationRule",
+    .name = "interplib._interp.IntegrationSpecs",
     .basicsize = sizeof(integration_specs_object),
     .itemsize = 0,
     .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IMMUTABLETYPE | Py_TPFLAGS_HEAPTYPE | Py_TPFLAGS_HAVE_GC,
     .slots =
         (PyType_Slot[]){
-            {Py_tp_doc, (void *)integration_specs_doc},
+            {Py_tp_doc, (void *)integration_specs_docstring},
             {Py_tp_getset, integration_rule_getset},
             {Py_tp_new, integration_specs_new},
             {Py_tp_repr, (reprfunc)integration_rule_repr},
             {Py_tp_traverse, heap_type_traverse_type},
+            {Py_tp_methods,
+             (PyMethodDef[]){
+                 {
+                     .ml_name = "nodes",
+                     .ml_meth = (void *)integration_specs_nodes,
+                     .ml_flags = METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
+                     .ml_doc = integration_specs_nodes_docstring,
+                 },
+                 {
+                     .ml_name = "weights",
+                     .ml_meth = (void *)integration_specs_weights,
+                     .ml_flags = METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
+                     .ml_doc = integration_specs_weights_docstring,
+                 },
+                 {},
+             }},
             {},
         },
 };

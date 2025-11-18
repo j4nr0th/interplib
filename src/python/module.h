@@ -43,12 +43,12 @@ extern allocator_callbacks OBJECT_ALLOCATOR;
 typedef struct
 {
     // Integration
-    PyTypeObject *integration_rule_type;
+    PyTypeObject *integration_spec_type;
     PyTypeObject *integration_registry_type;
 
     // Basis
     basis_set_registry_t *basis_registry;
-    PyTypeObject *basis_set_type;
+    PyTypeObject *basis_spec_type;
 
     // Topology
     PyTypeObject *geoid_type;
@@ -73,26 +73,6 @@ static inline const interplib_module_state_t *interplib_get_module_state(PyTypeO
         return NULL;
     }
     return PyModule_GetState(mod);
-}
-
-static inline integration_rule_registry_t *interplib_get_integration_registry(PyTypeObject *type)
-{
-    const interplib_module_state_t *const state = interplib_get_module_state(type);
-    if (!state)
-    {
-        return NULL;
-    }
-    return state->integration_rule_registry;
-}
-
-static inline basis_set_registry_t *interplib_get_basis_registry(PyTypeObject *type)
-{
-    const interplib_module_state_t *const state = interplib_get_module_state(type);
-    if (!state)
-    {
-        return NULL;
-    }
-    return state->basis_registry;
 }
 
 INTERPLIB_INTERNAL

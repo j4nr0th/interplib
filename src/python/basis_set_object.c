@@ -148,7 +148,7 @@ PyDoc_STRVAR(basis_specs_docstring, "BasisSpecs(basis_type: interplib._typing.Ba
 
 /* Spec for heap type */
 PyType_Spec basis_specs_type_spec = {
-    .name = "interplib._interp.BasisSet",
+    .name = "interplib._interp.BasisSpecs",
     .basicsize = sizeof(basis_specs_object),
     .flags =
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_IMMUTABLETYPE,

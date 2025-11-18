@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from interplib import IntegrationMethod, IntegrationRule
+from interplib import IntegrationMethod, IntegrationSpecs
 
 
 def _exact_integral_monomial(k: int) -> float:
@@ -17,11 +17,11 @@ def _exact_integral_monomial(k: int) -> float:
 @pytest.mark.parametrize("method", IntegrationMethod)
 def test_monomials_integrated_exactly(order: int, method: IntegrationMethod):
     """Check monomials are integrated exactly."""
-    rule = IntegrationRule(order, method=method)
+    rule = IntegrationSpecs(order, method=method)
     acc = rule.accuracy
 
     for k in range(acc + 1):
-        approx = np.sum(rule.weights * rule.nodes**k)
+        approx = np.sum(rule.weights() * rule.nodes() ** k)
         exact = _exact_integral_monomial(k)
         assert pytest.approx(approx) == exact, (
             f"Failed for k={k}, method={method}, order={order}"

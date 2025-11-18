@@ -16,7 +16,7 @@ typedef struct
 } integration_specs_object;
 
 INTERPLIB_INTERNAL
-extern PyType_Spec integration_rule_registry_type_spec;
+extern PyType_Spec integration_registry_type_spec;
 
 INTERPLIB_INTERNAL
 extern PyType_Spec integration_specs_type_spec;

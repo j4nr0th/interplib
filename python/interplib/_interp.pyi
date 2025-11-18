@@ -348,6 +348,40 @@ class IntegrationSpecs:
         """Method used for integration."""
         ...
 
+    def nodes(
+        self, registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY
+    ) -> npt.NDArray[np.double]:
+        """Get the integration nodes.
+
+        Parameters
+        ----------
+        registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rule.
+
+        Returns
+        -------
+        array
+            Array of integration nodes.
+        """
+        ...
+
+    def weights(
+        self, registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY
+    ) -> npt.NDArray[np.double]:
+        """Get the integration weights.
+
+        Parameters
+        ----------
+        registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rule.
+
+        Returns
+        -------
+        array
+            Array of integration weights.
+        """
+        ...
+
 @final
 class BasisSpecs:
     """Type that describes specifications for a basis set.
