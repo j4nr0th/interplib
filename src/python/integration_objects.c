@@ -1,4 +1,4 @@
-#include "integration_rule_object.h"
+#include "integration_objects.h"
 #include <Python.h>
 #include <numpy/ndarrayobject.h>
 

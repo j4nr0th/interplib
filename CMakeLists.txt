@@ -100,8 +100,8 @@ set(PYTHON_TOPOLOGY_SOURCE_FILES
 )
 
 set(PYTHON_NUMERICS_SOURCE_FILES
-        src/python/integration_rule_object.c
-        src/python/basis_set_object.c
+        src/python/integration_objects.c
+        src/python/basis_objects.c
 )
 
 Python_add_library(_interp MODULE

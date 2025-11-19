@@ -383,6 +383,18 @@ class IntegrationSpecs:
         ...
 
 @final
+class BasisRegistry:
+    """Registry for basis specifications.
+
+    This registry contains all available basis specifications and caches them for
+    efficient retrieval.
+    """
+
+    def __new__(cls) -> Self: ...
+    def usage(self) -> tuple[tuple[str, int], ...]: ...
+    def clear(self) -> None: ...
+
+@final
 class BasisSpecs:
     """Type that describes specifications for a basis set.
 

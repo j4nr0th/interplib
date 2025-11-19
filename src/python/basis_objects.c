@@ -2,8 +2,8 @@
 // Created by jan on 2025-09-11.
 //
 
-#include "basis_set_object.h"
-#include "integration_rule_object.h"
+#include "basis_objects.h"
+#include "integration_objects.h"
 
 #include <numpy/ndarrayobject.h>
 #include <string.h>

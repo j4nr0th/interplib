@@ -13,10 +13,11 @@
 #include "../integration/gauss_lobatto.h"
 #include "../polynomials/bernstein.h"
 #include "../polynomials/lagrange.h"
-#include "basis_set_object.h"
-#include "integration_rule_object.h"
+#include "basis_objects.h"
+#include "integration_objects.h"
 
 // Topology
+#include "cpyutl.h"
 #include "topology/geoid_object.h"
 #include "topology/line_object.h"
 #include "topology/manifold1d_object.h"
@@ -777,30 +778,6 @@ static void free_module_state(void *module)
     *module_state = (interplib_module_state_t){};
 }
 
-static PyTypeObject *add_type_from_spec_to_module(PyObject *module, PyType_Spec *spec, PyObject *bases)
-{
-    PyTypeObject *const type = (PyTypeObject *)PyType_FromMetaclass(NULL, module, spec, bases);
-    if (!type)
-    {
-        return NULL;
-    }
-    const char *name = spec->name;
-
-    const char *last_pos = strrchr(name, '.');
-    if (last_pos)
-        name = last_pos + 1;
-
-    const int res = PyModule_AddObjectRef(module, name, (PyObject *)type);
-    Py_DECREF(type);
-
-    if (res < 0)
-    {
-        return NULL;
-    }
-
-    return type;
-}
-
 static int interplib_add_types(PyObject *mod)
 {
     interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
@@ -809,19 +786,20 @@ static int interplib_add_types(PyObject *mod)
         return -1;
     }
 
-    if ((module_state->integration_spec_type = add_type_from_spec_to_module(mod, &integration_specs_type_spec, NULL)) ==
-            NULL ||
+    if ((module_state->integration_spec_type =
+             cpyutl_add_type_from_spec_to_module(mod, &integration_specs_type_spec, NULL)) == NULL ||
         (module_state->integration_registry_type =
-             add_type_from_spec_to_module(mod, &integration_registry_type_spec, NULL)) == NULL ||
-        (module_state->basis_spec_type = add_type_from_spec_to_module(mod, &basis_specs_type_spec, NULL)) == NULL ||
-        (module_state->geoid_type = add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
-        (module_state->line_type = add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
-        (module_state->surf_type = add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||
-        (module_state->man_type = add_type_from_spec_to_module(mod, &manifold_type_spec, NULL)) == NULL ||
-        (module_state->man1d_type =
-             add_type_from_spec_to_module(mod, &manifold1d_type_spec, (PyObject *)module_state->man_type)) == NULL ||
-        (module_state->man2d_type =
-             add_type_from_spec_to_module(mod, &manifold2d_type_spec, (PyObject *)module_state->man_type)) == NULL)
+             cpyutl_add_type_from_spec_to_module(mod, &integration_registry_type_spec, NULL)) == NULL ||
+        (module_state->basis_spec_type = cpyutl_add_type_from_spec_to_module(mod, &basis_specs_type_spec, NULL)) ==
+            NULL ||
+        (module_state->geoid_type = cpyutl_add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
+        (module_state->line_type = cpyutl_add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
+        (module_state->surf_type = cpyutl_add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||
+        (module_state->man_type = cpyutl_add_type_from_spec_to_module(mod, &manifold_type_spec, NULL)) == NULL ||
+        (module_state->man1d_type = cpyutl_add_type_from_spec_to_module(mod, &manifold1d_type_spec,
+                                                                        (PyObject *)module_state->man_type)) == NULL ||
+        (module_state->man2d_type = cpyutl_add_type_from_spec_to_module(mod, &manifold2d_type_spec,
+                                                                        (PyObject *)module_state->man_type)) == NULL)
     {
         return -1;
     }
@@ -847,7 +825,7 @@ static int interplib_add_registries(PyObject *mod)
     }
 
     // Add integration registry
-    if (module_add_steal(mod, "integration_registry",
+    if (module_add_steal(mod, "DEFAULT_INTEGRATION_REGISTRY",
                          (module_state->registry_integration = (PyObject *)integration_registry_object_create(
                               module_state->integration_registry_type))) < 0)
         return -1;
