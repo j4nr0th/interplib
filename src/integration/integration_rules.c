@@ -354,8 +354,8 @@ unsigned integration_rule_get_rules(integration_rule_registry_t *this, const uns
             if (count < max_count)
             {
                 specs[count] = bucket->rules[j]->spec;
-                count += 1;
             }
+            count += 1;
         }
     }
     rw_lock_release_read(&this->lock);

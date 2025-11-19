@@ -387,3 +387,31 @@ void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *const th
     }
     rw_lock_release_write(&this->lock);
 }
+unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_count,
+                                     basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, const max_count),
+                                     integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, const max_count))
+{
+    rw_lock_acquire_read(&this->lock);
+    unsigned count = 0;
+    for (unsigned i = 0; i < this->n_buckets; ++i)
+    {
+        const basis_bucket_btype_t *const first_bucket = this->buckets + i;
+        for (unsigned j = 0; j < first_bucket->count; ++j)
+        {
+            const basis_bucket_itype_t *const second_bucket = first_bucket->buckets + j;
+            for (unsigned k = 0; k < second_bucket->count; ++k)
+            {
+                const basis_set_t *const basis = second_bucket->basis_sets[k];
+                if (count < max_count)
+                {
+                    basis_spec[count] = basis->spec;
+                    integration_spec[count] = basis->integration_spec;
+                }
+                count += 1;
+            }
+        }
+    }
+
+    rw_lock_release_read(&this->lock);
+    return count;
+}

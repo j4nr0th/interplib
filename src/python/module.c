@@ -773,8 +773,6 @@ static PyMethodDef module_methods[] = {
 static void free_module_state(void *module)
 {
     interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(module);
-    if (module_state->basis_registry)
-        basis_set_registry_destroy(module_state->basis_registry);
     *module_state = (interplib_module_state_t){};
 }
 
@@ -792,6 +790,8 @@ static int interplib_add_types(PyObject *mod)
              cpyutl_add_type_from_spec_to_module(mod, &integration_registry_type_spec, NULL)) == NULL ||
         (module_state->basis_spec_type = cpyutl_add_type_from_spec_to_module(mod, &basis_specs_type_spec, NULL)) ==
             NULL ||
+        (module_state->basis_registry_type =
+             cpyutl_add_type_from_spec_to_module(mod, &basis_registry_type_specs, NULL)) == NULL ||
         (module_state->geoid_type = cpyutl_add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
         (module_state->line_type = cpyutl_add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
         (module_state->surf_type = cpyutl_add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||
@@ -831,18 +831,10 @@ static int interplib_add_registries(PyObject *mod)
         return -1;
 
     // Add basis registry
-    {
-        basis_set_registry_t *basis_registry;
-        const interp_result_t res = basis_set_registry_create(&basis_registry, 1, &SYSTEM_ALLOCATOR);
-        if (res != INTERP_SUCCESS)
-        {
-            PyErr_Format(PyExc_RuntimeError, "Could not initialize basis registry: %s (%s)", interp_error_str(res),
-                         interp_error_msg(res));
-            return -1;
-        }
-
-        module_state->basis_registry = basis_registry;
-    }
+    if (module_add_steal(mod, "DEFAULT_BASIS_REGISTRY",
+                         (module_state->registry_basis =
+                              (PyObject *)basis_registry_object_create(module_state->basis_registry_type))) < 0)
+        return -1;
 
     return 0;
 }

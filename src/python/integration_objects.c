@@ -7,6 +7,7 @@ integration_registry_object *integration_registry_object_create(PyTypeObject *ty
     integration_registry_object *const self = (integration_registry_object *)type->tp_alloc(type, 0);
     if (!self)
         return NULL;
+    self->registry = NULL;
     const interp_result_t res = integration_rule_registry_create(&self->registry, 1, &SYSTEM_ALLOCATOR);
     if (res != INTERP_SUCCESS)
     {
@@ -15,6 +16,14 @@ integration_registry_object *integration_registry_object_create(PyTypeObject *ty
         Py_DECREF(self);
         return NULL;
     }
+    return self;
+}
+integration_specs_object *integration_specs_object_create(PyTypeObject *type, const integration_rule_spec_t spec)
+{
+    integration_specs_object *const self = (integration_specs_object *)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+    self->spec = spec;
     return self;
 }
 
@@ -63,7 +72,11 @@ static PyObject *integration_registry_repr(PyObject *self)
 static void integration_registry_dealloc(integration_registry_object *self)
 {
     PyObject_GC_UnTrack(self);
-    integration_rule_registry_destroy(self->registry);
+    if (self->registry)
+    {
+        integration_rule_registry_destroy(self->registry);
+        self->registry = NULL;
+    }
     PyTypeObject *const type = Py_TYPE(self);
     type->tp_free((PyObject *)self);
     Py_DECREF(type);
@@ -103,7 +116,7 @@ static PyObject *integration_registry_usage(PyObject *self, PyTypeObject *defini
         return NULL;
     for (unsigned i = 0; i < count; ++i)
     {
-        PyObject *const val = Py_BuildValue("Is", specs[i].order, integration_rule_type_to_str(specs[i].type));
+        integration_specs_object *const val = integration_specs_object_create(state->integration_spec_type, specs[i]);
         if (!val)
         {
             Py_DECREF(out);
@@ -121,7 +134,7 @@ static PyObject *integration_registry_clear(PyObject *self, PyTypeObject *defini
 {
     if (nargs != 0 || kwnames != NULL)
     {
-        PyErr_SetString(PyExc_TypeError, "usage() takes no arguments.");
+        PyErr_SetString(PyExc_TypeError, "clear() takes no arguments.");
         return NULL;
     }
 
@@ -130,7 +143,7 @@ static PyObject *integration_registry_clear(PyObject *self, PyTypeObject *defini
     if (ensure_integration_registry_state(self, defining_class, &this, &state) < 0)
         return NULL;
 
-    integration_rule_registry_release_all_rules(this->registry);
+    integration_rule_registry_release_unused_rules(this->registry);
 
     Py_RETURN_NONE;
 }
@@ -153,7 +166,7 @@ PyType_Spec integration_registry_type_spec = {
                      "usage",
                      (PyCFunction)integration_registry_usage,
                      METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
-                     "usage() -> tuple[tuple[int, str], ...]\nReturns a list of currently stored rules.",
+                     "usage() -> tuple[IntegrationSpecs, ...]\nReturns a list of currently stored rules.",
                  },
                  {
                      "clear",

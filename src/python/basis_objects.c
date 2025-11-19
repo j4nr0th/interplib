@@ -72,6 +72,173 @@ static const char *basis_type_string(const basis_set_type_t type)
     }
 }
 
+static PyObject *basis_registry_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
+{
+    if (PyTuple_GET_SIZE(args) != 0 || (kwds && PyDict_Size(kwds) != 0))
+    {
+        PyErr_SetString(PyExc_TypeError, "BasisRegistry takes no arguments.");
+        return NULL;
+    }
+
+    return (PyObject *)basis_registry_object_create(subtype);
+}
+
+static void basis_registry_dealloc(basis_registry_object *self)
+{
+    PyObject_GC_UnTrack(self);
+    PyTypeObject *const type = Py_TYPE(self);
+    if (self->registry)
+    {
+        basis_set_registry_destroy(self->registry);
+        self->registry = NULL;
+    }
+    type->tp_free((PyObject *)self);
+    Py_DECREF(type);
+}
+
+static int ensure_basis_registry_and_state(PyObject *self, PyTypeObject *defining_class,
+                                           const interplib_module_state_t **p_state, basis_registry_object **p_this)
+{
+    const interplib_module_state_t *const state =
+        defining_class ? PyType_GetModuleState(defining_class) : interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        return -1;
+    }
+    if (!PyObject_TypeCheck(self, state->basis_registry_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->basis_registry_type->tp_name,
+                     Py_TYPE(self)->tp_name);
+        return -1;
+    }
+
+    *p_state = state;
+    *p_this = (basis_registry_object *)self;
+    return 0;
+}
+
+PyDoc_STRVAR(basis_registry_usage_docstring, "usage() -> tuple[tuple[BasisSpecs, IntegrationSpecs], ...]\n");
+
+static PyObject *basis_registry_usage(PyObject *self, PyTypeObject *defining_class, PyObject *const *Py_UNUSED(args),
+                                      const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    basis_registry_object *this;
+    if (ensure_basis_registry_and_state(self, defining_class, &state, &this) < 0)
+        return NULL;
+
+    if (nargs != 0 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "usage() takes no arguments.");
+        return NULL;
+    }
+
+    unsigned usage = basis_set_registry_get_sets(this->registry, 0, (basis_spec_t[]){}, (integration_rule_spec_t[]){});
+
+    integration_rule_spec_t *const specs = PyMem_Malloc(usage * sizeof(*specs));
+    if (!specs)
+        return NULL;
+    basis_spec_t *const basis_specs = PyMem_Malloc(usage * sizeof(*basis_specs));
+    if (!basis_specs)
+    {
+        PyMem_Free(specs);
+        return NULL;
+    }
+    unsigned const new_usage = basis_set_registry_get_sets(this->registry, usage, basis_specs, specs);
+    usage = new_usage < usage ? new_usage : usage;
+
+    PyTupleObject *const out = (PyTupleObject *)PyTuple_New(usage);
+    if (!out)
+    {
+        PyMem_Free(basis_specs);
+        PyMem_Free(specs);
+        return NULL;
+    }
+
+    for (unsigned i = 0; i < usage; ++i)
+    {
+        integration_specs_object *ir = NULL;
+        basis_specs_object *br = NULL;
+        PyObject *packed = NULL;
+
+        if ((ir = integration_specs_object_create(state->integration_spec_type, specs[i])) == NULL ||
+            (br = basis_specs_object_create(state->basis_spec_type, basis_specs[i])) == NULL ||
+            (packed = PyTuple_New(2)) == NULL)
+        {
+            Py_XDECREF(ir);
+            Py_XDECREF(br);
+            PyMem_Free(basis_specs);
+            PyMem_Free(specs);
+            Py_DECREF(out);
+            return NULL;
+        }
+        PyTuple_SET_ITEM(packed, 0, (PyObject *)br);
+        PyTuple_SET_ITEM(packed, 1, (PyObject *)ir);
+        PyTuple_SET_ITEM(out, i, packed);
+    }
+
+    PyMem_Free(basis_specs);
+    PyMem_Free(specs);
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(basis_registry_clear_docstring, "clear() -> None\n");
+
+static PyObject *basis_registry_clear(PyObject *self, PyTypeObject *defining_class, PyObject *const *Py_UNUSED(args),
+                                      const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    basis_registry_object *this;
+    if (ensure_basis_registry_and_state(self, defining_class, &state, &this) < 0)
+        return NULL;
+    if (nargs != 0 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "clear() takes no arguments.");
+        return NULL;
+    }
+
+    basis_set_registry_release_unused_basis_sets(this->registry);
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(basis_registry_docstring, "Registry for basis sets.\n"
+                                       "\n"
+                                       "This registry contains all available basis sets and caches them for efficient\n"
+                                       "retrieval.\n");
+
+PyType_Spec basis_registry_type_specs = {
+    .name = "interplib._interp.BasisRegistry",
+    .basicsize = sizeof(basis_registry_object),
+    .itemsize = 0,
+    .flags = Py_TPFLAGS_IMMUTABLETYPE | Py_TPFLAGS_HEAPTYPE | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_DEFAULT,
+    .slots =
+        (PyType_Slot[]){
+            {Py_tp_new, basis_registry_new},
+            {Py_tp_dealloc, basis_registry_dealloc},
+            {Py_tp_traverse, heap_type_traverse_type},
+            {Py_tp_doc, (void *)basis_registry_docstring},
+            {Py_tp_methods,
+             (PyMethodDef[]){
+                 {
+                     "usage",
+                     (void *)basis_registry_usage,
+                     METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
+                     basis_registry_usage_docstring,
+                 },
+                 {
+                     "clear",
+                     (void *)basis_registry_clear,
+                     METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
+                     basis_registry_clear_docstring,
+                 },
+                 {},
+             }},
+            {},
+        },
+
+};
+
 /* __new__ */
 static PyObject *basis_specs_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
 {
@@ -161,3 +328,28 @@ PyType_Spec basis_specs_type_spec = {
             {},
         },
 };
+
+basis_registry_object *basis_registry_object_create(PyTypeObject *type)
+{
+    basis_registry_object *const this = (basis_registry_object *)type->tp_alloc(type, 0);
+    if (!this)
+        return NULL;
+    this->registry = NULL;
+    const interp_result_t res = basis_set_registry_create(&this->registry, 1, &SYSTEM_ALLOCATOR);
+    if (res != INTERP_SUCCESS)
+    {
+        PyErr_Format(PyExc_RuntimeError, "Could not initialize basis set registry: %s (%s)", interp_error_str(res),
+                     interp_error_msg(res));
+        Py_DECREF(this);
+        return NULL;
+    }
+    return this;
+}
+basis_specs_object *basis_specs_object_create(PyTypeObject *type, const basis_spec_t spec)
+{
+    basis_specs_object *const this = (basis_specs_object *)type->tp_alloc(type, 0);
+    if (!this)
+        return NULL;
+    this->spec = spec;
+    return this;
+}

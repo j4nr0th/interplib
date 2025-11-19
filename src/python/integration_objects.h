@@ -24,4 +24,7 @@ extern PyType_Spec integration_specs_type_spec;
 INTERPLIB_INTERNAL
 integration_registry_object *integration_registry_object_create(PyTypeObject *type);
 
+INTERPLIB_INTERNAL
+integration_specs_object *integration_specs_object_create(PyTypeObject *type, integration_rule_spec_t spec);
+
 #endif // INTERPLIB_INTEGRATION_RULE_OBJECT_H

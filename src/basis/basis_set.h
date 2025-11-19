@@ -75,4 +75,9 @@ void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *this);
 INTERPLIB_INTERNAL
 void basis_set_registry_release_all_basis_sets(const basis_set_registry_t *this);
 
+INTERPLIB_INTERNAL
+unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_count,
+                                     basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, max_count),
+                                     integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
+
 #endif // INTERPLIB_BASIS_H

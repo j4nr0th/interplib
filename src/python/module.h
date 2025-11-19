@@ -47,7 +47,7 @@ typedef struct
     PyTypeObject *integration_registry_type;
 
     // Basis
-    basis_set_registry_t *basis_registry;
+    PyTypeObject *basis_registry_type;
     PyTypeObject *basis_spec_type;
 
     // Topology
@@ -60,6 +60,7 @@ typedef struct
 
     // Default Registries
     PyObject *registry_integration;
+    PyObject *registry_basis;
 } interplib_module_state_t;
 
 INTERPLIB_INTERNAL
