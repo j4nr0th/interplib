@@ -4,8 +4,6 @@
 
 #include "../../src/integration/integration_rules.h"
 #include "../common/common.h"
-#include <X11/Xlib.h>
-#include <math.h>
 
 /**
  * Main test function to verify the numerical integration rule using the Gauss-Legendre method.

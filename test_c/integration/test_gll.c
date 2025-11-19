@@ -1,10 +1,6 @@
-//
-// Created by jan on 2025-09-07.
-//
 
 #include "../../src/integration/integration_rules.h"
 #include "../common/common.h"
-#include <math.h>
 
 /**
  * Main test function to verify the numerical integration rule using the Gauss-Lobatto method.

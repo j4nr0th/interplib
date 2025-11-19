@@ -1,7 +1,3 @@
-//
-// Created by jan on 2025-09-08.
-//
-
 #include "../../src/integration/integration_rules.h"
 #include "../common/common.h"
 
