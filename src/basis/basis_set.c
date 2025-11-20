@@ -5,9 +5,16 @@
 #include "basis_set.h"
 #include "../common/rw_lock.h"
 
+#include "../integration/gauss_legendre.h"
+#include "../integration/gauss_lobatto.h"
+#include "../polynomials/bernstein.h"
+#include "../polynomials/lagrange.h"
+#include "../polynomials/legendre.h"
 #include "basis_bernstein.h"
 #include "basis_lagrange.h"
 #include "basis_legendre.h"
+
+#include <math.h>
 #include <string.h>
 
 // Bucket containing all basis sets of the same integration type
@@ -414,4 +421,65 @@ unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_co
 
     rw_lock_release_read(&this->lock);
     return count;
+}
+
+// TODO: shift Bernstein polynomials to be on [-1, +1] instead of [0, +1]
+void basis_compute_at_point(const basis_set_type_t type, const unsigned order, const unsigned cnt,
+                            const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                            double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                            double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
+{
+    // Prepare the roots for Lagrange multipliers
+    switch (type)
+    {
+    case BASIS_LAGRANGE_UNIFORM:
+        for (unsigned i = 0; i < order + 1; ++i)
+        {
+            work[i] = (2.0 * i) / (double)(order)-1.0;
+        }
+        break;
+
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+        for (unsigned i = 0; i < order + 1; ++i)
+        {
+            work[i] = cos(M_PI * (double)(2 * i + 1) / (double)(2 * (order + 1)));
+        }
+        break;
+
+    case BASIS_LAGRANGE_GAUSS:
+        // TODO: replace the hard-coded values by some parameters?
+        gauss_legendre_nodes(order + 1, 1e-12, 100, work);
+        break;
+
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+        gauss_lobatto_nodes(order + 1, 1e-12, 100, work);
+        break;
+
+    default:
+        // Nothing to do here
+        break;
+    }
+
+    switch (type)
+    {
+    case BASIS_LEGENDRE:
+        for (unsigned i = 0; i < cnt; ++i)
+            legendre_eval_bonnet_all(order, x[i], out + i * (order + 1));
+        break;
+
+    case BASIS_BERNSTEIN:
+        for (unsigned i = 0; i < cnt; ++i)
+            bernstein_interpolation_vector(x[i], order, out + i * (order + 1));
+        break;
+
+    case BASIS_LAGRANGE_UNIFORM:
+    case BASIS_LAGRANGE_GAUSS:
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+        lagrange_polynomial_values_2(cnt, x, order + 1, work, out);
+        break;
+
+    default:
+        break;
+    }
 }

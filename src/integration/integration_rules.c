@@ -367,9 +367,13 @@ unsigned integration_rule_spec_get_accuracy(const integration_rule_spec_t spec)
     switch (spec.type)
     {
     case INTEGRATION_RULE_TYPE_GAUSS_LEGENDRE:
-        return 2 * spec.order - 1;
+        if (spec.order > 0)
+            return 2 * spec.order - 1;
+        return 1;
     case INTEGRATION_RULE_TYPE_GAUSS_LOBATTO:
-        return 2 * spec.order - 3;
+        if (spec.order > 2)
+            return 2 * spec.order - 3;
+        return 1;
     default:
         return 0;
     }

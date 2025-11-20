@@ -420,6 +420,23 @@ class BasisSpecs:
         """Order of the basis in the set."""
         ...
 
+    def values(self, x: npt.ArrayLike, /) -> npt.NDArray[np.double]:
+        """Evaluate basis functions at given locations.
+
+        Parameters
+        ----------
+        x : array_like
+            Locations where the basis functions should be evaluated.
+
+        Returns
+        -------
+        array
+            Array of basis function values at the specified locations.
+            It has one more dimension than ``x``, with the last dimension
+            corresponding to the basis function index.
+        """
+        ...
+
 @final
 class GeoID:
     """Type used to identify a geometrical object with an index and orientation.

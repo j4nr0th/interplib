@@ -778,6 +778,9 @@ static void free_module_state(void *module)
 
 static int interplib_add_types(PyObject *mod)
 {
+    if (PyArray_ImportNumPyAPI() < 0)
+        return -1;
+
     interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
     if (!module_state)
     {
@@ -858,8 +861,6 @@ PyModuleDef interplib_module = {
 PyMODINIT_FUNC PyInit__interp(void)
 {
     import_array();
-    if (PyArray_ImportNumPyAPI() < 0)
-        return NULL;
 
     return PyModuleDef_Init(&interplib_module);
 }

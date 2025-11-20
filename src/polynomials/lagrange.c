@@ -105,6 +105,74 @@ void lagrange_polynomial_values(const unsigned n_pos, const double INTERPLIB_ARR
 }
 
 INTERPLIB_INTERNAL
+void lagrange_polynomial_values_2(const unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                  const unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                  double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos))
+{
+    double *const denominators = values + n_roots * (n_pos - 1);
+    // Store denominators in the last row
+    lagrange_polynomial_denominators(n_roots, p_roots, denominators);
+
+    //  Compute the numerators now
+    for (unsigned k = 0; k < n_pos - 1; ++k)
+    {
+        double *const row = values + n_roots * k;
+        //  The first loop can be used to initialize the row
+        {
+            const double dif = p_pos[k] - p_roots[0];
+            row[0] = 1.0;
+            for (unsigned j = 1; j < n_roots; ++j)
+            {
+                row[j] = +dif;
+            }
+        }
+        // Deal with the rest of the iterations
+        for (unsigned i = 1; i < n_roots; ++i)
+        {
+            const double dif = p_pos[k] - p_roots[i];
+            for (unsigned j = 0; j < i; ++j)
+            {
+                row[j] *= +dif;
+            }
+            for (unsigned j = i + 1; j < n_roots; ++j)
+            {
+                row[j] *= +dif;
+            }
+        }
+        //  Divide by the denominator
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            row[i] /= denominators[i];
+        }
+    }
+
+    const unsigned k = n_pos - 1;
+    double *const row = values + n_roots * (k);
+    // Here we already have denominators in the array, so we deal with them on the first run
+    {
+        const double dif = p_pos[k] - p_roots[0];
+        row[0] = 1.0 / denominators[0];
+        for (unsigned j = 1; j < n_roots; ++j)
+        {
+            row[j] = +dif / denominators[j];
+        }
+    }
+    // The rest of these are the same
+    for (unsigned i = 1; i < n_roots; ++i)
+    {
+        const double dif = p_pos[k] - p_roots[i];
+        for (unsigned j = 0; j < i; ++j)
+        {
+            row[j] *= +dif;
+        }
+        for (unsigned j = i + 1; j < n_roots; ++j)
+        {
+            row[j] *= +dif;
+        }
+    }
+}
+
+INTERPLIB_INTERNAL
 void lagrange_polynomial_values_transposed(const unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
                                            const unsigned n_nodes, const double INTERPLIB_ARRAY_ARG(x, static n_nodes),
                                            double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),

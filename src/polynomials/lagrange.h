@@ -50,6 +50,11 @@ void lagrange_polynomial_values(unsigned n_pos, const double INTERPLIB_ARRAY_ARG
                                 double INTERPLIB_ARRAY_ARG(work, restrict n_roots));
 
 INTERPLIB_INTERNAL
+void lagrange_polynomial_values_2(unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                  unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                  double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos));
+
+INTERPLIB_INTERNAL
 void lagrange_polynomial_values_transposed(unsigned n_in, const double INTERPLIB_ARRAY_ARG(pos, static n_in),
                                            unsigned n_nodes, const double INTERPLIB_ARRAY_ARG(x, static n_nodes),
                                            double INTERPLIB_ARRAY_ARG(weights, restrict n_nodes *n_in),

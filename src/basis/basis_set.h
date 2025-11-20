@@ -80,4 +80,10 @@ unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_co
                                      basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, max_count),
                                      integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
 
+INTERPLIB_INTERNAL
+void basis_compute_at_point(basis_set_type_t type, unsigned order, unsigned cnt,
+                            const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                            double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                            double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+
 #endif // INTERPLIB_BASIS_H

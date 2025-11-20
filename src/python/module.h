@@ -27,6 +27,8 @@
 #endif
 
 #include <Python.h>
+#include <cpyutl.h>
+#include <numpy/ndarrayobject.h>
 
 INTERPLIB_INTERNAL
 extern allocator_callbacks SYSTEM_ALLOCATOR;
