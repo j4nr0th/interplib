@@ -14,19 +14,22 @@ int main(const int argc, const char *argv[argc])
 
     nd_iterator_init(iter, 1, (const size_t[]){v});
 
+    // Forward iteration tests
+
+    nd_iterator_set_to_start(iter);
     // Check that iteration without any steps works well
     for (size_t i = 0; i < v; ++i)
     {
         TEST_ASSERTION(nd_iterator_get_flat_index(iter) == i, "Unexpected index");
         nd_iterator_advance(iter, 0, 1);
     }
-    TEST_ASSERTION(nd_iterator_is_done(iter), "Iterator is not done");
+    TEST_ASSERTION(nd_iterator_is_at_end(iter), "Iterator is not done");
     TEST_ASSERTION(nd_iterator_get_flat_index(iter) == v, "End index was not what was expected");
 
     // Check that different stride length works
     for (size_t stride = 1; stride < 25; ++stride)
     {
-        nd_iterator_restart(iter);
+        nd_iterator_set_to_start(iter);
         TEST_ASSERTION(nd_iterator_get_flat_index(iter) == 0, "Iterator did not correctly reset");
         unsigned last_index = 0;
         while (last_index < v)
@@ -35,8 +38,35 @@ int main(const int argc, const char *argv[argc])
             last_index += stride;
             nd_iterator_advance(iter, 0, stride);
         }
-        TEST_ASSERTION(nd_iterator_is_done(iter), "Iterator is not done");
+        TEST_ASSERTION(nd_iterator_is_at_end(iter), "Iterator is not done");
         TEST_ASSERTION(nd_iterator_get_flat_index(iter) == v, "End index was not what was expected");
+    }
+
+    // Backward iteration steps
+    nd_iterator_set_to_end(iter);
+    // Check that iteration without any steps works well
+    for (size_t i = 0; i < v; ++i)
+    {
+        TEST_ASSERTION(nd_iterator_get_flat_index(iter) == v - i, "Unexpected index");
+        nd_iterator_recede(iter, 0, 1);
+    }
+    TEST_ASSERTION(nd_iterator_is_at_start(iter), "Iterator is not at the start");
+    TEST_ASSERTION(nd_iterator_get_flat_index(iter) == 0, "Start index was not what was expected");
+
+    // Check that different stride length works
+    for (size_t stride = 1; stride < 25; ++stride)
+    {
+        nd_iterator_set_to_end(iter);
+        TEST_ASSERTION(nd_iterator_get_flat_index(iter) == v, "Iterator did not correctly reset");
+        unsigned last_index = 0;
+        while (last_index < v)
+        {
+            TEST_ASSERTION(nd_iterator_get_flat_index(iter) == v - last_index, "Unexpected index");
+            last_index += stride;
+            nd_iterator_recede(iter, 0, stride);
+        }
+        TEST_ASSERTION(nd_iterator_is_at_start(iter), "Iterator is not at the start");
+        TEST_ASSERTION(nd_iterator_get_flat_index(iter) == 0, "Start index was not what was expected");
     }
 
     free(iter);

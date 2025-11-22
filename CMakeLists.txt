@@ -111,6 +111,7 @@ set(PYTHON_TOPOLOGY_SOURCE_FILES
 set(PYTHON_NUMERICS_SOURCE_FILES
         src/python/integration_objects.c
         src/python/basis_objects.c
+        src/python/function_space_objects.c
 )
 
 Python_add_library(_interp MODULE

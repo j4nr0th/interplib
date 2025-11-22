@@ -48,3 +48,7 @@ add_test(NAME nd_iterator_1d COMMAND test_nd_iterator_1d 120)
 add_executable(test_nd_iterator_2d operations/test_nd_iterator_2d.c)
 target_link_libraries(test_nd_iterator_2d PRIVATE interp m)
 add_test(NAME nd_iterator_2d COMMAND test_nd_iterator_2d 12 40)
+
+add_executable(test_nd_iterator_3d operations/test_nd_iterator_3d.c)
+target_link_libraries(test_nd_iterator_3d PRIVATE interp m)
+add_test(NAME nd_iterator_3d COMMAND test_nd_iterator_3d 13 7 17)

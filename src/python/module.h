@@ -27,8 +27,10 @@
 #endif
 
 #include <Python.h>
-#include <cpyutl.h>
 #include <numpy/ndarrayobject.h>
+
+// This must be after the NumPy include
+#include <cpyutl.h>
 
 INTERPLIB_INTERNAL
 extern allocator_callbacks SYSTEM_ALLOCATOR;
