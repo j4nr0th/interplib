@@ -13,8 +13,11 @@
 
 #include <math.h>
 
-static void failed_assertion(const char *file, const int line, const char *function, const char *expr, const char *msg,
-                             ...)
+#ifdef __GNUC__
+__attribute__((format(printf, 5, 6)))
+#endif
+static void
+failed_assertion(const char *file, const int line, const char *function, const char *expr, const char *msg, ...)
 {
     char buffer[1024];
     va_list args;

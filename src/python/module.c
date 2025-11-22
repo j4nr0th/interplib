@@ -18,6 +18,7 @@
 
 // Topology
 #include "cpyutl.h"
+#include "function_space_objects.h"
 #include "topology/geoid_object.h"
 #include "topology/line_object.h"
 #include "topology/manifold1d_object.h"
@@ -746,13 +747,13 @@ static PyMethodDef module_methods[] = {
     },
     {
         "bernstein1d",
-        (PyCFunction)bernstein_interpolation_matrix,
+        (void *)bernstein_interpolation_matrix,
         METH_FASTCALL,
         bernstein_interpolation_matrix_doc,
     },
     {
         "bernstein_coefficients",
-        (PyCFunction)bernstein_coefficients,
+        (void *)bernstein_coefficients,
         METH_O,
         bernstein_coefficients_doc,
     },
@@ -795,6 +796,8 @@ static int interplib_add_types(PyObject *mod)
             NULL ||
         (module_state->basis_registry_type =
              cpyutl_add_type_from_spec_to_module(mod, &basis_registry_type_specs, NULL)) == NULL ||
+        (module_state->function_space_type =
+             cpyutl_add_type_from_spec_to_module(mod, &function_space_type_spec, NULL)) == NULL ||
         (module_state->geoid_type = cpyutl_add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
         (module_state->line_type = cpyutl_add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
         (module_state->surf_type = cpyutl_add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||

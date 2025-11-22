@@ -33,13 +33,18 @@
                             #condition __VA_OPT__(, ) __VA_ARGS__),                                                    \
                     exit(EXIT_FAILURE)))
 #else
-#ifdef __GNUC__
-#define ASSUME(condition, message) __assume(condition)
-#endif
 #ifndef ASSERT
 #define ASSERT(condition, message) 0
 #endif
 #endif
+#endif
+
+#ifdef __GNUC__
+#define ASSUME(condition, message) __attribute__((assume(condition)))
+#endif
+
+#ifndef ASSUME
+#define ASSUME(condition, message) ASSERT(condition, message)
 #endif
 
 #ifndef INTERPLIB_EXPECT_CONDITION

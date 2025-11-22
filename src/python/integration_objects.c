@@ -164,13 +164,13 @@ PyType_Spec integration_registry_type_spec = {
              (PyMethodDef[]){
                  {
                      "usage",
-                     (PyCFunction)integration_registry_usage,
+                     (void *)integration_registry_usage,
                      METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
                      "usage() -> tuple[IntegrationSpecs, ...]\nReturns a list of currently stored rules.",
                  },
                  {
                      "clear",
-                     (PyCFunction)integration_registry_clear,
+                     (void *)integration_registry_clear,
                      METH_METHOD | METH_KEYWORDS | METH_FASTCALL,
                      "clear() -> None\nClears all stored rules.",
                  },

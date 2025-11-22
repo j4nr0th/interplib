@@ -52,6 +52,9 @@ typedef struct
     PyTypeObject *basis_registry_type;
     PyTypeObject *basis_spec_type;
 
+    // Function Spaces
+    PyTypeObject *function_space_type;
+
     // Topology
     PyTypeObject *geoid_type;
     PyTypeObject *line_type;

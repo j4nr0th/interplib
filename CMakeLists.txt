@@ -55,6 +55,14 @@ set(INTEGRATION_HEADER_FILES
         src/integration/gauss_lobatto.h
 )
 
+set(OPERATIONS_SOURCE_FILES
+        src/operations/nd_iteration.c
+)
+
+set(OPERATIONS_HEADER_FILES
+        src/operations/nd_iteration.h
+)
+
 set(POLYNOMIALS_SOURCE_FILES
         src/polynomials/bernstein.c
         src/polynomials/lagrange.c
@@ -79,6 +87,7 @@ add_library(interp STATIC
         ${BASIS_SOURCE_FILES}
         ${COMMON_SOURCE_FILES}
         ${INTEGRATION_SOURCE_FILES}
+        ${OPERATIONS_SOURCE_FILES}
         ${TOPOLOGY_SOURCE_FILES}
         ${POLYNOMIALS_SOURCE_FILES}
 )
@@ -87,7 +96,7 @@ set_property(TARGET interp PROPERTY C_STANDARD 17)
 target_compile_definitions(interp PRIVATE INTERPLIB_ASSERTS)
 target_link_libraries(interp PRIVATE m)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(interp PRIVATE -Wall -Wextra -fanalyzer -Werror)
+    target_compile_options(interp PRIVATE -Wall -Wextra -Werror -fanalyzer -Werror)
 endif ()
 
 set(PYTHON_TOPOLOGY_SOURCE_FILES
@@ -122,8 +131,8 @@ if ("${NumPy_INCLUDE_DIRS}" STREQUAL "")
 endif ()
 target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} cpyutl/src)
 
-if (CMAKE_C_COMPILER_ID EQUAL "GNU")
-    target_compile_options(_interp PRIVATE -Wall -Wextra -fwhole-program -flto=auto)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(_interp PRIVATE -Wall -Wextra -Werror -fwhole-program -flto=auto)
 endif ()
 
 
