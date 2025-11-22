@@ -56,11 +56,11 @@ set(INTEGRATION_HEADER_FILES
 )
 
 set(OPERATIONS_SOURCE_FILES
-        src/operations/nd_iteration.c
+        src/operations/multidim_iteration.c
 )
 
 set(OPERATIONS_HEADER_FILES
-        src/operations/nd_iteration.h
+        src/operations/multidim_iteration.h
 )
 
 set(POLYNOMIALS_SOURCE_FILES
