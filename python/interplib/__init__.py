@@ -1,7 +1,12 @@
 """Package dedicated to interpolation using data defined on different topologies."""
 
 # C base types
+from interplib._interp import DEFAULT_BASIS_REGISTRY as DEFAULT_BASIS_REGISTRY
+from interplib._interp import DEFAULT_INTEGRATION_REGISTRY as DEFAULT_INTEGRATION_REGISTRY
+from interplib._interp import BasisRegistry as BasisRegistry
 from interplib._interp import BasisSpecs as BasisSpecs
+from interplib._interp import FunctionSpace as FunctionSpace
+from interplib._interp import IntegrationRegistry as IntegrationRegistry
 from interplib._interp import IntegrationSpecs as IntegrationSpecs
 from interplib._interp import bernstein1d as bernstein1d
 from interplib._interp import bernstein_coefficients as bernstein_coefficients
