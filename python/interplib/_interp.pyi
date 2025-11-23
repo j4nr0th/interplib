@@ -437,6 +437,7 @@ class BasisSpecs:
         """
         ...
 
+@final
 class FunctionSpace:
     """Function space defined with basis.
 
@@ -483,6 +484,64 @@ class FunctionSpace:
         -------
         array
             Array of basis function values at the specified locations.
+        """
+        ...
+
+@final
+class IntegrationSpace:
+    """Integration space defined with integration rules.
+
+    Integration space defined by tensor product of integration rules in each
+    dimension. Integration rule for each dimension are defined by an
+    IntegrationSpecs object.
+
+    Parameters
+    ----------
+    *integration_specs : IntegrationSpecs
+        Integration specifications for each dimension of the integration space.
+    """
+
+    def __new__(cls, *integration_specs: IntegrationSpecs) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the integration space."""
+        ...
+    @property
+    def integration_specs(self) -> tuple[IntegrationSpecs, ...]:
+        """Integration specifications that define the integration space."""
+        ...
+    @property
+    def orders(self) -> tuple[int, ...]:
+        """Orders of the integration rules in each dimension."""
+        ...
+
+    def nodes(
+        self, registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, /
+    ) -> npt.NDArray[np.double]:
+        """Get the integration nodes of the space.
+
+        registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+
+        Returns
+        -------
+        array
+            Array of integration nodes.
+        """
+        ...
+
+    def weights(
+        self, registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, /
+    ) -> npt.NDArray[np.double]:
+        """Get the integration weights of the space.
+
+        registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+
+        Returns
+        -------
+        array
+            Array of integration weights.
         """
         ...
 

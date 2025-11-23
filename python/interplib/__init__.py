@@ -7,6 +7,7 @@ from interplib._interp import BasisRegistry as BasisRegistry
 from interplib._interp import BasisSpecs as BasisSpecs
 from interplib._interp import FunctionSpace as FunctionSpace
 from interplib._interp import IntegrationRegistry as IntegrationRegistry
+from interplib._interp import IntegrationSpace as IntegrationSpace
 from interplib._interp import IntegrationSpecs as IntegrationSpecs
 from interplib._interp import bernstein1d as bernstein1d
 from interplib._interp import bernstein_coefficients as bernstein_coefficients

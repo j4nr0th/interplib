@@ -133,9 +133,9 @@ static PyObject *basis_registry_usage(PyObject *self, PyTypeObject *defining_cla
         return NULL;
     }
 
-    unsigned usage = basis_set_registry_get_sets(this->registry, 0, (basis_spec_t[]){}, (integration_rule_spec_t[]){});
+    unsigned usage = basis_set_registry_get_sets(this->registry, 0, (basis_spec_t[]){}, (integration_spec_t[]){});
 
-    integration_rule_spec_t *const specs = PyMem_Malloc(usage * sizeof(*specs));
+    integration_spec_t *const specs = PyMem_Malloc(usage * sizeof(*specs));
     if (!specs)
         return NULL;
     basis_spec_t *const basis_specs = PyMem_Malloc(usage * sizeof(*basis_specs));

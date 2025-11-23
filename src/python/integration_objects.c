@@ -18,7 +18,7 @@ integration_registry_object *integration_registry_object_create(PyTypeObject *ty
     }
     return self;
 }
-integration_specs_object *integration_specs_object_create(PyTypeObject *type, const integration_rule_spec_t spec)
+integration_specs_object *integration_specs_object_create(PyTypeObject *type, const integration_spec_t spec)
 {
     integration_specs_object *const self = (integration_specs_object *)type->tp_alloc(type, 0);
     if (!self)
@@ -103,7 +103,7 @@ static PyObject *integration_registry_usage(PyObject *self, PyTypeObject *defini
 
     unsigned count = integration_rule_get_rules(this->registry, 0, NULL);
 
-    integration_rule_spec_t *const specs = PyMem_Malloc(count * sizeof(*specs));
+    integration_spec_t *const specs = PyMem_Malloc(count * sizeof(*specs));
     if (!specs)
         return NULL;
     {
@@ -234,7 +234,7 @@ static PyObject *integration_specs_new(PyTypeObject *type, PyObject *args, PyObj
     if (!self)
         return NULL;
 
-    self->spec = (integration_rule_spec_t){.order = order, .type = integration_type};
+    self->spec = (integration_spec_t){.order = order, .type = integration_type};
 
     return (PyObject *)self;
 }
@@ -452,6 +452,30 @@ PyDoc_STRVAR(integration_specs_docstring,
              "method : typing.Literal[\"gauss\", \"gauss-lobatto\"], default: \"gauss\"\n"
              "    Method used for integration.\n");
 
+PyObject *integration_spec_richcompare(PyObject *self, PyObject *other, const int op)
+{
+    const interplib_module_state_t *state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        PyErr_Clear();
+        state = interplib_get_module_state(Py_TYPE(other));
+        if (!state)
+        {
+            return NULL;
+        }
+    }
+    if (!PyObject_TypeCheck(self, state->integration_spec_type) ||
+        !PyObject_TypeCheck(other, state->integration_spec_type) || (op != Py_EQ && op != Py_NE))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    const integration_specs_object *const this = (integration_specs_object *)self;
+    const integration_specs_object *const other_specs = (integration_specs_object *)other;
+    const int equal = this->spec.order == other_specs->spec.order && this->spec.type == other_specs->spec.type;
+    return PyBool_FromLong(op == Py_EQ ? equal : !equal);
+}
+
 PyType_Spec integration_specs_type_spec = {
     .name = "interplib._interp.IntegrationSpecs",
     .basicsize = sizeof(integration_specs_object),
@@ -464,6 +488,7 @@ PyType_Spec integration_specs_type_spec = {
             {Py_tp_new, integration_specs_new},
             {Py_tp_repr, (reprfunc)integration_rule_repr},
             {Py_tp_traverse, heap_type_traverse_type},
+            {Py_tp_richcompare, integration_spec_richcompare},
             {Py_tp_methods,
              (PyMethodDef[]){
                  {
@@ -483,3 +508,369 @@ PyType_Spec integration_specs_type_spec = {
             {},
         },
 };
+
+static PyObject *integration_space_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    if (kwds && PyDict_Size(kwds))
+    {
+        PyErr_SetString(PyExc_TypeError, "Constructor takes no keyword arguments.");
+        return NULL;
+    }
+    const Py_ssize_t nargs = PyTuple_GET_SIZE(args);
+    if (nargs == 0)
+    {
+        PyErr_SetString(PyExc_TypeError, "Expected at least one argument.");
+        return NULL;
+    }
+    const interplib_module_state_t *const state = interplib_get_module_state(type);
+    if (!state)
+        return NULL;
+
+    // Check all args are integration specs
+    for (unsigned i = 0; i < nargs; ++i)
+    {
+        PyObject *const arg = PyTuple_GET_ITEM(args, i);
+        if (!PyObject_TypeCheck(arg, state->integration_spec_type))
+        {
+            PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_spec_type->tp_name,
+                         Py_TYPE(arg)->tp_name);
+            return NULL;
+        }
+    }
+    integration_space_object *self = (integration_space_object *)type->tp_alloc(type, nargs);
+    if (!self)
+        return NULL;
+    for (unsigned i = 0; i < nargs; ++i)
+    {
+        const integration_specs_object *const spec = (integration_specs_object *)PyTuple_GET_ITEM(args, i);
+        self->specs[i] = spec->spec;
+    }
+
+    return (PyObject *)self;
+}
+
+static PyObject *integration_space_get_dimension(PyObject *self, void *Py_UNUSED(closure))
+{
+    return PyLong_FromSize_t(Py_SIZE(self));
+}
+
+static PyObject *integration_space_get_integration_specs(PyObject *self, void *Py_UNUSED(closure))
+{
+    const interplib_module_state_t *const state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+        return NULL;
+    PyObject *const out = PyTuple_New(Py_SIZE(self));
+    if (!out)
+        return NULL;
+    const integration_space_object *const this = (integration_space_object *)self;
+    for (unsigned i = 0; i < Py_SIZE(self); ++i)
+    {
+        integration_specs_object *const spec =
+            integration_specs_object_create(state->integration_spec_type, this->specs[i]);
+        if (!spec)
+        {
+            Py_DECREF(out);
+            return NULL;
+        }
+        PyTuple_SET_ITEM(out, i, (PyObject *)spec);
+    }
+    return out;
+}
+
+static PyObject *integration_space_get_orders(PyObject *self, void *Py_UNUSED(closure))
+{
+    const interplib_module_state_t *const state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+        return NULL;
+    PyObject *const out = PyTuple_New(Py_SIZE(self));
+    if (!out)
+        return NULL;
+    const integration_space_object *const this = (integration_space_object *)self;
+    for (unsigned i = 0; i < Py_SIZE(self); ++i)
+    {
+        PyObject *const val = PyLong_FromLong(this->specs[i].order);
+        if (!val)
+        {
+            Py_DECREF(out);
+            return NULL;
+        }
+        PyTuple_SET_ITEM(out, i, val);
+    }
+    return out;
+}
+
+static int ensure_integration_space_state(PyObject *self, PyTypeObject *defining_class,
+                                          integration_space_object **p_this, const interplib_module_state_t **p_state)
+{
+    const interplib_module_state_t *const state =
+        defining_class ? PyType_GetModuleState(defining_class) : interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+        return -1;
+    if (!PyObject_TypeCheck(self, state->integration_space_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_space_type->tp_name,
+                     Py_TYPE(self)->tp_name);
+        return -1;
+    }
+    *p_this = (integration_space_object *)self;
+    *p_state = state;
+    return 0;
+}
+
+PyDoc_STRVAR(integration_space_weights_docstring,
+             "weights(registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, /) -> "
+             "numpy.typing.NDArray[numpy.double]\n"
+             "Get the integration weights of the space.\n"
+             "\n"
+             "registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+             "    Registry used to retrieve the integration rules.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of integration weights.\n");
+
+static PyObject *integration_space_weights(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                           const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    integration_space_object *this;
+    if (ensure_integration_space_state(self, defining_class, &this, &state) < 0)
+        return NULL;
+    if (nargs > 1 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "Expected at most one positional argument.");
+        return NULL;
+    }
+    if (nargs && !PyObject_TypeCheck(args[0], state->integration_registry_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_registry_type->tp_name,
+                     Py_TYPE(args[0]));
+        return NULL;
+    }
+    const integration_registry_object *const registry_object =
+        (integration_registry_object *)(nargs ? args[0] : state->registry_integration);
+
+    const Py_ssize_t ndim = Py_SIZE(self);
+    const size_t mem_dims = sizeof(npy_intp) * ndim;
+    const size_t mem_iter = multidim_iterator_needed_memory(ndim);
+    npy_intp *const dims_out = PyMem_Malloc(mem_dims > mem_iter ? mem_dims : mem_iter);
+    if (!dims_out)
+        return NULL;
+
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        dims_out[i] = this->specs[i].order + 1;
+    }
+
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(ndim, dims_out, NPY_DOUBLE);
+    if (!out)
+    {
+        PyMem_Free(dims_out);
+        return NULL;
+    }
+
+    npy_double *const p_out = PyArray_DATA(out);
+    multidim_iterator_t *const iter = (multidim_iterator_t *)dims_out;
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        multidim_iterator_init_dim(iter, i, this->specs[i].order + 1);
+    }
+    interp_result_t res = INTERP_SUCCESS;
+    Py_BEGIN_ALLOW_THREADS;
+
+    p_out[0] = 1.0;
+    for (unsigned idim = 0; idim < ndim; ++idim)
+    {
+        const integration_rule_t *rule;
+        res = integration_rule_registry_get_rule(registry_object->registry, this->specs[idim], &rule);
+        if (res != INTERP_SUCCESS)
+            break;
+        multidim_iterator_set_to_start(iter);
+        const unsigned npts = this->specs[idim].order + 1;
+        while (!multidim_iterator_is_at_end(iter))
+        {
+            const double prev_v = p_out[multidim_iterator_get_flat_index(iter)];
+            for (unsigned ipt = 0; ipt < npts; ++ipt)
+            {
+                ASSERT(!multidim_iterator_is_at_end(iter), "Iterator should not be at end at this point");
+                const size_t idx = multidim_iterator_get_flat_index(iter);
+                p_out[idx] = prev_v * integration_rule_weights_const(rule)[ipt];
+                multidim_iterator_advance(iter, idim, 1);
+            }
+        }
+    }
+
+    Py_END_ALLOW_THREADS;
+    PyMem_Free(dims_out);
+
+    if (res != INTERP_SUCCESS)
+    {
+        Py_DECREF(out);
+        PyErr_Format(PyExc_RuntimeError, "Failed to retrieve integration rule: %s (%s).", interp_error_str(res),
+                     interp_error_msg(res));
+        return NULL;
+    }
+
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(
+    integration_space_nodes_docstring,
+    "nodes(registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, /) -> numpy.typing.NDArray[numpy.double]\n"
+    "Get the integration nodes of the space.\n"
+    "\n"
+    "registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+    "    Registry used to retrieve the integration rules.\n"
+    "\n"
+    "Returns\n"
+    "-------\n"
+    "array\n"
+    "    Array of integration nodes.\n");
+
+static PyObject *integration_space_nodes(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                         const Py_ssize_t nargs, const PyObject *kwnames)
+{
+
+    const interplib_module_state_t *state;
+    integration_space_object *this;
+    if (ensure_integration_space_state(self, defining_class, &this, &state) < 0)
+        return NULL;
+    if (nargs > 1 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "Expected at most one positional argument.");
+        return NULL;
+    }
+    if (nargs && !PyObject_TypeCheck(args[0], state->integration_registry_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->integration_registry_type->tp_name,
+                     Py_TYPE(args[0]));
+        return NULL;
+    }
+    const integration_registry_object *const registry_object =
+        (integration_registry_object *)(nargs ? args[0] : state->registry_integration);
+
+    const Py_ssize_t ndim = Py_SIZE(self);
+    const size_t mem_dims = sizeof(npy_intp) * (ndim + 1);
+    const size_t mem_iter = multidim_iterator_needed_memory(ndim);
+    npy_intp *const dims_out = PyMem_Malloc(mem_dims > mem_iter ? mem_dims : mem_iter);
+    if (!dims_out)
+        return NULL;
+
+    dims_out[0] = ndim;
+    size_t size_per_dim = 1;
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        const unsigned size_dim = this->specs[i].order + 1;
+        dims_out[i + 1] = size_dim;
+        size_per_dim *= size_dim;
+    }
+
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(ndim + 1, dims_out, NPY_DOUBLE);
+    if (!out)
+    {
+        PyMem_Free(dims_out);
+        return NULL;
+    }
+
+    npy_double *const p_out = PyArray_DATA(out);
+    multidim_iterator_t *const iter = (multidim_iterator_t *)dims_out;
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        multidim_iterator_init_dim(iter, i, this->specs[i].order + 1);
+    }
+    interp_result_t res = INTERP_SUCCESS;
+    Py_BEGIN_ALLOW_THREADS;
+
+    for (unsigned idim = 0; idim < ndim; ++idim)
+    {
+        npy_double *const ptr = p_out + size_per_dim * idim;
+        const integration_rule_t *rule;
+        res = integration_rule_registry_get_rule(registry_object->registry, this->specs[idim], &rule);
+        if (res != INTERP_SUCCESS)
+            break;
+        multidim_iterator_set_to_start(iter);
+
+        while (!multidim_iterator_is_at_end(iter))
+        {
+            ptr[multidim_iterator_get_flat_index(iter)] =
+                integration_rule_nodes_const(rule)[multidim_iterator_get_offset(iter, idim)];
+            multidim_iterator_advance(iter, ndim - 1, 1);
+        }
+    }
+
+    Py_END_ALLOW_THREADS;
+    PyMem_Free(dims_out);
+
+    if (res != INTERP_SUCCESS)
+    {
+        Py_DECREF(out);
+        PyErr_Format(PyExc_RuntimeError, "Failed to retrieve integration rule: %s (%s).", interp_error_str(res),
+                     interp_error_msg(res));
+        return NULL;
+    }
+
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(integration_space_docstring,
+             "IntegrationSpace(*specs : IntegrationSpecs, /)\n"
+             "Integration space defined with integration rules.\n"
+             "\n"
+             "Integration space defined by tensor product of integration rules in each\n"
+             "dimension. Integration rule for each dimension are defined by an\n"
+             "IntegrationSpecs object.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "*integration_specs : IntegrationSpecs\n"
+             "    Integration specifications for each dimension of the integration space.\n");
+
+PyType_Spec integration_space_type_spec = {
+    .name = "interplib._interp.IntegrationSpace",
+    .basicsize = sizeof(integration_space_object),
+    .itemsize = sizeof(integration_spec_t),
+    .flags = Py_TPFLAGS_HEAPTYPE | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_IMMUTABLETYPE | Py_TPFLAGS_DEFAULT,
+    .slots = (PyType_Slot[]){
+        {Py_tp_new, integration_space_new},
+        {Py_tp_traverse, heap_type_traverse_type},
+        {
+            Py_tp_getset,
+            (PyGetSetDef[]){
+                {
+                    .name = "dimension",
+                    .get = integration_space_get_dimension,
+                    .doc = "int : Number of dimensions in the integration space.",
+                },
+                {
+                    .name = "integration_specs",
+                    .get = integration_space_get_integration_specs,
+                    .doc = "tuple[IntegrationSpecs] : Integration specifications that define the integration space.",
+                },
+                {
+                    .name = "orders",
+                    .get = integration_space_get_orders,
+                    .doc = "tuple[int] : Orders of the integration rules.",
+                },
+                {},
+            },
+        },
+        {Py_tp_methods,
+         (PyMethodDef[]){
+             {
+                 .ml_name = "weights",
+                 .ml_meth = (void *)integration_space_weights,
+                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                 .ml_doc = (void *)integration_space_weights_docstring,
+             },
+             {
+                 .ml_name = "nodes",
+                 .ml_meth = (void *)integration_space_nodes,
+                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                 .ml_doc = (void *)integration_space_nodes_docstring,
+             },
+             {},
+         }},
+        {Py_tp_doc, (void *)integration_space_docstring},
+        {},
+    }};

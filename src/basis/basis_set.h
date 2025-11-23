@@ -27,9 +27,9 @@ typedef struct
 
 typedef struct
 {
-    basis_spec_t spec;                        // Specifications for the Basis
-    integration_rule_spec_t integration_spec; // Specifications for the Integration rule
-    double _data[];                           // Values of the basis_sets and their derivatives at integration nodes
+    basis_spec_t spec;                   // Specifications for the Basis
+    integration_spec_t integration_spec; // Specifications for the Integration rule
+    double _data[];                      // Values of the basis_sets and their derivatives at integration nodes
 } basis_set_t;
 
 static inline const double *basis_set_values_all(const basis_set_t *this)
@@ -79,7 +79,7 @@ void basis_set_registry_release_all_basis_sets(const basis_set_registry_t *this)
 INTERPLIB_INTERNAL
 unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_count,
                                      basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, max_count),
-                                     integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
+                                     integration_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
 
 /**
  *

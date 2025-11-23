@@ -49,6 +49,7 @@ typedef struct
     // Integration
     PyTypeObject *integration_spec_type;
     PyTypeObject *integration_registry_type;
+    PyTypeObject *integration_space_type;
 
     // Basis
     PyTypeObject *basis_registry_type;

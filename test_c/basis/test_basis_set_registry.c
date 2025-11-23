@@ -35,7 +35,7 @@ int main(void)
     // Generate PAIR_COUNT different basis sets with random parameters
     for (int i = 0; i < PAIR_COUNT; i++)
     {
-        const integration_rule_spec_t rule_spec = {
+        const integration_spec_t rule_spec = {
             .type = (integration_rule_type_t)(test_prng_next_uint(&prng) % INTEGRATION_RULE_TYPE_COUNT + 1),
             .order = 1 + (test_prng_next_uint(&prng) % INTEGRATION_RULE_MAX_ORDER)};
 

@@ -396,7 +396,7 @@ void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *const th
 }
 unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_count,
                                      basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, const max_count),
-                                     integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, const max_count))
+                                     integration_spec_t INTERPLIB_ARRAY_ARG(integration_spec, const max_count))
 {
     rw_lock_acquire_read(&this->lock);
     unsigned count = 0;

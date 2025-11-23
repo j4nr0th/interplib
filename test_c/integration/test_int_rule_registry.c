@@ -19,8 +19,7 @@ int main()
     {
         const unsigned order = MIN_ORDER + (rand() % (MAX_ORDER - MIN_ORDER + 1));
         integration_rule_type_t type = 1 + (rand() % 2);
-        TEST_INTERP_RESULT(
-            integration_rule_registry_get_rule(registry, (integration_rule_spec_t){type, order}, rules + i));
+        TEST_INTERP_RESULT(integration_rule_registry_get_rule(registry, (integration_spec_t){type, order}, rules + i));
     }
 
     for (unsigned order = MIN_ORDER; order <= MAX_ORDER; ++order)

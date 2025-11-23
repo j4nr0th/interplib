@@ -21,11 +21,11 @@ typedef struct
 {
     integration_rule_type_t type; // Type of the integration rule
     unsigned order;               // Order of the integration rule
-} integration_rule_spec_t;
+} integration_spec_t;
 
 typedef struct
 {
-    integration_rule_spec_t spec;
+    integration_spec_t spec;
     unsigned accuracy; // Order of polynomial which is exactly integrated
     unsigned n_nodes;  // Number of nodes and weights
     double _data[];    // Array with nodes, followed by weights
@@ -132,7 +132,7 @@ void integration_rule_registry_destroy(integration_rule_registry_t *this);
  * `integration_rule_registry_release_unused_rules` has been called.
  */
 INTERPLIB_INTERNAL
-interp_result_t integration_rule_registry_get_rule(integration_rule_registry_t *this, integration_rule_spec_t spec,
+interp_result_t integration_rule_registry_get_rule(integration_rule_registry_t *this, integration_spec_t spec,
                                                    const integration_rule_t **p_rule);
 
 /**
@@ -194,9 +194,9 @@ void integration_rule_registry_release_all_rules(integration_rule_registry_t *th
 
 INTERPLIB_INTERNAL
 unsigned integration_rule_get_rules(integration_rule_registry_t *this, unsigned max_count,
-                                    integration_rule_spec_t INTERPLIB_ARRAY_ARG(specs, max_count));
+                                    integration_spec_t INTERPLIB_ARRAY_ARG(specs, max_count));
 
 INTERPLIB_INTERNAL
-unsigned integration_rule_spec_get_accuracy(integration_rule_spec_t spec);
+unsigned integration_rule_spec_get_accuracy(integration_spec_t spec);
 
 #endif // INTERPLIB_INTEGRATION_RULES_H

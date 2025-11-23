@@ -798,6 +798,8 @@ static int interplib_add_types(PyObject *mod)
              cpyutl_add_type_from_spec_to_module(mod, &basis_registry_type_specs, NULL)) == NULL ||
         (module_state->function_space_type =
              cpyutl_add_type_from_spec_to_module(mod, &function_space_type_spec, NULL)) == NULL ||
+        (module_state->integration_space_type =
+             cpyutl_add_type_from_spec_to_module(mod, &integration_space_type_spec, NULL)) == NULL ||
         (module_state->geoid_type = cpyutl_add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
         (module_state->line_type = cpyutl_add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
         (module_state->surf_type = cpyutl_add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||
