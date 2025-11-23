@@ -6,6 +6,7 @@
 #define INTERPLIB_BASIS_H
 #include "../common/error.h"
 #include "../integration/integration_rules.h"
+#include "../operations/multidim_iteration.h"
 
 typedef enum
 {
@@ -99,11 +100,13 @@ INTERPLIB_INTERNAL
 void basis_compute_outer_product_basis_required_memory(unsigned n_basis,
                                                        const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
                                                        unsigned cnt, unsigned *out_elements, unsigned *work_elements,
-                                                       unsigned *tmp_elements);
+                                                       unsigned *tmp_elements, size_t *iterator_size);
 
 INTERPLIB_INTERNAL
-void basis_compute_outer_product_basis(unsigned n_basis, const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
-                                       unsigned cnt, const double INTERPLIB_ARRAY_ARG(x, restrict cnt *n_basis),
-                                       double out[restrict], double work[restrict], double tmp[restrict]);
+void basis_compute_outer_product_basis(unsigned n_basis_dims,
+                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis_dims), unsigned cnt,
+                                       const double *INTERPLIB_ARRAY_ARG(x, restrict n_basis_dims),
+                                       double out[restrict], double work[restrict], double tmp[restrict],
+                                       multidim_iterator_t *iter);
 
 #endif // INTERPLIB_BASIS_H

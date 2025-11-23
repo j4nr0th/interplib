@@ -38,6 +38,13 @@ void multidim_iterator_init(multidim_iterator_t *const this, const size_t ndims,
         iter_offsets[i] = 0;
     }
 }
+void multidim_iterator_init_dim(multidim_iterator_t *this, size_t dim, size_t size)
+{
+    this->ndims = dim + 1;
+    multidim_iterator_dims_ptr(this)[dim] = size;
+    multidim_iterator_offsets_ptr(this)[dim] = 0;
+}
+
 void multidim_iterator_set_to_start(multidim_iterator_t *this)
 {
     // Reset offsets
@@ -94,6 +101,7 @@ compute_offset:;
 
     goto compute_offset;
 }
+
 void multidim_iterator_recede(multidim_iterator_t *this, size_t dim, size_t step)
 {
     ASSERT(dim < this->ndims, "Dimension out of bounds");
@@ -126,6 +134,7 @@ compute_offset:;
 
     goto compute_offset;
 }
+
 int multidim_iterator_is_at_start(const multidim_iterator_t *this)
 {
     const size_t *const iter_offsets = multidim_iterator_offsets_const_ptr(this);
@@ -148,6 +157,7 @@ int multidim_iterator_is_at_end(const multidim_iterator_t *this)
     }
     return iter_offsets[this->ndims - 1] == iter_dims[this->ndims - 1];
 }
+
 size_t multidim_iterator_get_flat_index(const multidim_iterator_t *this)
 {
     size_t index = 0;
@@ -160,6 +170,7 @@ size_t multidim_iterator_get_flat_index(const multidim_iterator_t *this)
     }
     return index;
 }
+
 size_t multidim_iterator_get_ndims(const multidim_iterator_t *this)
 {
     return this->ndims;
@@ -169,6 +180,7 @@ const size_t *multidim_iterator_dims(const multidim_iterator_t *this)
 {
     return multidim_iterator_dims_const_ptr(this);
 }
+
 const size_t *multidim_iterator_offsets(const multidim_iterator_t *this)
 {
     return multidim_iterator_offsets_const_ptr(this);
@@ -178,10 +190,12 @@ size_t multidim_iterator_get_dim(const multidim_iterator_t *this, const size_t d
 {
     return multidim_iterator_dims_const_ptr(this)[dim];
 }
+
 size_t multidim_iterator_get_offset(const multidim_iterator_t *this, const size_t dim)
 {
     return multidim_iterator_offsets_const_ptr(this)[dim];
 }
+
 size_t multidim_iterator_total_size(const multidim_iterator_t *this)
 {
     size_t total_size = 1;

@@ -490,7 +490,8 @@ void basis_compute_at_point_compute(const basis_set_type_t type, const unsigned 
 void basis_compute_outer_product_basis_required_memory(const unsigned n_basis,
                                                        const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
                                                        const unsigned cnt, unsigned *out_elements,
-                                                       unsigned *work_elements, unsigned *tmp_elements)
+                                                       unsigned *work_elements, unsigned *tmp_elements,
+                                                       size_t *iterator_size)
 {
     unsigned max_order = 1, total_basis = 1;
     for (unsigned i = 0; i < n_basis; ++i)
@@ -502,19 +503,63 @@ void basis_compute_outer_product_basis_required_memory(const unsigned n_basis,
     *out_elements = cnt * total_basis;
     *work_elements = max_order + 1;
     *tmp_elements = (max_order + 1) * cnt;
+    *iterator_size = multidim_iterator_needed_memory(n_basis);
 }
-void basis_compute_outer_product_basis(unsigned n_basis, const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
-                                       unsigned cnt, const double INTERPLIB_ARRAY_ARG(x, restrict cnt *n_basis),
-                                       double out[restrict], double work[restrict], double tmp[restrict])
-{
-    (void)tmp;
-    for (unsigned i = 0; i < n_basis; ++i)
-    {
-        // Prepare the basis
-        basis_compute_at_point_prepare(basis_specs[i].type, basis_specs[i].order, work);
 
-        // Compute the basis
-        basis_compute_at_point_compute(basis_specs[i].type, basis_specs[i].order, cnt, x + i * cnt, out + i * cnt,
-                                       work);
+void basis_compute_outer_product_basis(const unsigned n_basis_dims,
+                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis_dims),
+                                       const unsigned cnt, const double *INTERPLIB_ARRAY_ARG(x, restrict n_basis_dims),
+                                       double out[restrict], double work[restrict], double tmp[restrict],
+                                       multidim_iterator_t *const iter)
+{
+    size_t size_out = cnt, max_size_basis = 1;
+    for (unsigned dim = 0; dim < n_basis_dims; ++dim)
+    {
+        const unsigned dim_size = basis_specs[dim].order + 1;
+        multidim_iterator_init_dim(iter, dim, dim_size);
+        size_out *= dim_size;
+        max_size_basis = max_size_basis > dim_size ? max_size_basis : dim_size;
+    }
+    (void)size_out;
+    (void)max_size_basis;
+    // memset(out, 0, size_out * sizeof(*out));
+
+    const size_t basis_count = multidim_iterator_total_size(iter);
+    for (unsigned i_point = 0; i_point < cnt; ++i_point)
+    {
+        out[i_point * basis_count] = 1;
+    }
+
+    for (unsigned i_dim = 0; i_dim < n_basis_dims; ++i_dim)
+    {
+        const basis_spec_t *const specs = basis_specs + i_dim;
+        const unsigned n_basis = specs->order + 1;
+        // Prepare for computations
+        basis_compute_at_point_prepare(specs->type, specs->order, work);
+        // Compute point values and write it to the buffer
+        basis_compute_at_point_compute(specs->type, specs->order, cnt, (double *)x[i_dim], tmp, work);
+
+        for (unsigned i_point = 0; i_point < cnt; ++i_point)
+        {
+            double *const ptr = out + i_point * basis_count;
+            multidim_iterator_set_to_start(iter);
+            while (!multidim_iterator_is_at_end(iter))
+            {
+                const double prev_v = ptr[multidim_iterator_get_flat_index(iter)];
+                for (unsigned i_basis = 0; i_basis < n_basis; ++i_basis)
+                {
+                    ASSERT(!multidim_iterator_is_at_end(iter), "Iterator should not be at end at this point ()");
+                    const size_t idx = multidim_iterator_get_flat_index(iter);
+                    ASSERT(idx + i_point * basis_count < size_out,
+                           "Iterator index should be within bounds ((%zu + %zu) vs %zu)", idx, i_point * basis_count,
+                           size_out);
+                    ASSERT(i_basis + n_basis * i_point < max_size_basis * cnt,
+                           "Basis buffer index is out of bounds ((%u + %u) vs %zu).", i_basis, n_basis * i_point,
+                           max_size_basis * cnt);
+                    ptr[idx] = prev_v * tmp[i_basis + n_basis * i_point];
+                    multidim_iterator_advance(iter, i_dim, 1);
+                }
+            }
+        }
     }
 }

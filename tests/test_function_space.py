@@ -80,3 +80,9 @@ def test_3d_function_space():
     # These may no longer match exactly due to floating point errors
     # since now order of multiplications may differ between C and Python.
     assert values_fs == pytest.approx(expected_values)
+
+
+if __name__ == "__main__":
+    test_1d_function_space()
+    test_2d_function_space()
+    test_3d_function_space()

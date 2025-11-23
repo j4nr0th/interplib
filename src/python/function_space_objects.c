@@ -233,61 +233,34 @@ static PyObject *function_space_evaluate(PyObject *self, PyTypeObject *defining_
     PyMem_Free(p_dim_out);
     npy_double *const p_out = (npy_double *)PyArray_DATA(out);
     CPYUTL_ASSERT(size_out == (size_t)PyArray_SIZE(out), "Incorrect output size.");
+    const double **const input_ptrs = PyMem_Malloc(n_basis_dims * sizeof(*input_ptrs));
+    if (!input_ptrs)
+    {
+        Py_DECREF(out);
+        return NULL;
+    }
+    for (unsigned i = 0; i < n_basis_dims; ++i)
+    {
+        input_ptrs[i] = (npy_double *)PyArray_DATA((PyArrayObject *)args[i]);
+    }
 
     Py_BEGIN_ALLOW_THREADS;
-    double *const basis_buffer = PyMem_RawMalloc(max_size_basis * (size_in + 1) * sizeof(*basis_buffer));
-    multidim_iterator_t *const iterator = PyMem_RawMalloc(multidim_iterator_needed_memory(n_basis_dims));
-    static_assert(sizeof(*p_dim_in) == sizeof(*iterator->dims_and_offsets),
-                  "Types must match in size for the pointer cast to make sense");
+    unsigned out_elements, work_elements, tmp_elements;
+    size_t iter_size;
+    basis_compute_outer_product_basis_required_memory(n_basis_dims, this->specs, size_in, &out_elements, &work_elements,
+                                                      &tmp_elements, &iter_size);
+    double *const basis_buffer = PyMem_RawMalloc((tmp_elements + work_elements) * sizeof(*basis_buffer));
+    multidim_iterator_t *const iterator = PyMem_RawMalloc(iter_size);
 
     if (basis_buffer && iterator)
     {
-        multidim_iterator_init(iterator, n_basis_dims, (const size_t *)p_dim_out + n_dim_in);
-        memset(p_out, 0, size_out * sizeof(*p_out));
-        const size_t basis_count = multidim_iterator_total_size(iterator);
-        for (unsigned i_point = 0; i_point < size_in; ++i_point)
-        {
-            p_out[i_point * basis_count] = 1;
-        }
-        for (unsigned i_dim = 0; i_dim < n_basis_dims; ++i_dim)
-        {
-            const basis_spec_t *const specs = this->specs + i_dim;
-            const unsigned n_basis = specs->order + 1;
-            // Prepare for computations
-            basis_compute_at_point_prepare(specs->type, specs->order, basis_buffer + n_basis * size_in);
-            // Compute point values and write it to the buffer
-            basis_compute_at_point_compute(specs->type, specs->order, size_in,
-                                           (double *)PyArray_DATA((PyArrayObject *)args[i_dim]), basis_buffer,
-                                           basis_buffer + n_basis * size_in);
-
-            for (unsigned i_point = 0; i_point < size_in; ++i_point)
-            {
-                double *const ptr = p_out + i_point * basis_count;
-                multidim_iterator_set_to_start(iterator);
-                while (!multidim_iterator_is_at_end(iterator))
-                {
-                    const double prev_v = ptr[multidim_iterator_get_flat_index(iterator)];
-                    for (unsigned i_basis = 0; i_basis < n_basis; ++i_basis)
-                    {
-                        CPYUTL_ASSERT(!multidim_iterator_is_at_end(iterator),
-                                      "Iterator should not be at end at this point ()");
-                        const size_t idx = multidim_iterator_get_flat_index(iterator);
-                        CPYUTL_ASSERT(idx + i_point * basis_count < size_out,
-                                      "Iterator index should be within bounds ((%zu + %zu) vs %zu)", idx,
-                                      i_point * basis_count, size_out);
-                        CPYUTL_ASSERT(i_basis + n_basis * i_point < max_size_basis * size_in,
-                                      "Basis buffer index is out of bounds ((%zu + %zu) vs %zu).", i_basis,
-                                      n_basis * i_point, max_size_basis * size_in);
-                        ptr[idx] = prev_v * basis_buffer[i_basis + n_basis * i_point];
-                        multidim_iterator_advance(iterator, i_dim, 1);
-                    }
-                }
-            }
-        }
+        basis_compute_outer_product_basis(n_basis_dims, this->specs, size_in, input_ptrs, p_out,
+                                          basis_buffer + tmp_elements, basis_buffer, iterator);
     }
     PyMem_RawFree(iterator);
     PyMem_RawFree(basis_buffer);
     Py_END_ALLOW_THREADS;
+    PyMem_Free(input_ptrs);
     return (PyObject *)out;
 }
 

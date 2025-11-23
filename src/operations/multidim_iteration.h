@@ -31,6 +31,16 @@ size_t multidim_iterator_needed_memory(size_t ndims);
  */
 void multidim_iterator_init(multidim_iterator_t *this, size_t ndims,
                             const size_t INTERPLIB_ARRAY_ARG(dims, static ndims));
+/**
+ * Alternative to `multidim_iterator_init` to initalize the iterator by iteratevly
+ * initializing the dimensions. Note that this function has to be called for all
+ * dimensions from the lowest to the highest in order.
+ *
+ * @param this Pointer to the multidim_iterator_t instance to be initialized.
+ * @param dim Dimension to initialize.
+ * @param size Size of the dimension.
+ */
+void multidim_iterator_init_dim(multidim_iterator_t *this, size_t dim, size_t size);
 
 /**
  * Resets the offsets of the multidimensional iterator to their starting values.
