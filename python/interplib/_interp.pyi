@@ -409,7 +409,7 @@ class BasisSpecs:
         Order of the basis in the set.
     """
 
-    def __new__(cls, basis_type: _BasisTypeHint, order: int) -> Self: ...
+    def __new__(cls, basis_type: _BasisTypeHint, order: int, /) -> Self: ...
     @property
     def basis_type(self) -> _BasisTypeHint:
         """Type of the basis used for the set."""

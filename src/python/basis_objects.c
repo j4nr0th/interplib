@@ -410,6 +410,35 @@ static PyObject *basis_specs_values(PyObject *self, PyTypeObject *defining_class
     return (PyObject *)out;
 }
 
+static PyObject *basis_specs_richcompare(PyObject *self, PyObject *other, const int op)
+{
+    const interplib_module_state_t *state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        PyErr_Clear();
+        state = interplib_get_module_state(Py_TYPE(other));
+        if (!state)
+        {
+            return NULL;
+        }
+    }
+
+    if (!PyObject_TypeCheck(other, state->basis_spec_type) || !PyObject_TypeCheck(self, state->basis_spec_type) ||
+        (op != Py_EQ && op != Py_NE))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    const basis_specs_object *const this = (basis_specs_object *)self;
+    const basis_specs_object *const that = (basis_specs_object *)other;
+    int equal = this->spec.order == that->spec.order && this->spec.type == that->spec.type;
+    if (op == Py_NE)
+    {
+        equal = !equal;
+    }
+    return PyBool_FromLong(equal);
+}
+
 /* Spec for heap type */
 PyType_Spec basis_specs_type_spec = {
     .name = "interplib._interp.BasisSpecs",
@@ -432,6 +461,7 @@ PyType_Spec basis_specs_type_spec = {
                  },
                  {},
              }},
+            {Py_tp_richcompare, basis_specs_richcompare},
             {},
         },
 };

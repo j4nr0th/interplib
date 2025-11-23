@@ -23,7 +23,7 @@ static inline const size_t *multidim_iterator_offsets_const_ptr(const multidim_i
 
 size_t multidim_iterator_needed_memory(const size_t ndims)
 {
-    return sizeof(multidim_iterator_t) + ndims * sizeof(*((multidim_iterator_t *)0xB00B5)->dims_and_offsets);
+    return sizeof(multidim_iterator_t) + 2 * ndims * sizeof(*((multidim_iterator_t *)0xB00B5)->dims_and_offsets);
 }
 
 void multidim_iterator_init(multidim_iterator_t *const this, const size_t ndims,
