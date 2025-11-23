@@ -423,11 +423,8 @@ unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_co
     return count;
 }
 
-// TODO: shift Bernstein polynomials to be on [-1, +1] instead of [0, +1]
-void basis_compute_at_point(const basis_set_type_t type, const unsigned order, const unsigned cnt,
-                            const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
-                            double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
-                            double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
+void basis_compute_at_point_prepare(const basis_set_type_t type, const unsigned order,
+                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
 {
     // Prepare the roots for Lagrange multipliers
     switch (type)
@@ -459,7 +456,13 @@ void basis_compute_at_point(const basis_set_type_t type, const unsigned order, c
         // Nothing to do here
         break;
     }
+}
 
+void basis_compute_at_point_compute(const basis_set_type_t type, const unsigned order, const unsigned cnt,
+                                    const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                    double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
+{
     switch (type)
     {
     case BASIS_LEGENDRE:
@@ -469,7 +472,7 @@ void basis_compute_at_point(const basis_set_type_t type, const unsigned order, c
 
     case BASIS_BERNSTEIN:
         for (unsigned i = 0; i < cnt; ++i)
-            bernstein_interpolation_vector(x[i], order, out + i * (order + 1));
+            bernstein_interpolation_vector((x[i] + 1) / 2, order, out + i * (order + 1));
         break;
 
     case BASIS_LAGRANGE_UNIFORM:
@@ -481,5 +484,37 @@ void basis_compute_at_point(const basis_set_type_t type, const unsigned order, c
 
     default:
         break;
+    }
+}
+
+void basis_compute_outer_product_basis_required_memory(const unsigned n_basis,
+                                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
+                                                       const unsigned cnt, unsigned *out_elements,
+                                                       unsigned *work_elements, unsigned *tmp_elements)
+{
+    unsigned max_order = 1, total_basis = 1;
+    for (unsigned i = 0; i < n_basis; ++i)
+    {
+        const unsigned i_order = basis_specs[i].order;
+        max_order = max_order > i_order ? max_order : i_order;
+        total_basis *= (i_order + 1);
+    }
+    *out_elements = cnt * total_basis;
+    *work_elements = max_order + 1;
+    *tmp_elements = (max_order + 1) * cnt;
+}
+void basis_compute_outer_product_basis(unsigned n_basis, const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
+                                       unsigned cnt, const double INTERPLIB_ARRAY_ARG(x, restrict cnt *n_basis),
+                                       double out[restrict], double work[restrict], double tmp[restrict])
+{
+    (void)tmp;
+    for (unsigned i = 0; i < n_basis; ++i)
+    {
+        // Prepare the basis
+        basis_compute_at_point_prepare(basis_specs[i].type, basis_specs[i].order, work);
+
+        // Compute the basis
+        basis_compute_at_point_compute(basis_specs[i].type, basis_specs[i].order, cnt, x + i * cnt, out + i * cnt,
+                                       work);
     }
 }

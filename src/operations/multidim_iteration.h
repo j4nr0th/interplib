@@ -133,4 +133,10 @@ const size_t *multidim_iterator_dims(const multidim_iterator_t *this);
  */
 const size_t *multidim_iterator_offsets(const multidim_iterator_t *this);
 
+size_t multidim_iterator_get_dim(const multidim_iterator_t *this, size_t dim);
+
+size_t multidim_iterator_get_offset(const multidim_iterator_t *this, size_t dim);
+
+size_t multidim_iterator_total_size(const multidim_iterator_t *this);
+
 #endif // INTERPLIB_ND_ITERATION_H

@@ -437,6 +437,55 @@ class BasisSpecs:
         """
         ...
 
+class FunctionSpace:
+    """Function space defined with basis.
+
+    Function space defined by tensor product of basis functions in each dimension.
+    Basis for each dimension are defined by a BasisSpecs object.
+
+    Parameters
+    ----------
+    *basis_specs : BasisSpecs
+        Basis specifications for each dimension of the function space.
+    """
+
+    def __new__(cls, *basis_specs: BasisSpecs) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the function space."""
+        ...
+    @property
+    def basis_specs(self) -> tuple[BasisSpecs, ...]:
+        """Basis specifications that define the function space."""
+        ...
+    @property
+    def orders(self) -> tuple[int, ...]:
+        """Orders of the basis in each dimension."""
+        ...
+
+    def evaluate(
+        self, *x: npt.NDArray[np.double], out: npt.NDArray[np.double] | None = None
+    ) -> npt.NDArray[np.double]:
+        """Evaluate basis functions at given locations.
+
+        Parameters
+        ----------
+        *x : array
+            Coordinates where the basis functions should be evaluated.
+            Each array corresponds to a dimension in the function space.
+        out : array, optional
+            Array where the results should be written to. If not given, a new one
+            will be created and returned. It should have the same shape as ``x``,
+            but with an extra dimension added, the length of which is the total
+            number of basis functions in the function space.
+
+        Returns
+        -------
+        array
+            Array of basis function values at the specified locations.
+        """
+        ...
+
 @final
 class GeoID:
     """Type used to identify a geometrical object with an index and orientation.

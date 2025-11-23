@@ -173,3 +173,22 @@ const size_t *multidim_iterator_offsets(const multidim_iterator_t *this)
 {
     return multidim_iterator_offsets_const_ptr(this);
 }
+
+size_t multidim_iterator_get_dim(const multidim_iterator_t *this, const size_t dim)
+{
+    return multidim_iterator_dims_const_ptr(this)[dim];
+}
+size_t multidim_iterator_get_offset(const multidim_iterator_t *this, const size_t dim)
+{
+    return multidim_iterator_offsets_const_ptr(this)[dim];
+}
+size_t multidim_iterator_total_size(const multidim_iterator_t *this)
+{
+    size_t total_size = 1;
+    const size_t *const dims = multidim_iterator_dims_const_ptr(this);
+    for (size_t i = 0; i < this->ndims; ++i)
+    {
+        total_size *= dims[i];
+    }
+    return total_size;
+}

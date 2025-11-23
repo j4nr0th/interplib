@@ -402,7 +402,8 @@ static PyObject *basis_specs_values(PyObject *self, PyTypeObject *defining_class
         return NULL;
     }
 
-    basis_compute_at_point(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
+    basis_compute_at_point_prepare(this->spec.type, this->spec.order, work);
+    basis_compute_at_point_compute(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
 
     PyMem_Free(work);
 

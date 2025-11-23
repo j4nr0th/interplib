@@ -80,10 +80,30 @@ unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_co
                                      basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, max_count),
                                      integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
 
+/**
+ *
+ */
 INTERPLIB_INTERNAL
-void basis_compute_at_point(basis_set_type_t type, unsigned order, unsigned cnt,
-                            const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
-                            double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
-                            double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+void basis_compute_at_point_prepare(basis_set_type_t type, unsigned order,
+                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+/**
+ *
+ */
+INTERPLIB_INTERNAL
+void basis_compute_at_point_compute(basis_set_type_t type, unsigned order, unsigned cnt,
+                                    const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                    double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+
+INTERPLIB_INTERNAL
+void basis_compute_outer_product_basis_required_memory(unsigned n_basis,
+                                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
+                                                       unsigned cnt, unsigned *out_elements, unsigned *work_elements,
+                                                       unsigned *tmp_elements);
+
+INTERPLIB_INTERNAL
+void basis_compute_outer_product_basis(unsigned n_basis, const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
+                                       unsigned cnt, const double INTERPLIB_ARRAY_ARG(x, restrict cnt *n_basis),
+                                       double out[restrict], double work[restrict], double tmp[restrict]);
 
 #endif // INTERPLIB_BASIS_H
