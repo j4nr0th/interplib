@@ -545,6 +545,36 @@ class IntegrationSpace:
         """
         ...
 
+def compute_mass_matrix(
+    space_in: FunctionSpace,
+    space_out: FunctionSpace,
+    integration_space: IntegrationSpace,
+    *,
+    integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+    basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+) -> npt.NDArray[np.double]:
+    """Compute the mass matrix between two function spaces.
+
+    Parameters
+    ----------
+    space_in : FunctionSpace
+        Function space for the input functions.
+    space_out : FunctionSpace
+        Function space for the output functions.
+    integration_space : IntegrationSpace
+        Integration space used to compute the mass matrix.
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        Registry used to retrieve the integration rules.
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        Registry used to retrieve the basis specifications.
+
+    Returns
+    -------
+    array
+        Mass matrix as a 2D array, which maps the primal degress of freedom of the input
+        function space to dual degrees of freedom of the output function space.
+    """
+    ...
 @final
 class GeoID:
     """Type used to identify a geometrical object with an index and orientation.

@@ -15,6 +15,7 @@
 #include "../polynomials/lagrange.h"
 #include "basis_objects.h"
 #include "integration_objects.h"
+#include "mass_matrices.h"
 
 // Topology
 #include "cpyutl.h"
@@ -268,7 +269,6 @@ PyDoc_STRVAR(interp_lagrange_doc,
              "    >>> plt.grid()\n"
              "    >>> plt.show()\n"
              "\n"
-
              "Accuracy is retained even at very high polynomial order. The following\n"
              "snippet shows that even at absurdly high order of 51, the results still\n"
              "have high accuracy and don't suffer from rounding errors. It also performs\n"
@@ -325,8 +325,8 @@ static PyObject *interp_dlagrange(PyObject *Py_UNUSED(module), PyObject *args)
     const npy_intp n_dim = PyArray_NDIM(positions);
     const npy_intp *const p_dim = PyArray_DIMS(positions);
 
-    size_t size_work = sizeof(double) * 2 * n_roots;
-    size_t size_buffet = sizeof(npy_intp) * (n_dim + 1);
+    const size_t size_work = sizeof(double) * 2 * n_roots;
+    const size_t size_buffet = sizeof(npy_intp) * (n_dim + 1);
     void *const mem_buffer = PyMem_Malloc(size_buffet > size_work ? size_buffet : size_work);
     if (!mem_buffer)
     {
@@ -815,6 +815,20 @@ static int interplib_add_types(PyObject *mod)
     return 0;
 }
 
+static int interplib_add_functions(PyObject *mod)
+{
+    interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
+    if (!module_state)
+    {
+        return -1;
+    }
+
+    if (PyModule_AddFunctions(mod, mass_matrices_methods) < 0)
+        return -1;
+
+    return 0;
+}
+
 static int module_add_steal(PyObject *mod, const char *name, PyObject *obj)
 {
     if (!obj)
@@ -857,6 +871,7 @@ PyModuleDef interplib_module = {
     .m_slots =
         (PyModuleDef_Slot[]){
             {.slot = Py_mod_exec, .value = interplib_add_types},
+            {.slot = Py_mod_exec, .value = interplib_add_functions},
             {.slot = Py_mod_exec, .value = interplib_add_registries},
             {.slot = Py_mod_multiple_interpreters, .value = Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED},
             {},
