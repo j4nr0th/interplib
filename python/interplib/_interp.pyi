@@ -545,6 +545,71 @@ class IntegrationSpace:
         """
         ...
 
+@final
+class DegreesOfFreedom:
+    """Degrees of freedom associated with a function space.
+
+    Parameters
+    ----------
+    function_space : FunctionSpace
+        Function space the degrees of freedom belong to.
+    values : array_like, optional
+        Values of the degrees of freedom. When not specified, they are zero initialized.
+    """
+
+    def __new__(
+        cls, function_space: FunctionSpace, values: npt.ArrayLike | None = None, /
+    ) -> Self: ...
+    @property
+    def function_space(self) -> FunctionSpace:
+        """Function space the degrees of freedom belong to."""
+        ...
+    @property
+    def n_dofs(self) -> int:
+        """Total number of degrees of freedom."""
+        ...
+    @property
+    def values(self) -> npt.NDArray[np.double]:
+        """Values of the degrees of freedom."""
+        ...
+    @values.setter
+    def values(self, value: npt.ArrayLike) -> None:
+        """Assign new values to the degrees of freedom."""
+        ...
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Shape of the degrees of freedom."""
+        ...
+
+@final
+class CoordinateMap:
+    """Mapping between reference and physical coordinates."""
+
+    def __new__(cls, function_space: FunctionSpace, /) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the coordinate map."""
+        ...
+    def map(
+        self, *x: npt.NDArray[np.double], out: npt.NDArray[np.double] | None = None
+    ) -> npt.NDArray[np.double]:
+        """Map reference coordinates to physical coordinates.
+
+        Parameters
+        ----------
+        *x : array
+            Reference coordinates to be mapped. Each array corresponds to a dimension.
+        out : array, optional
+            Array where the results should be written to. If not given, a new one
+            will be created and returned. It should have the same shape as ``x``.
+
+        Returns
+        -------
+        array
+            Mapped physical coordinates.
+        """
+        ...
+
 def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,

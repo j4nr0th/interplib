@@ -58,6 +58,9 @@ typedef struct
     // Function Spaces
     PyTypeObject *function_space_type;
 
+    // DOFs
+    PyTypeObject *degrees_of_freedom_type;
+
     // Topology
     PyTypeObject *geoid_type;
     PyTypeObject *line_type;

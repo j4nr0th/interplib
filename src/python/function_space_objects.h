@@ -12,4 +12,8 @@ typedef struct
 INTERPLIB_INTERNAL
 extern PyType_Spec function_space_type_spec;
 
+INTERPLIB_INTERNAL
+function_space_object *function_space_object_create(PyTypeObject *type, unsigned n_basis,
+                                                    const basis_spec_t INTERPLIB_ARRAY_ARG(specs, static n_basis));
+
 #endif // INTERPLIB_FUNCTION_SPACE_OBJECTS_H

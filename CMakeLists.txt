@@ -113,6 +113,7 @@ set(PYTHON_NUMERICS_SOURCE_FILES
         src/python/basis_objects.c
         src/python/function_space_objects.c
         src/python/mass_matrices.c
+        src/python/degrees_of_freedom.c
 )
 
 Python_add_library(_interp MODULE

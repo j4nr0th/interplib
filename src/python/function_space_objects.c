@@ -2,6 +2,16 @@
 #include "../operations/multidim_iteration.h"
 #include "basis_objects.h"
 
+function_space_object *function_space_object_create(PyTypeObject *type, const unsigned n_basis,
+                                                    const basis_spec_t INTERPLIB_ARRAY_ARG(specs, static n_basis))
+{
+    function_space_object *const this = (function_space_object *)type->tp_alloc(type, n_basis);
+    if (!this)
+        return NULL;
+    memcpy(this->specs, specs, n_basis * sizeof(basis_spec_t));
+    return this;
+}
+
 static PyObject *function_space_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     if (kwds && PyDict_Size(kwds))
