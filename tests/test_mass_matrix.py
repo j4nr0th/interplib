@@ -49,5 +49,68 @@ def test_mass_matrix_1d(
     assert pytest.approx(mass_matrix) == expected_mass_matrix
 
 
+@pytest.mark.parametrize(
+    ("spec11", "spec12", "spec21", "spec22"),
+    (
+        (
+            BasisSpecs(BasisType.LEGENDRE, 1),
+            BasisSpecs(BasisType.LEGENDRE, 1),
+            BasisSpecs(BasisType.LEGENDRE, 1),
+            BasisSpecs(BasisType.LEGENDRE, 1),
+        ),
+        (
+            BasisSpecs(BasisType.LEGENDRE, 2),
+            BasisSpecs(BasisType.LEGENDRE, 3),
+            BasisSpecs(BasisType.LEGENDRE, 2),
+            BasisSpecs(BasisType.LEGENDRE, 3),
+        ),
+        (
+            BasisSpecs(BasisType.LEGENDRE, 2),
+            BasisSpecs(BasisType.BERNSTEIN, 3),
+            BasisSpecs(BasisType.LAGRANGE_UNIFORM, 2),
+            BasisSpecs(BasisType.LAGRNAGE_GAUSS_LOBATTO, 4),
+        ),
+    ),
+)
+def test_mass_matrix_2d(
+    spec11: BasisSpecs, spec12: BasisSpecs, spec21: BasisSpecs, spec22: BasisSpecs
+) -> None:
+    """Check mass matrix computation in 2D."""
+    order_1 = max(spec11.order, spec12.order)
+    order_2 = max(spec21.order, spec22.order)
+
+    int_space = IntegrationSpace(
+        IntegrationSpecs(order_1 + 1, IntegrationMethod.GAUSS),
+        IntegrationSpecs(order_2 + 1, IntegrationMethod.GAUSS),
+    )
+    func_space_1 = FunctionSpace(spec11, spec12)
+    func_space_2 = FunctionSpace(spec21, spec22)
+
+    mass_matrix = compute_mass_matrix(func_space_1, func_space_2, int_space)
+
+    int_nodes_1 = int_space.nodes()[0, ...]
+    int_nodes_2 = int_space.nodes()[1, ...]
+    int_weights = int_space.weights()
+
+    vals_1 = func_space_1.evaluate(int_nodes_1, int_nodes_2).reshape(
+        int_weights.shape + (-1,)
+    )
+    vals_2 = func_space_2.evaluate(int_nodes_1, int_nodes_2).reshape(
+        int_weights.shape + (-1,)
+    )
+
+    expected_mass_matrix = np.sum(
+        vals_1[..., None, :] * vals_2[..., :, None] * int_weights[..., None, None],
+        axis=tuple(range(int_weights.ndim)),
+    )
+    assert pytest.approx(mass_matrix) == expected_mass_matrix
+
+
 if __name__ == "__main__":
-    test_mass_matrix_1d(2, BasisType.LEGENDRE, 3, BasisType.LEGENDRE)
+    # test_mass_matrix_1d(2, BasisType.LEGENDRE, 3, BasisType.LEGENDRE)
+    test_mass_matrix_2d(
+        BasisSpecs(BasisType.LEGENDRE, 2),
+        BasisSpecs(BasisType.BERNSTEIN, 3),
+        BasisSpecs(BasisType.LAGRANGE_UNIFORM, 2),
+        BasisSpecs(BasisType.LAGRNAGE_GAUSS_LOBATTO, 4),
+    )

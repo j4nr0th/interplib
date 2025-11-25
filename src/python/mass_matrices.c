@@ -291,12 +291,12 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
             {
                 const size_t integration_point_idx = multidim_iterator_get_offset(resources.iter_int, idim);
                 weight *= integration_rule_weights_const(resources.rules[idim])[integration_point_idx];
-                basis_in *=
-                    basis_set_basis_values(resources.basis_in[idim],
-                                           multidim_iterator_get_flat_index(resources.iter_in))[integration_point_idx];
-                basis_out *=
-                    basis_set_basis_values(resources.basis_out[idim],
-                                           multidim_iterator_get_flat_index(resources.iter_out))[integration_point_idx];
+                basis_in *= basis_set_basis_values(
+                    resources.basis_in[idim],
+                    multidim_iterator_get_offset(resources.iter_in, idim))[integration_point_idx];
+                basis_out *= basis_set_basis_values(
+                    resources.basis_out[idim],
+                    multidim_iterator_get_offset(resources.iter_out, idim))[integration_point_idx];
             }
             multidim_iterator_advance(resources.iter_int, n_space_dim - 1, 1);
             // Add the contributions to the result

@@ -188,11 +188,13 @@ const size_t *multidim_iterator_offsets(const multidim_iterator_t *this)
 
 size_t multidim_iterator_get_dim(const multidim_iterator_t *this, const size_t dim)
 {
+    ASSERT(dim < this->ndims, "Dimension out of bounds");
     return multidim_iterator_dims_const_ptr(this)[dim];
 }
 
 size_t multidim_iterator_get_offset(const multidim_iterator_t *this, const size_t dim)
 {
+    ASSERT(dim < this->ndims, "Dimension out of bounds");
     return multidim_iterator_offsets_const_ptr(this)[dim];
 }
 
