@@ -235,15 +235,7 @@ static PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObj
     dof_object *this;
     if (ensure_dof_and_state(self, defining_class, &state, &this) < 0)
         return NULL;
-    const unsigned ndim = this->n_dims;
-    if (nargs != ndim)
-    {
-        PyErr_Format(PyExc_TypeError,
-                     "Expected the same number of positional arguments as the dimensions of the function space of "
-                     "degrees of freedom (%u), got %zd.",
-                     ndim, nargs);
-        return NULL;
-    }
+
     // Parse the arguments
     const integration_space_object *integration_space;
     const integration_registry_object *python_integration_registry =
@@ -282,7 +274,7 @@ static PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObj
                 },
                 {},
             },
-            args + nargs, 0, kwnames) < 0)
+            args, nargs, kwnames) < 0)
         return NULL;
 
     // Do dimensions match
@@ -406,6 +398,7 @@ static PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObj
             }
             // Scale the basis value by the degree of freedom
             val += basis_val * this->values[multidim_iterator_get_flat_index(iter_basis)];
+            multidim_iterator_advance(iter_basis, this->n_dims - 1, 1);
         }
 
         // Write output and advance the integration iterator

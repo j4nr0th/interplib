@@ -69,3 +69,32 @@ def test_degrees_of_freedom(orders: tuple[int, ...]) -> None:
     reconstructed_function = reconstruct(dofs, *pts)
     expected_function = test_function(*pts)
     assert pytest.approx(reconstructed_function) == expected_function
+
+
+@pytest.mark.parametrize(
+    "orders",
+    (
+        (2, 2, 2),
+        (3, 4, 5),
+        (1, 2, 3, 4, 5),
+    ),
+)
+def test_reconstruction_at_integration_nodes(orders: tuple[int, ...]) -> None:
+    """Check that reconstruction at integration nodes works correctly."""
+    integration_space = IntegrationSpace(
+        *[IntegrationSpecs(order + 2, IntegrationMethod.GAUSS) for order in orders]
+    )
+    function_space = FunctionSpace(
+        *[BasisSpecs(BasisType.LEGENDRE, order) for order in orders]
+    )
+
+    rng = np.random.default_rng(1234)
+    dofs = DegreesOfFreedom(function_space)
+    dofs.values = rng.random(dofs.shape)
+
+    nodes = integration_space.nodes()
+    expected_reconstruction = reconstruct(
+        dofs, *[nodes[i, ...] for i in range(nodes.shape[0])]
+    )
+    test_reconstruction = dofs.reconstruct_at_integration_points(integration_space)
+    assert pytest.approx(expected_reconstruction) == test_reconstruction
