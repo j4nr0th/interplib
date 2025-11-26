@@ -5,6 +5,7 @@ from interplib._interp import DEFAULT_BASIS_REGISTRY as DEFAULT_BASIS_REGISTRY
 from interplib._interp import DEFAULT_INTEGRATION_REGISTRY as DEFAULT_INTEGRATION_REGISTRY
 from interplib._interp import BasisRegistry as BasisRegistry
 from interplib._interp import BasisSpecs as BasisSpecs
+from interplib._interp import DegreesOfFreedom as DegreesOfFreedom
 from interplib._interp import FunctionSpace as FunctionSpace
 from interplib._interp import IntegrationRegistry as IntegrationRegistry
 from interplib._interp import IntegrationSpace as IntegrationSpace
@@ -15,6 +16,12 @@ from interplib._interp import compute_gll as compute_gll
 from interplib._interp import compute_mass_matrix as compute_mass_matrix
 from interplib._interp import dlagrange1d as dlagrange1d
 from interplib._interp import lagrange1d as lagrange1d
+
+# DoFs functions
+from interplib.degrees_of_freedom import (
+    compute_dual_degrees_of_freedom as compute_dual_degrees_of_freedom,
+)
+from interplib.degrees_of_freedom import reconstruct as reconstruct
 
 # Enum types
 from interplib.enum_type import BasisType as BasisType

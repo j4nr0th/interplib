@@ -274,6 +274,56 @@ static PyObject *function_space_evaluate(PyObject *self, PyTypeObject *defining_
     return (PyObject *)out;
 }
 
+PyDoc_STRVAR(function_space_type_docstring,
+             "FunctionSpace(*specs: BasisSpec)\n"
+             "Function space defined with basis.\n"
+             "\n"
+             "Function space defined by tensor product of basis functions in each dimension.\n"
+             "Basis for each dimension are defined by a BasisSpecs object.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "*basis_specs : BasisSpecs\n"
+             "    Basis specifications for each dimension of the function space.\n");
+
+static int function_space_equal(const function_space_object *const this, const function_space_object *const that)
+{
+    const unsigned n_basis = Py_SIZE(this);
+
+    if (Py_SIZE(that) != n_basis)
+        return 0;
+
+    for (unsigned i = 0; i < n_basis; ++i)
+    {
+        if (this->specs[i].order != that->specs[i].order || this->specs[i].type != that->specs[i].type)
+            return 0;
+    }
+
+    return 1;
+}
+
+static PyObject *function_space_rich_compare(PyObject *self, PyObject *other, const int op)
+{
+    const interplib_module_state_t *state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        PyErr_Clear();
+        if ((state = interplib_get_module_state(Py_TYPE(other))) == NULL)
+            return NULL;
+    }
+
+    if (!PyObject_TypeCheck(self, state->function_space_type) ||
+        !PyObject_TypeCheck(other, state->function_space_type) || (op != Py_EQ && op != Py_NE))
+        Py_RETURN_NOTIMPLEMENTED;
+
+    const function_space_object *const this = (function_space_object *)self;
+    const function_space_object *const that = (function_space_object *)other;
+
+    const int equal = function_space_equal(this, that);
+
+    return PyBool_FromLong(op == Py_EQ ? equal : !equal);
+}
+
 PyType_Spec function_space_type_spec = {
     .name = "interplib._interp.FunctionSpace",
     .basicsize = sizeof(function_space_object),
@@ -282,6 +332,8 @@ PyType_Spec function_space_type_spec = {
     .slots = (PyType_Slot[]){
         {Py_tp_traverse, heap_type_traverse_type},
         {Py_tp_new, function_space_new},
+        {Py_tp_doc, (void *)function_space_type_docstring},
+        {Py_tp_richcompare, function_space_rich_compare},
         {
             Py_tp_getset,
             (PyGetSetDef[]){
@@ -315,3 +367,18 @@ PyType_Spec function_space_type_spec = {
          }},
         {},
     }};
+
+multidim_iterator_t *function_space_iterator(const function_space_object *space)
+{
+    const unsigned ndims = Py_SIZE(space);
+    multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(ndims));
+    if (!iter)
+        return NULL;
+
+    for (unsigned idim = 0; idim < ndims; ++idim)
+    {
+        multidim_iterator_init_dim(iter, idim, space->specs[idim].order + 1);
+    }
+
+    return iter;
+}

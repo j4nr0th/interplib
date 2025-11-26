@@ -490,3 +490,53 @@ basis_specs_object *basis_specs_object_create(PyTypeObject *type, const basis_sp
     this->spec = spec;
     return this;
 }
+
+const basis_set_t **python_basis_sets_get(const unsigned n_basis, const basis_spec_t specs[const static n_basis],
+                                          const integration_rule_t *rules[const static n_basis],
+                                          basis_set_registry_t *registry)
+{
+    const basis_set_t **const array = PyMem_Malloc(n_basis * sizeof(*array));
+    if (!array)
+        return NULL;
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        const interp_result_t res =
+            basis_set_registry_get_basis_set(registry, array + ibasis, rules[ibasis], specs[ibasis]);
+        if (res != INTERP_SUCCESS)
+        {
+            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve basis set: %s (%s).", interp_error_str(res),
+                         interp_error_msg(res));
+            for (unsigned i = 0; i < ibasis; ++i)
+            {
+                basis_set_registry_release_basis_set(registry, array[i]);
+            }
+            PyMem_Free(array);
+            return NULL;
+        }
+    }
+    return array;
+}
+
+void python_basis_sets_release(const unsigned n_basis, const basis_set_t *sets[static n_basis],
+                               basis_set_registry_t *registry)
+{
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        basis_set_registry_release_basis_set(registry, sets[ibasis]);
+        sets[ibasis] = NULL;
+    }
+    PyMem_Free(sets);
+}
+multidim_iterator_t *python_basis_iterator(const unsigned n_basis, const basis_spec_t specs[const static n_basis])
+{
+    multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(n_basis));
+    if (!iter)
+        return NULL;
+
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        multidim_iterator_init_dim(iter, ibasis, specs[ibasis].order + 1);
+    }
+
+    return iter;
+}

@@ -874,3 +874,54 @@ PyType_Spec integration_space_type_spec = {
         {Py_tp_doc, (void *)integration_space_docstring},
         {},
     }};
+
+multidim_iterator_t *integration_space_iterator(const integration_space_object *space)
+{
+    const unsigned ndims = Py_SIZE(space);
+    multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(ndims));
+    if (!iter)
+        return NULL;
+
+    for (unsigned i = 0; i < ndims; ++i)
+    {
+        multidim_iterator_init_dim(iter, i, space->specs[i].order + 1);
+    }
+
+    return iter;
+}
+
+const integration_rule_t **python_integration_rules_get(const unsigned n_rules,
+                                                        const integration_spec_t specs[const static n_rules],
+                                                        integration_rule_registry_t *registry)
+{
+    const integration_rule_t **const array = PyMem_Malloc(n_rules * sizeof(*array));
+    if (!array)
+        return NULL;
+    for (unsigned irule = 0; irule < n_rules; ++irule)
+    {
+        const interp_result_t res = integration_rule_registry_get_rule(registry, specs[irule], array + irule);
+        if (res != INTERP_SUCCESS)
+        {
+            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve integration rule: %s (%s).", interp_error_str(res),
+                         interp_error_msg(res));
+            for (unsigned i = 0; i < irule; ++i)
+            {
+                integration_rule_registry_release_rule(registry, array[i]);
+            }
+            PyMem_Free(array);
+            return NULL;
+        }
+    }
+    return array;
+}
+
+void python_integration_rules_release(const unsigned n_rules, const integration_rule_t *rules[static n_rules],
+                                      integration_rule_registry_t *registry)
+{
+    for (unsigned irule = 0; irule < n_rules; ++irule)
+    {
+        integration_rule_registry_release_rule(registry, rules[irule]);
+        rules[irule] = NULL;
+    }
+    PyMem_Free(rules);
+}

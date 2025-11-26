@@ -581,32 +581,33 @@ class DegreesOfFreedom:
         """Shape of the degrees of freedom."""
         ...
 
-@final
-class CoordinateMap:
-    """Mapping between reference and physical coordinates."""
-
-    def __new__(cls, function_space: FunctionSpace, /) -> Self: ...
-    @property
-    def dimension(self) -> int:
-        """Number of dimensions in the coordinate map."""
-        ...
-    def map(
-        self, *x: npt.NDArray[np.double], out: npt.NDArray[np.double] | None = None
+    def reconstruct_at_integration_points(
+        self,
+        integration_space: IntegrationSpace,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+        *,
+        out: npt.NDArray[np.double] | None = None,
     ) -> npt.NDArray[np.double]:
-        """Map reference coordinates to physical coordinates.
+        """Reconstruct the function at the integration points of the given space.
 
         Parameters
         ----------
-        *x : array
-            Reference coordinates to be mapped. Each array corresponds to a dimension.
+        integration_space : IntegrationSpace
+            Integration space where the function should be reconstructed.
+        integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Registry used to retrieve the basis specifications.
         out : array, optional
             Array where the results should be written to. If not given, a new one
-            will be created and returned. It should have the same shape as ``x``.
+            will be created and returned. It should have the same shape as the
+            integration points.
 
         Returns
         -------
         array
-            Mapped physical coordinates.
+            Array of reconstructed function values at the integration points.
         """
         ...
 

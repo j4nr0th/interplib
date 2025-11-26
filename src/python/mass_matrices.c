@@ -28,105 +28,6 @@ PyDoc_STRVAR(compute_mass_matrix_docstring,
              "Mass matrix as a 2D array, which maps the primal degress of freedom of the input\n"
              "function space to dual degrees of freedom of the output function space.\n");
 
-static multidim_iterator_t *function_space_iterator(const function_space_object *space)
-{
-    const Py_ssize_t ndims = Py_SIZE(space);
-    multidim_iterator_t *iter = PyMem_Malloc(multidim_iterator_needed_memory(ndims));
-    if (!iter)
-        return NULL;
-    for (unsigned idim = 0; idim < ndims; ++idim)
-    {
-        multidim_iterator_init_dim(iter, idim, space->specs[idim].order + 1);
-    }
-    return iter;
-}
-
-static multidim_iterator_t *integration_space_iterator(const integration_space_object *space)
-{
-    const Py_ssize_t ndims = Py_SIZE(space);
-    multidim_iterator_t *iter = PyMem_Malloc(multidim_iterator_needed_memory(ndims));
-    if (!iter)
-        return NULL;
-    for (unsigned idim = 0; idim < ndims; ++idim)
-    {
-        multidim_iterator_init_dim(iter, idim, space->specs[idim].order + 1);
-    }
-    return iter;
-}
-
-static const integration_rule_t **integration_rules_get(const unsigned n_rules,
-                                                        const integration_spec_t specs[const static n_rules],
-                                                        integration_rule_registry_t *registry)
-{
-    const integration_rule_t **const array = PyMem_Malloc(n_rules * sizeof(*array));
-    if (!array)
-        return NULL;
-    for (unsigned irule = 0; irule < n_rules; ++irule)
-    {
-        const interp_result_t res = integration_rule_registry_get_rule(registry, specs[irule], array + irule);
-        if (res != INTERP_SUCCESS)
-        {
-            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve integration rule: %s (%s).", interp_error_str(res),
-                         interp_error_msg(res));
-            for (unsigned i = 0; i < irule; ++i)
-            {
-                integration_rule_registry_release_rule(registry, array[i]);
-            }
-            PyMem_Free(array);
-            return NULL;
-        }
-    }
-    return array;
-}
-
-static void integration_rules_release(const unsigned n_rules, const integration_rule_t *rules[static n_rules],
-                                      integration_rule_registry_t *registry)
-{
-    for (unsigned irule = 0; irule < n_rules; ++irule)
-    {
-        integration_rule_registry_release_rule(registry, rules[irule]);
-        rules[irule] = NULL;
-    }
-    PyMem_Free(rules);
-}
-
-static const basis_set_t **basis_sets_get(const unsigned n_basis, const basis_spec_t specs[const static n_basis],
-                                          const integration_rule_t *rules[const static n_basis],
-                                          basis_set_registry_t *registry)
-{
-    const basis_set_t **const array = PyMem_Malloc(n_basis * sizeof(*array));
-    if (!array)
-        return NULL;
-    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
-    {
-        const interp_result_t res =
-            basis_set_registry_get_basis_set(registry, array + ibasis, rules[ibasis], specs[ibasis]);
-        if (res != INTERP_SUCCESS)
-        {
-            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve basis set: %s (%s).", interp_error_str(res),
-                         interp_error_msg(res));
-            for (unsigned i = 0; i < ibasis; ++i)
-            {
-                basis_set_registry_release_basis_set(registry, array[i]);
-            }
-            PyMem_Free(array);
-            return NULL;
-        }
-    }
-    return array;
-}
-
-static void basis_sets_release(const unsigned n_basis, const basis_set_t *sets[static n_basis],
-                               basis_set_registry_t *registry)
-{
-    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
-    {
-        basis_set_registry_release_basis_set(registry, sets[ibasis]);
-        sets[ibasis] = NULL;
-    }
-    PyMem_Free(sets);
-}
-
 typedef struct
 {
     multidim_iterator_t *iter_in;
@@ -145,11 +46,11 @@ static void mass_matrix_release_resources(mass_matrix_resources_t *resources,
                                           basis_set_registry_t *basis_registry)
 {
     if (resources->basis_out)
-        basis_sets_release(resources->n_dim_out, resources->basis_out, basis_registry);
+        python_basis_sets_release(resources->n_dim_out, resources->basis_out, basis_registry);
     if (resources->basis_in)
-        basis_sets_release(resources->n_dim_in, resources->basis_in, basis_registry);
+        python_basis_sets_release(resources->n_dim_in, resources->basis_in, basis_registry);
     if (resources->rules)
-        integration_rules_release(resources->n_rules, resources->rules, integration_registry);
+        python_integration_rules_release(resources->n_rules, resources->rules, integration_registry);
     if (resources->iter_out)
         PyMem_Free(resources->iter_out);
     if (resources->iter_in)
@@ -171,13 +72,13 @@ static int mass_matrix_create_resources(const function_space_object *space_in, c
     res.iter_int = integration_space_iterator(integration_space);
     const Py_ssize_t n_rules = Py_SIZE(integration_space);
     // Get integration rules and basis sets
-    res.rules = integration_rules_get(n_rules, integration_space->specs, integration_registry);
+    res.rules = python_integration_rules_get(n_rules, integration_space->specs, integration_registry);
     res.n_rules = n_rules;
     const Py_ssize_t n_basis_in = Py_SIZE(space_in);
-    res.basis_in = res.rules ? basis_sets_get(n_basis_in, space_in->specs, res.rules, basis_registry) : NULL;
+    res.basis_in = res.rules ? python_basis_sets_get(n_basis_in, space_in->specs, res.rules, basis_registry) : NULL;
     res.n_dim_in = n_basis_in;
     const Py_ssize_t n_basis_out = Py_SIZE(space_out);
-    res.basis_out = res.rules ? basis_sets_get(n_basis_out, space_out->specs, res.rules, basis_registry) : NULL;
+    res.basis_out = res.rules ? python_basis_sets_get(n_basis_out, space_out->specs, res.rules, basis_registry) : NULL;
     res.n_dim_out = n_basis_out;
     if (!res.iter_in || !res.iter_out || !res.iter_int || !res.rules || !res.basis_in || !res.basis_out)
     {
@@ -302,6 +203,10 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
             // Add the contributions to the result
             result += weight * basis_in * basis_out;
         }
+
+        // Write the output
+        p_out[index_out * dims[1] + index_in] = result;
+
         // Advance the input basis
         multidim_iterator_advance(resources.iter_in, n_space_dim - 1, 1);
         // If we've done enough input basis, we advance the output basis and reset the input iterator
@@ -310,7 +215,6 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
             multidim_iterator_advance(resources.iter_out, n_space_dim - 1, 1);
             multidim_iterator_set_to_start(resources.iter_in);
         }
-        p_out[index_out * dims[1] + index_in] = result;
     }
 
     // If we're symmetric, we have to fill up the upper diagonal part

@@ -1,5 +1,8 @@
 #include "degrees_of_freedom.h"
+
+#include "basis_objects.h"
 #include "function_space_objects.h"
+#include "integration_objects.h"
 
 /**
  * Checks if a given Numpy array has a specific shape determined by the number
@@ -33,7 +36,7 @@ static PyObject *dof_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
 
     const function_space_object *space;
     PyObject *py_vals = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!O", (char *[]){"", "", NULL}, state->function_space_type, &space,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!|O", (char *[]){"", "", NULL}, state->function_space_type, &space,
                                      &py_vals))
         return NULL;
 
@@ -199,6 +202,224 @@ static int dof_set_values(PyObject *self, PyObject *value, void *Py_UNUSED(closu
     return 0;
 }
 
+PyDoc_STRVAR(dof_reconstruct_at_integration_points_docstring,
+             "reconstruct_at_integration_points(integration_space: IntegrationSpace, integration_registry: "
+             "IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, basis_registry: BasisRegistry = "
+             "DEFAULT_BASIS_REGISTRY, *, out: numpy.typing.NDArray[numpy.double] | None = None, ) -> "
+             "numpy.typing.NDArray[numpy.double]\n"
+             "Reconstruct the function at the integration points of the given space.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "integration_space : IntegrationSpace\n"
+             "    Integration space where the function should be reconstructed.\n"
+             "integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+             "    Registry used to retrieve the integration rules.\n"
+             "basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY\n"
+             "    Registry used to retrieve the basis specifications.\n"
+             "out : array, optional\n"
+             "    Array where the results should be written to. If not given, a new one\n"
+             "    will be created and returned. It should have the same shape as the\n"
+             "    integration points.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of reconstructed function values at the integration points.\n");
+
+static PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObject *defining_class,
+                                                       PyObject *const *args, const Py_ssize_t nargs,
+                                                       const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    dof_object *this;
+    if (ensure_dof_and_state(self, defining_class, &state, &this) < 0)
+        return NULL;
+    const unsigned ndim = this->n_dims;
+    if (nargs != ndim)
+    {
+        PyErr_Format(PyExc_TypeError,
+                     "Expected the same number of positional arguments as the dimensions of the function space of "
+                     "degrees of freedom (%u), got %zd.",
+                     ndim, nargs);
+        return NULL;
+    }
+    // Parse the arguments
+    const integration_space_object *integration_space;
+    const integration_registry_object *python_integration_registry =
+        (integration_registry_object *)state->registry_integration;
+    const basis_registry_object *python_basis_registry = (basis_registry_object *)state->registry_basis;
+    PyArrayObject *out_array = NULL;
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &integration_space,
+                    .type_check = state->integration_space_type,
+                    .kwname = "integration_space",
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &python_integration_registry,
+                    .type_check = state->integration_registry_type,
+                    .kwname = "integration_registry",
+                    .optional = 1,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &python_basis_registry,
+                    .type_check = state->basis_registry_type,
+                    .kwname = "basis_registry",
+                    .optional = 1,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &out_array,
+                    .type_check = &PyArray_Type,
+                    .kwname = "out",
+                    .optional = 1,
+                    .kw_only = 1,
+                },
+                {},
+            },
+            args + nargs, 0, kwnames) < 0)
+        return NULL;
+
+    // Do dimensions match
+    const unsigned n_dof = Py_SIZE(self);
+    if (Py_SIZE(integration_space) != this->n_dims)
+    {
+        PyErr_Format(PyExc_ValueError, "Expected integration space with %u dimensions, but it had only %u.",
+                     this->n_dims, Py_SIZE(integration_space));
+        return NULL;
+    }
+
+    // Check or create output
+    if (out_array)
+    {
+        if (check_input_array(out_array, 0, (const npy_intp[]){}, NPY_DOUBLE,
+                              NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED, "out") < 0)
+        {
+            raise_exception_from_current(PyExc_ValueError,
+                                         "Output array must be a contiguous, aligned array of doubles.");
+            return NULL;
+        }
+        if ((unsigned)PyArray_NDIM(out_array) != this->n_dims)
+        {
+            PyErr_Format(PyExc_ValueError, "Output array must have %u dimensions, but it had %u.", this->n_dims,
+                         (unsigned)PyArray_NDIM(out_array));
+            return NULL;
+        }
+        for (unsigned idim = 0; idim < this->n_dims; ++idim)
+        {
+            if (PyArray_DIM(out_array, (int)idim) != integration_space->specs[idim].order + 1)
+            {
+                PyErr_Format(PyExc_ValueError,
+                             "Output array must have the exact same shape as the integration space, but dimension %u "
+                             "did not match (integration space: %u, array: %u).",
+                             idim, integration_space->specs[idim].order + 1,
+                             (unsigned)PyArray_DIM(out_array, (int)idim));
+                return NULL;
+            }
+        }
+        // Good, now incref it
+        Py_INCREF(out_array);
+    }
+    else
+    {
+        // Create it
+        npy_intp *const p_dim_out = PyMem_Malloc(sizeof(*p_dim_out) * this->n_dims);
+        if (!p_dim_out)
+            return NULL;
+        for (unsigned idim = 0; idim < this->n_dims; ++idim)
+            p_dim_out[idim] = integration_space->specs[idim].order + 1;
+        out_array = (PyArrayObject *)PyArray_SimpleNew(this->n_dims, p_dim_out, NPY_DOUBLE);
+        PyMem_Free(p_dim_out);
+        if (!out_array)
+            return NULL;
+    }
+
+    // Create iterators
+    multidim_iterator_t *const iter_int = integration_space_iterator(integration_space);
+    if (!iter_int)
+    {
+        Py_DECREF(out_array);
+        return NULL;
+    }
+    multidim_iterator_t *const iter_basis = python_basis_iterator(this->n_dims, this->basis_specs);
+    if (!iter_basis)
+    {
+        PyMem_Free(iter_int);
+        Py_DECREF(out_array);
+        return NULL;
+    }
+
+    // Extract registry pointers
+    basis_set_registry_t *const basis_registry = (basis_set_registry_t *)python_basis_registry->registry;
+    const basis_set_t **basis_sets;
+
+    // Get basis (and first the integration rules)
+    {
+        integration_rule_registry_t *const integration_registry =
+            (integration_rule_registry_t *)python_integration_registry->registry;
+        // Get integration rules
+        const integration_rule_t **const integration_rules =
+            python_integration_rules_get(this->n_dims, integration_space->specs, integration_registry);
+        if (!integration_rules)
+        {
+            PyMem_Free(iter_basis);
+            PyMem_Free(iter_int);
+            Py_DECREF(out_array);
+            return NULL;
+        }
+        basis_sets = python_basis_sets_get(this->n_dims, this->basis_specs, integration_rules, basis_registry);
+        python_integration_rules_release(this->n_dims, integration_rules, integration_registry);
+    }
+    if (!basis_sets)
+    {
+        PyMem_Free(iter_basis);
+        PyMem_Free(iter_int);
+        Py_DECREF(out_array);
+        return NULL;
+    }
+
+    npy_double *const ptr = PyArray_DATA(out_array);
+    // Compute the values
+    CPYUTL_ASSERT(multidim_iterator_total_size(iter_basis) == n_dof,
+                  "Basis iterator should have the same number of elements as there are DoFs (%zu vs %u)",
+                  multidim_iterator_total_size(iter_basis), n_dof);
+    multidim_iterator_set_to_start(iter_int);
+    while (!multidim_iterator_is_at_end(iter_int))
+    {
+        // Compute the point value
+        double val = 0;
+        multidim_iterator_set_to_start(iter_basis);
+        while (!multidim_iterator_is_at_end(iter_basis))
+        {
+            // For each basis compute value at the integration point
+            double basis_val = 1;
+            for (unsigned idim = 0; idim < this->n_dims; ++idim)
+            {
+                basis_val *= basis_set_basis_values(
+                    basis_sets[idim],
+                    multidim_iterator_get_offset(iter_basis, idim))[multidim_iterator_get_offset(iter_int, idim)];
+            }
+            // Scale the basis value by the degree of freedom
+            val += basis_val * this->values[multidim_iterator_get_flat_index(iter_basis)];
+        }
+
+        // Write output and advance the integration iterator
+        ptr[multidim_iterator_get_flat_index(iter_int)] = val;
+        multidim_iterator_advance(iter_int, this->n_dims - 1, 1);
+    }
+
+    // Free the iterator memory and release the basis sets
+    PyMem_Free(iter_basis);
+    PyMem_Free(iter_int);
+    python_basis_sets_release(this->n_dims, basis_sets, basis_registry);
+    return (PyObject *)out_array;
+}
+
 PyType_Spec degrees_of_freedom_type_spec = {
     .name = "interplib._interp.DegreesOfFreedom",
     .basicsize = sizeof(dof_object),
@@ -230,6 +451,16 @@ PyType_Spec degrees_of_freedom_type_spec = {
                  .get = dof_get_values,
                  .set = dof_set_values,
                  .doc = "numpy.typing.NDArray[numpy.double] : Values of the degrees of freedom.",
+             },
+             {},
+         }},
+        {Py_tp_methods,
+         (PyMethodDef[]){
+             {
+                 .ml_name = "reconstruct_at_integration_points",
+                 .ml_meth = (void *)dof_reconstruct_at_integration_points,
+                 .ml_flags = METH_FASTCALL | METH_KEYWORDS | METH_METHOD,
+                 .ml_doc = (void *)dof_reconstruct_at_integration_points_docstring,
              },
              {},
          }},

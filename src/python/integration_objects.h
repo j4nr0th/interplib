@@ -1,6 +1,7 @@
 #ifndef INTERPLIB_INTEGRATION_RULE_OBJECT_H
 #define INTERPLIB_INTEGRATION_RULE_OBJECT_H
 #include "../integration/integration_rules.h"
+#include "../operations/multidim_iteration.h"
 #include "module.h"
 
 typedef struct
@@ -35,5 +36,17 @@ typedef struct
 
 INTERPLIB_INTERNAL
 extern PyType_Spec integration_space_type_spec;
+
+INTERPLIB_INTERNAL
+multidim_iterator_t *integration_space_iterator(const integration_space_object *space);
+
+INTERPLIB_INTERNAL
+const integration_rule_t **python_integration_rules_get(unsigned n_rules,
+                                                        const integration_spec_t specs[const static n_rules],
+                                                        integration_rule_registry_t *registry);
+
+INTERPLIB_INTERNAL
+void python_integration_rules_release(unsigned n_rules, const integration_rule_t *rules[static n_rules],
+                                      integration_rule_registry_t *registry);
 
 #endif // INTERPLIB_INTEGRATION_RULE_OBJECT_H
