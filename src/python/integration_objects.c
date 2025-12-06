@@ -875,19 +875,24 @@ PyType_Spec integration_space_type_spec = {
         {},
     }};
 
-multidim_iterator_t *integration_space_iterator(const integration_space_object *space)
+multidim_iterator_t *integration_specs_iterator(const unsigned n_specs,
+                                                const integration_spec_t INTERPLIB_ARRAY_ARG(specs, static n_specs))
 {
-    const unsigned ndims = Py_SIZE(space);
-    multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(ndims));
+    multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(n_specs));
     if (!iter)
         return NULL;
 
-    for (unsigned i = 0; i < ndims; ++i)
+    for (unsigned i = 0; i < n_specs; ++i)
     {
-        multidim_iterator_init_dim(iter, i, space->specs[i].order + 1);
+        multidim_iterator_init_dim(iter, i, specs[i].order + 1);
     }
 
     return iter;
+}
+
+multidim_iterator_t *integration_space_iterator(const integration_space_object *space)
+{
+    return integration_specs_iterator(Py_SIZE(space), space->specs);
 }
 
 const integration_rule_t **python_integration_rules_get(const unsigned n_rules,

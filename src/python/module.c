@@ -15,6 +15,7 @@
 #include "../polynomials/lagrange.h"
 #include "basis_objects.h"
 #include "integration_objects.h"
+#include "mappings.h"
 #include "mass_matrices.h"
 
 // Topology
@@ -803,6 +804,10 @@ static int interplib_add_types(PyObject *mod)
              cpyutl_add_type_from_spec_to_module(mod, &integration_space_type_spec, NULL)) == NULL ||
         (module_state->degrees_of_freedom_type =
              cpyutl_add_type_from_spec_to_module(mod, &degrees_of_freedom_type_spec, NULL)) == NULL ||
+        (module_state->coordinate_mapping_type =
+             cpyutl_add_type_from_spec_to_module(mod, &coordinate_map_type_spec, NULL)) == NULL ||
+        (module_state->space_mapping_type = cpyutl_add_type_from_spec_to_module(mod, &space_map_type_spec, NULL)) ==
+            NULL ||
         (module_state->geoid_type = cpyutl_add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
         (module_state->line_type = cpyutl_add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
         (module_state->surf_type = cpyutl_add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||

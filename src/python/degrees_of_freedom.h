@@ -14,4 +14,13 @@ typedef struct
 INTERPLIB_INTERNAL
 extern PyType_Spec degrees_of_freedom_type_spec;
 
+INTERPLIB_INTERNAL
+PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                                Py_ssize_t nargs, const PyObject *kwnames);
+
+INTERPLIB_INTERNAL
+PyObject *dof_reconstruct_derivative_at_integration_points(PyObject *self, PyTypeObject *defining_class,
+                                                           PyObject *const *args, Py_ssize_t nargs,
+                                                           const PyObject *kwnames);
+
 #endif // INTERPLIB_DEGREES_OF_FREEDOM_H

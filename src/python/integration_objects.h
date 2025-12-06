@@ -41,6 +41,10 @@ INTERPLIB_INTERNAL
 multidim_iterator_t *integration_space_iterator(const integration_space_object *space);
 
 INTERPLIB_INTERNAL
+multidim_iterator_t *integration_specs_iterator(unsigned n_specs,
+                                                const integration_spec_t INTERPLIB_ARRAY_ARG(specs, static n_specs));
+
+INTERPLIB_INTERNAL
 const integration_rule_t **python_integration_rules_get(unsigned n_rules,
                                                         const integration_spec_t specs[const static n_rules],
                                                         integration_rule_registry_t *registry);

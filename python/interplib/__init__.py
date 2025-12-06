@@ -5,6 +5,7 @@ from interplib._interp import DEFAULT_BASIS_REGISTRY as DEFAULT_BASIS_REGISTRY
 from interplib._interp import DEFAULT_INTEGRATION_REGISTRY as DEFAULT_INTEGRATION_REGISTRY
 from interplib._interp import BasisRegistry as BasisRegistry
 from interplib._interp import BasisSpecs as BasisSpecs
+from interplib._interp import CoordinateMap as CoordinateMap
 from interplib._interp import DegreesOfFreedom as DegreesOfFreedom
 from interplib._interp import FunctionSpace as FunctionSpace
 from interplib._interp import IntegrationRegistry as IntegrationRegistry

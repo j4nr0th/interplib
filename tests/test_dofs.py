@@ -98,3 +98,7 @@ def test_reconstruction_at_integration_nodes(orders: tuple[int, ...]) -> None:
     )
     test_reconstruction = dofs.reconstruct_at_integration_points(integration_space)
     assert pytest.approx(expected_reconstruction) == test_reconstruction
+
+
+if __name__ == "__main__":
+    test_dofs_initialization()

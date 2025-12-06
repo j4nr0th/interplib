@@ -1,7 +1,3 @@
-//
-// Created by jan on 29.9.2024.
-//
-
 #ifndef COMMON_DEFINES_H
 #define COMMON_DEFINES_H
 
@@ -44,11 +40,7 @@
 #endif
 
 #ifndef ASSUME
-#define ASSUME(condition, message) ASSERT(condition, message)
-#endif
-
-#ifndef INTERPLIB_EXPECT_CONDITION
-#define INTERPLIB_EXPECT_CONDITION(x) (x)
+#define ASSUME(condition, message) ASSUME(condition, message)
 #endif
 
 #ifndef INTERPLIB_INTERNAL

@@ -57,6 +57,7 @@ set(INTEGRATION_HEADER_FILES
 
 set(OPERATIONS_SOURCE_FILES
         src/operations/multidim_iteration.c
+        src/operations/reconstruction.c
 )
 
 set(OPERATIONS_HEADER_FILES
@@ -114,6 +115,7 @@ set(PYTHON_NUMERICS_SOURCE_FILES
         src/python/function_space_objects.c
         src/python/mass_matrices.c
         src/python/degrees_of_freedom.c
+        src/python/mappings.c
 )
 
 Python_add_library(_interp MODULE
@@ -124,10 +126,10 @@ Python_add_library(_interp MODULE
 
 add_subdirectory(cpyutl)
 
-target_link_libraries(_interp PRIVATE interp cpyutl)
+target_link_libraries(_interp PRIVATE interp cpyutl OpenMP::OpenMP_C)
 set_property(TARGET _interp PROPERTY C_STANDARD 17)
 install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
-target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS)
+target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS CPYUTL_ENABLE_ASSERTS)
 
 if ("${NumPy_INCLUDE_DIRS}" STREQUAL "")
     message(FATAL_ERROR "NumPy_INCLUDE_DIRS was empty.")

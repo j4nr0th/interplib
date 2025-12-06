@@ -611,6 +611,140 @@ class DegreesOfFreedom:
         """
         ...
 
+    def reconstruct_derivative_at_integration_points(
+        self,
+        integration_space: IntegrationSpace,
+        idim: Sequence[int],
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+        *,
+        out: npt.NDArray[np.double] | None = None,
+    ) -> npt.NDArray[np.double]:
+        """Reconstruct the derivative of the function in given dimension.
+
+        Parameters
+        ----------
+        integration_space : IntegrationSpace
+            Integration space where the function derivative should be reconstructed.
+        idim : Sequence[int]
+            Dimensions in which the derivative should be computed. All values
+            should appear at most once.
+        integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Registry used to retrieve the basis specifications.
+        out : array, optional
+            Array where the results should be written to. If not given, a new one
+            will be created and returned. It should have the same shape as the
+            integration points.
+
+        Returns
+        -------
+        array
+            Array of reconstructed function derivative values at the integration points.
+        """
+        ...
+
+@final
+class CoordinateMap:
+    """Mapping between reference and physical coordinates.
+
+    This is type is a glorified wrapper around
+    :meth:`DegreesOfFreedom.reconstruct_at_integration_points()`
+    that represents a coordinate mapping for one dimension. In N-dimensional space,
+    N such maps are used to represent the full mapping.
+
+    Parameters
+    ----------
+    dofs : DegreesOfFreedom
+        Degrees of freedom that define the coordinate map.
+    integration_space : IntegrationSpace
+        Integration space used for the mapping.
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        Registry used to retrieve the integration rules.
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        Registry used to retrieve the basis specifications.
+    """
+
+    def __new__(
+        cls,
+        dofs: DegreesOfFreedom,
+        integration_space: IntegrationSpace,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+        /,
+    ) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the coordinate map."""
+        ...
+
+    @property
+    def integration_space(self) -> IntegrationSpace:
+        """Integration space used for the mapping."""
+        ...
+
+    @property
+    def values(self) -> npt.NDArray[np.double]:
+        """Values of the coordinate map at the integration points."""
+        ...
+
+    def gradient(self, idim: int, /) -> npt.NDArray[np.double]:
+        """Retrieve the gradient of the coordinate map in given dimension."""
+        ...
+
+@final
+class SpaceMap:
+    """Mapping between a reference space and a physical space.
+
+    A mapping from a reference space to a physical space, which maps the
+    :math:`N`-dimensional reference space to an :math:`M`-dimensional
+    physical space. With this mapping, it is possible to integrate a
+    quantity on a deformed element.
+
+    Parameters
+    ----------
+    *coordinates : CoordinateMap
+        Maps for each coordinate of physical space. All of these must be
+        defined on the same :class:`IntegrationSpace`.
+    """
+
+    def __new__(cls, *coordinates: CoordinateMap) -> Self: ...
+    def coordinate_map(self, idx: int) -> CoordinateMap:
+        """Return the coordinate map for the specified dimension.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the dimension for which the map shoudl be returned.
+
+        Returns
+        -------
+        CoordinateMap
+            Map used for the specified coordinate.
+        """
+        ...
+
+    @property
+    def integration_space(self) -> IntegrationSpace:
+        """Integration space used by the map."""
+        ...
+
+    @property
+    def input_dimensions(self) -> int:
+        """Dimension of the input/reference space."""
+        ...
+
+    @property
+    def output_dimensions(self) -> int:
+        """Dimension of the output/physical space."""
+        ...
+
+    @property
+    def determinant(self) -> npt.NDArray[np.double]:
+        """Array with the values of determinant at integration points."""
+        ...
+
 def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,
