@@ -3,7 +3,7 @@ name = "interplib"
 version = "0.0.1a"
 authors = [{ name = "Jan Roth", email = "r0th.j4n@gmail.com" }]
 description = "Interpolation library designed to handle different topologies."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["numpy>=2.0.0", "scipy"]
 
 
@@ -19,14 +19,13 @@ build.verbose = true
 logging.level = "INFO"
 editable.verbose = true
 editable.rebuild = false
-# wheel.py-api = "cp310"
 
 
 [project.optional-dependencies]
 dev = [
     "build",
     "scikit-build-core",
-    "mypy",
+    "pyrefly",
     "npt-promote",
     "pytest",
     "pytest-cov",
@@ -57,13 +56,12 @@ docs = [
 ]
 
 
-[tool.mypy]
-mypy_path = "python/interplib"
-plugins = ["npt_promote"]
-ignore_missing_imports = true
-warn_unused_configs = true
-warn_unused_ignores = true
-strict_equality = true
+[tool.pyrefly]
+project-includes = ["python/interplib/**/*.py", "python/interplib/**/*.pyi"]
+use-ignore-files = true
+search-path = ["python/interplib"]
+ignore-missing-imports = ["*"]
+
 
 [tool.codespell]
 skip = "sandbox/*"
