@@ -9,6 +9,7 @@ from interplib._interp import (
     DEFAULT_INTEGRATION_REGISTRY,
     IntegrationRegistry,
     IntegrationSpace,
+    SpaceMap,
 )
 
 
@@ -38,6 +39,7 @@ class Integrable(Protocol):
 def integrate_callable(
     func: Integrable,
     integration_space: IntegrationSpace,
+    space_map: SpaceMap | None = None,
     registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
 ) -> float:
     """Integrate a callable over a specified integration space with given specs.
@@ -46,9 +48,15 @@ def integrate_callable(
     ----------
     func : Callable
         The function to integrate.
+
     integration_space : IntegrationSpace
         The space over which to integrate the function.
-    registry : IntegrationRegistry | None, optional
+
+    space_map : SpaceMap, optional
+        Mapping between the integration domain, which is an :math:`N`-dimensional
+        :math:`[-1, +1]` hypercube, and the physical domain.
+
+    registry : IntegrationRegistry, optional
         The registry to use for obtaining the integrator. If None, the default registry is
         used.
 
@@ -59,6 +67,8 @@ def integrate_callable(
     """
     nodes = integration_space.nodes(registry)
     weights = integration_space.weights(registry)
+    if space_map is not None:
+        weights * space_map.determinant
     return float(
         np.sum(
             np.asarray(func(*[nodes[i, ...] for i in range(nodes.shape[0])])) * weights
