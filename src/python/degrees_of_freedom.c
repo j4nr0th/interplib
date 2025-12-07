@@ -277,16 +277,15 @@ static void compute_integration_point_values_derivatives(const unsigned ndim, mu
             double basis_val = 1;
             for (unsigned idim = 0; idim < ndim; ++idim)
             {
+                const size_t idx_basis_dim = multidim_iterator_get_offset(iter_basis, idim);
                 const double *basis_values;
                 if (derivatives[idim] == 0)
                 {
-                    basis_values =
-                        basis_set_basis_values(basis_sets[idim], multidim_iterator_get_offset(iter_basis, idim));
+                    basis_values = basis_set_basis_values(basis_sets[idim], idx_basis_dim);
                 }
                 else
                 {
-                    basis_values =
-                        basis_set_basis_derivatives(basis_sets[idim], multidim_iterator_get_offset(iter_basis, idim));
+                    basis_values = basis_set_basis_derivatives(basis_sets[idim], idx_basis_dim);
                 }
                 basis_val *= basis_values[multidim_iterator_get_offset(iter_int, idim)];
             }

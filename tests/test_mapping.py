@@ -34,6 +34,10 @@ def test_coord_1d(int_order: int, basis_order: int, basis_type: BasisType) -> No
     coord_map = CoordinateMap(dofs, int_space)
 
     assert np.all(coord_map.values == dofs.reconstruct_at_integration_points(int_space))
+    assert np.all(
+        coord_map.gradient(0)
+        == dofs.reconstruct_derivative_at_integration_points(int_space, idim=[0])
+    )
 
 
 _TEST_ORDERS_2D = ((1, 1), (2, 3), (10, 3), (10, 10))
@@ -73,6 +77,14 @@ def test_coord_2d(
     coord_map = CoordinateMap(dofs, int_space)
 
     assert np.all(coord_map.values == dofs.reconstruct_at_integration_points(int_space))
+    assert np.all(
+        coord_map.gradient(0)
+        == dofs.reconstruct_derivative_at_integration_points(int_space, idim=[0])
+    )
+    assert np.all(
+        coord_map.gradient(1)
+        == dofs.reconstruct_derivative_at_integration_points(int_space, idim=[1])
+    )
 
 
 _TEST_ORDERS_3D = (
@@ -124,3 +136,29 @@ def test_coord_3d(
     coord_map = CoordinateMap(dofs, int_space)
 
     assert np.all(coord_map.values == dofs.reconstruct_at_integration_points(int_space))
+    assert np.all(
+        coord_map.gradient(0)
+        == dofs.reconstruct_derivative_at_integration_points(int_space, idim=[0])
+    )
+    assert np.all(
+        coord_map.gradient(1)
+        == dofs.reconstruct_derivative_at_integration_points(int_space, idim=[1])
+    )
+    assert np.all(
+        coord_map.gradient(2)
+        == dofs.reconstruct_derivative_at_integration_points(int_space, idim=[2])
+    )
+
+
+# def test_space_map_2_to_2(n_in: int, n_out: int, btype: BasisType) -> None:
+#     """Test that a 2D -> 2D space map works."""
+#     # Create the integration space
+#     int_space = IntegrationSpace(IntegrationSpecs(n_in + 1), IntegrationSpecs(n_in - 1))
+#     # Create the function space
+#     func_space = FunctionSpace(BasisSpecs(btype, n_out - 1),
+# BasisSpecs(btype, n_out + 1))
+#     # Create the
+
+
+if __name__ == "__main__":
+    test_coord_1d(6, 6, BasisType.BERNSTEIN)

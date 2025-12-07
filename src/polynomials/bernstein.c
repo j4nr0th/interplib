@@ -92,11 +92,28 @@ void bernstein_interpolation_value_derivative_matrix(const unsigned n_in,
         out_value[0 * n + i_pos] = out_derivative[0 * n + i_pos] * a;
 
         // Convert the order n - 1 from the derivative output into the derivative in place
-        for (unsigned i = n; i > 0; --i)
+        out_derivative[n * n_in + i_pos] = n * out_derivative[(n - 1) * n_in + i_pos];
+        for (unsigned i = n - 1; i > 0; --i)
         {
             out_derivative[i * n_in + i_pos] =
                 n * (out_derivative[i * n_in + i_pos] - out_derivative[(i - 1) * n_in + i_pos]);
         }
-        out_derivative[0 * n_in + i_pos] = 1.0;
+        out_derivative[0 * n_in + i_pos] *= n;
+        // if (i_pos == n_in / 2)
+        // {
+        //     printf("Computed Bernstein basis at i_pos = %u (t = %f):", i_pos, x);
+        //     for (unsigned i = 0; i < n + 1; ++i)
+        //     {
+        //         printf(" %f", out_value[i * n_in + i_pos]);
+        //     }
+        //     printf("\n");
+        //
+        //     printf("Computed Bernstein basis derivative at i_pos = %u (t = %f):", i_pos, x);
+        //     for (unsigned i = 0; i < n + 1; ++i)
+        //     {
+        //         printf(" %f", out_derivative[i * n_in + i_pos]);
+        //     }
+        //     printf("\n");
+        // }
     }
 }

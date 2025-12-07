@@ -51,7 +51,7 @@ static inline const double *basis_set_derivatives_all(const basis_set_t *this)
 static inline const double *basis_set_basis_derivatives(const basis_set_t *this, const unsigned index)
 {
     ASSERT(index <= this->spec.order, "Index was out of bounds.");
-    return this->_data + index * (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
+    return this->_data + (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
 }
 
 typedef struct basis_set_registry_t basis_set_registry_t;
