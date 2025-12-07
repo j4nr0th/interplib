@@ -201,8 +201,8 @@ static PyObject *coordinate_map_gradient(PyObject *self, PyTypeObject *defining_
         dims[idim] = dim_size;
     }
 
-    PyArrayObject *const res = (PyArrayObject *)PyArray_SimpleNewFromData(this->ndim, dims, NPY_DOUBLE,
-                                                                          (void *)(this->values + total_cnt * idx));
+    PyArrayObject *const res = (PyArrayObject *)PyArray_SimpleNewFromData(
+        this->ndim, dims, NPY_DOUBLE, (void *)(this->values + total_cnt * (idx + 1)));
     PyMem_Free(dims);
     if (!res)
     {
@@ -294,6 +294,13 @@ static void space_map_object_dealloc(PyObject *self)
 static double compute_metric_determinant(const unsigned ndims, double metric_tensor[ndims][ndims],
                                          unsigned pivoted[ndims])
 {
+    if (ndims == 1)
+        return fabs(metric_tensor[0][0]);
+
+    // Initialize the pivoted array
+    for (unsigned i = 0; i < ndims; ++i)
+        pivoted[i] = i;
+
     double det = 1;
     for (unsigned i = 0; i < ndims; ++i)
     {
@@ -350,14 +357,14 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         PyErr_SetString(PyExc_TypeError, "SpaceMap takes no keyword arguments.");
         return NULL;
     }
-    const unsigned n_coords = PyTuple_GET_SIZE(args);
-    if (n_coords == 0)
+    const unsigned n_maps = PyTuple_GET_SIZE(args);
+    if (n_maps == 0)
     {
         PyErr_SetString(PyExc_TypeError, "SpaceMap requires at least one argument.");
         return NULL;
     }
 
-    for (unsigned i = 0; i < n_coords; ++i)
+    for (unsigned i = 0; i < n_maps; ++i)
     {
         PyObject *const o = PyTuple_GET_ITEM(args, i);
         if (!PyObject_TypeCheck(o, state->coordinate_mapping_type))
@@ -368,14 +375,14 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         }
     }
 
-    space_map_object *const this = (space_map_object *)subtype->tp_alloc(subtype, n_coords);
+    space_map_object *const this = (space_map_object *)subtype->tp_alloc(subtype, n_maps);
     if (!this)
         return NULL;
     // Zero initialize
     this->ndim = 0;
     this->int_specs = NULL;
     this->determinant = NULL;
-    for (unsigned i = 0; i < n_coords; ++i)
+    for (unsigned i = 0; i < n_maps; ++i)
         this->maps[i] = NULL;
 
     // Copy the integration space from the first space, then check all others comply
@@ -394,7 +401,7 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
     this->maps[0] = first_map;
     Py_INCREF(first_map);
 
-    for (unsigned i = 1; i < n_coords; ++i)
+    for (unsigned i = 1; i < n_maps; ++i)
     {
         coordinate_map_object *const map = (coordinate_map_object *)PyTuple_GET_ITEM(args, i);
         if (map->ndim != this->ndim)
@@ -406,6 +413,7 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
             Py_DECREF(this);
             return NULL;
         }
+
         if (map->ndim != first_map->ndim)
         {
             PyErr_Format(
@@ -416,6 +424,7 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
             Py_DECREF(this);
             return NULL;
         }
+
         for (unsigned idim = 0; idim < this->ndim; ++idim)
         {
             if (map->int_specs[idim].order != first_map->int_specs[idim].order ||
@@ -448,14 +457,15 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
 
     // Allocate work arrays
     const unsigned n_dim_in = this->ndim;
-    const unsigned n_dim_out = n_coords;
-    double *const metric_tensor = PyMem_RawMalloc(sizeof(*metric_tensor) * n_dim_out * n_dim_out);
+    const unsigned n_dim_out = n_maps;
+    double *const metric_tensor = PyMem_RawMalloc(sizeof(*metric_tensor) * n_dim_in * n_dim_in);
     if (!metric_tensor)
     {
         PyMem_Free(determinant);
         Py_DECREF(this);
         return NULL;
     }
+
     unsigned *const pivoted = PyMem_RawMalloc(sizeof(*pivoted) * this->ndim);
     if (!pivoted)
     {
@@ -471,25 +481,25 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         // Get the index of the point
         const size_t i_pt = multidim_iterator_get_flat_index(it);
 
-        for (unsigned idim = 0; idim < n_dim_out; ++idim)
+        for (unsigned idim = 0; idim < n_dim_in; ++idim)
         {
             // Exploit symmetry
             for (unsigned jdim = 0; jdim < idim + 1; ++jdim)
             {
                 double metric_value = 0;
-#pragma omp simd reduction(+ : metric_value)
-                for (unsigned k = 0; k < n_dim_in; ++k)
+                // #pragma omp simd reduction(+ : metric_value)
+                for (unsigned k = 0; k < n_dim_out; ++k)
                 {
                     metric_value += this->maps[k]->values[(jdim + 1) * total_points + i_pt] *
                                     this->maps[k]->values[(idim + 1) * total_points + i_pt];
                 }
                 // Symmetry to the rescue!
-                metric_tensor[idim * n_dim_out + jdim] = metric_value;
-                metric_tensor[jdim * n_dim_out + idim] = metric_value;
+                metric_tensor[idim * n_dim_in + jdim] = metric_value;
+                metric_tensor[jdim * n_dim_in + idim] = metric_value;
             }
         }
 
-        determinant[i_pt] = compute_metric_determinant(n_dim_out, (double (*)[n_dim_out])metric_tensor, pivoted);
+        determinant[i_pt] = compute_metric_determinant(n_dim_in, (double (*)[n_dim_in])metric_tensor, pivoted);
 
         multidim_iterator_advance(it, this->ndim - 1, 1);
     }

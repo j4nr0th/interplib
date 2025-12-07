@@ -28,7 +28,7 @@ interp_result_t legendre_basis_create(basis_set_t **out, const basis_spec_t spec
         for (unsigned i_deriv = 1; i_deriv <= spec.order; ++i_deriv)
         {
             // Use recurrence formula for subsequent derivatives
-            deriv = i_deriv * derivatives[i_pt + (i_deriv - 1) * (rule->n_nodes)] + node * deriv;
+            deriv = i_deriv * values[i_pt + (i_deriv - 1) * (rule->n_nodes)] + node * deriv;
             derivatives[i_pt + i_deriv * (rule->n_nodes)] = deriv;
         }
     }

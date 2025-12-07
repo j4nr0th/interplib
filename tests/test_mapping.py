@@ -9,6 +9,7 @@ from interplib._interp import (
     FunctionSpace,
     IntegrationSpace,
     IntegrationSpecs,
+    SpaceMap,
 )
 from interplib.enum_type import BasisType
 
@@ -150,15 +151,67 @@ def test_coord_3d(
     )
 
 
-# def test_space_map_2_to_2(n_in: int, n_out: int, btype: BasisType) -> None:
-#     """Test that a 2D -> 2D space map works."""
-#     # Create the integration space
-#     int_space = IntegrationSpace(IntegrationSpecs(n_in + 1), IntegrationSpecs(n_in - 1))
-#     # Create the function space
-#     func_space = FunctionSpace(BasisSpecs(btype, n_out - 1),
-# BasisSpecs(btype, n_out + 1))
-#     # Create the
+@pytest.mark.parametrize("n_int", (1, 2, 4))
+@pytest.mark.parametrize("n_b", (2, 4))
+@pytest.mark.parametrize("btype", BasisType)
+def test_space_map_2_to_2(n_int: int, n_b: int, btype: BasisType) -> None:
+    """Test that a 2D -> 2D space map works."""
+    # Create the integration space
+    int_space = IntegrationSpace(IntegrationSpecs(n_int + 1), IntegrationSpecs(n_int - 1))
+    # Create the function space
+    func_space = FunctionSpace(BasisSpecs(btype, n_b - 1), BasisSpecs(btype, n_b + 1))
+    # Create the DoFs for coordinates
+    dofs_1 = DegreesOfFreedom(func_space)
+    dofs_2 = DegreesOfFreedom(func_space)
+    # Set DoFs to random values for fun!
+    rng = np.random.default_rng(1 + n_int**2 + n_b * 3)
+    dofs_1.values = rng.random(dofs_1.values.shape)
+    dofs_2.values = rng.random(dofs_2.values.shape)
+    # Create the coordinate maps
+    map_1 = CoordinateMap(dofs_1, int_space)
+    map_2 = CoordinateMap(dofs_2, int_space)
+    det_real = map_1.gradient(0) * map_2.gradient(1) - map_1.gradient(1) * map_2.gradient(
+        0
+    )
+    # Make the space map
+    print("Crashing this code...", end="")
+    smap = SpaceMap(map_1, map_2)
+    print(" with no survivors!")
+    # Check that the determinant checks out
+    det_smap = smap.determinant
+    assert pytest.approx(det_smap) == np.abs(det_real)
 
 
-if __name__ == "__main__":
-    test_coord_1d(6, 6, BasisType.BERNSTEIN)
+@pytest.mark.parametrize("n_int", (1, 2, 4))
+@pytest.mark.parametrize("n_b", (2, 4))
+@pytest.mark.parametrize("btype", BasisType)
+def test_space_map_1_to_3(n_int: int, n_b: int, btype: BasisType) -> None:
+    """Test that a 1D -> 3D space map works.
+
+    This is equivalent to having a curve in 1D space.
+    """
+    # Create the integration space
+    int_space = IntegrationSpace(IntegrationSpecs(n_int))
+    # Create the function space
+    func_space = FunctionSpace(BasisSpecs(btype, n_b))
+    # Create the DoFs for coordinates
+    dofs_1 = DegreesOfFreedom(func_space)
+    dofs_2 = DegreesOfFreedom(func_space)
+    dofs_3 = DegreesOfFreedom(func_space)
+    # Set DoFs to random values for fun!
+    rng = np.random.default_rng(1 + n_int**2 + n_b * 3)
+    dofs_1.values = rng.random(dofs_1.values.shape)
+    dofs_2.values = rng.random(dofs_2.values.shape)
+    dofs_3.values = rng.random(dofs_3.values.shape)
+    # Create the coordinate maps
+    map_1 = CoordinateMap(dofs_1, int_space)
+    map_2 = CoordinateMap(dofs_2, int_space)
+    map_3 = CoordinateMap(dofs_3, int_space)
+    det_real = map_1.gradient(0) ** 2 + map_2.gradient(0) ** 2 + map_3.gradient(0) ** 2
+    # Make the space map
+    print("Crashing this code...", end="")
+    smap = SpaceMap(map_1, map_2, map_3)
+    print(" with no survivors!")
+    # Check that the determinant checks out
+    det_smap = smap.determinant
+    assert pytest.approx(det_smap) == np.abs(det_real)

@@ -567,6 +567,13 @@ static int *reconstruction_derivative_indices(const unsigned ndim, PyObject *py_
             Py_DECREF(seq);
             return NULL;
         }
+        if (idx < 0 || idx >= ndim)
+        {
+            PyErr_Format(PyExc_ValueError, "Expected an index between 0 and %u, but got %zd.", ndim - 1, idx);
+            PyMem_Free(indices);
+            Py_DECREF(seq);
+            return NULL;
+        }
         if (indices[idx] != 0)
         {
             PyErr_Format(PyExc_ValueError, "Expected each index to appear only once, but got it twice at index %zd.",
