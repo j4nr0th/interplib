@@ -29,7 +29,10 @@ def reconstruct(
             raise ValueError("All input coordinate arrays must have the same shape.")
 
     output = (
-        dof.function_space.evaluate(*x).reshape((-1, dof.n_dofs)) * dof.values.flatten()
+        dof.function_space.evaluate(
+            *(np.ascontiguousarray(v, np.double) for v in x)
+        ).reshape((-1, dof.n_dofs))
+        * dof.values.flatten()
     )
     return np.sum(output, axis=-1).reshape(x[0].shape)
 

@@ -1,0 +1,265 @@
+"""Types to simplify specifying domains."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import numpy as np
+import numpy.typing as npt
+
+from interplib._interp import (
+    DEFAULT_BASIS_REGISTRY,
+    DEFAULT_INTEGRATION_REGISTRY,
+    BasisRegistry,
+    BasisSpecs,
+    CoordinateMap,
+    DegreesOfFreedom,
+    FunctionSpace,
+    IntegrationRegistry,
+    IntegrationSpace,
+    IntegrationSpecs,
+    SpaceMap,
+    compute_mass_matrix,
+)
+from interplib.degrees_of_freedom import reconstruct
+from interplib.enum_type import BasisType
+
+
+@dataclass(frozen=True)
+class HypercubeDomain:
+    """Base type for all domains."""
+
+    dofs: tuple[DegreesOfFreedom, ...]
+
+    def __init__(self, *dofs: DegreesOfFreedom) -> None:
+        if not len(dofs):
+            raise ValueError("At least one coordinate must have its DoFs specified.")
+
+        fs: FunctionSpace | None = None
+        for i, d in enumerate(dofs):
+            if type(dofs) is None:
+                raise TypeError(
+                    f"Argument {i} was not {DegreesOfFreedom}, but {type(dofs)}."
+                )
+            if fs is None:
+                fs = d.function_space
+            elif d.function_space != fs:
+                raise ValueError(
+                    f"Function spaces of the DoFs {i} does not match the rest!"
+                )
+
+        object.__setattr__(self, "dofs", dofs)
+
+    @property
+    def ndim_physical(self) -> int:
+        """Number of physical dimensions of the domain."""
+        return len(self.dofs)
+
+    @property
+    def ndim_reference(self) -> int:
+        """Number of reference dimensions of the domain."""
+        return len(self.dofs[0].shape)
+
+    def __call__(
+        self,
+        space: IntegrationSpace,
+        /,
+        *,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+    ) -> SpaceMap:
+        """Create a space map based on the integration space."""
+        return SpaceMap(
+            *(
+                CoordinateMap(dof, space, integration_registry, basis_registry)
+                for dof in self.dofs
+            )
+        )
+
+    @property
+    def endpoints(self) -> tuple[npt.NDArray[np.double], ...]:
+        """Return the end points of the domain."""
+        int_space = IntegrationSpace(
+            *(
+                IntegrationSpecs(1, "gauss-lobatto")
+                for _idim in range(self.ndim_reference)
+            )
+        )
+        return tuple(
+            dof.reconstruct_at_integration_points(int_space) for dof in self.dofs
+        )
+
+    def compute_size(
+        self,
+        int_space: IntegrationSpace | None = None,
+        *,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+    ) -> float:
+        """Compute the size of the domain."""
+        if int_space is None:
+            int_space = IntegrationSpace(
+                *(
+                    IntegrationSpecs((order + 1) // 2)
+                    for order in self.dofs[0].function_space.orders
+                )
+            )
+        smap = self(
+            int_space,
+            integration_registry=integration_registry,
+            basis_registry=basis_registry,
+        )
+        return float(np.sum(int_space.weights(integration_registry) * smap.determinant))
+
+    def sample(self, *x: npt.NDArray[np.double]) -> tuple[npt.NDArray[np.double], ...]:
+        """Sample coordinates in the physical domain.
+
+        Parameters
+        ----------
+        *x : array
+            Arrays of coordinate positions to evaluate the points in domain at.
+
+        Returns
+        -------
+        tuple of array
+            Arrays with the shape of ``x``, containing values of coordinates
+            at the specified points.
+        """
+        return tuple(reconstruct(dof, *x) for dof in self.dofs)
+
+    @property
+    def function_space(self) -> FunctionSpace:
+        """Function space used by all the DoFs."""
+        return self.dofs[0].function_space
+
+
+@dataclass(frozen=True)
+class Line(HypercubeDomain):
+    """One dimensional object connecting two points."""
+
+    knots: npt.NDArray[np.double]
+
+    def __init__(self, *knots: npt.ArrayLike) -> None:
+        pts = np.array(knots)
+        if pts.ndim != 2:
+            raise ValueError("Line must be specified by an array of points.")
+        if pts.shape[0] < 2:
+            raise ValueError("At least two points must be given for a line.")
+        ndim = pts.shape[1]
+        basis = BasisSpecs(BasisType.BERNSTEIN, pts.shape[0] - 1)
+        func_space = FunctionSpace(basis)
+        dofs: list[DegreesOfFreedom] = list()
+        for idim in range(ndim):
+            dofs.append(DegreesOfFreedom(func_space, pts[:, idim]))
+        object.__setattr__(self, "knots", pts)
+        super().__init__(*dofs)
+
+    @property
+    def start(self) -> npt.NDArray[np.double]:
+        """The start point of the line."""
+        return self.knots[0, :]
+
+    @property
+    def end(self) -> npt.NDArray[np.double]:
+        """The end point of the line."""
+        return self.knots[-1, :]
+
+
+def _transfer_line_dofs(
+    dofs_in: DegreesOfFreedom, fs_out: FunctionSpace, int_space: IntegrationSpace
+) -> DegreesOfFreedom:
+    """Transfer line DoFs to a new function space."""
+    # Function space can be re-interpreted as being 2D
+    fs_in_new = FunctionSpace(
+        dofs_in.function_space.basis_specs[0], BasisSpecs(BasisType.BERNSTEIN, 0)
+    )
+    # Mass matrix to transfer primal in -> dual out
+    mat_mixed = compute_mass_matrix(fs_in_new, fs_out, int_space)
+    dual_out = mat_mixed @ dofs_in.values
+    # Mass matrix to transfer dual out -> primal out
+    mat_mass = compute_mass_matrix(fs_out, fs_out, int_space)
+    vals = np.linalg.solve(mat_mass, dual_out)
+    # Return the new DoFs
+    return DegreesOfFreedom(fs_out, vals)
+
+
+class Quad(HypercubeDomain):
+    """Two dimensional object with four corners."""
+
+    def __init__(self, bottom: Line, right: Line, top: Line, left: Line) -> None:
+        # Check we're dealing with the real types
+        for line in (bottom, right, top, left):
+            if type(line) is not Line:
+                raise TypeError(f"Only {Line} objects can be used as inputs for a Quad")
+
+        # Check the surface is closed
+        if np.all(bottom.end != right.start):
+            raise ValueError("The right side does not start where the bottom ends.")
+        if np.all(right.end != top.start):
+            raise ValueError("The top side does not start where the right ends.")
+        if np.all(top.end != left.start):
+            raise ValueError("The left side does not start where the top ends.")
+        if np.all(left.end != bottom.start):
+            raise ValueError("The bottom side does not start where the left ends.")
+
+        # Determine the function spaces we're dealing with
+        fs_b = bottom.function_space
+        fs_r = right.function_space
+        fs_t = top.function_space
+        fs_l = left.function_space
+        assert fs_b.dimension == 1
+        assert fs_r.dimension == 1
+        assert fs_t.dimension == 1
+        assert fs_l.dimension == 1
+
+        # Find the highest orders we must represent
+        max_h = max((1, fs_b.orders[0], fs_t.orders[0]))  # horizontal edges
+        max_v = max((1, fs_r.orders[0], fs_l.orders[0]))  # vertical edges
+
+        fs_quad = FunctionSpace(
+            BasisSpecs(BasisType.LAGRANGE_UNIFORM, max_h),
+            BasisSpecs(BasisType.LAGRANGE_UNIFORM, max_v),
+        )
+
+        xh = np.linspace(-1, +1, max_h + 1)
+        xv = np.linspace(-1, +1, max_v + 1)
+
+        coords_c1 = bottom.sample(xh)
+        coords_c2 = right.sample(xv)
+        coords_c3 = top.sample(np.flip(xh))
+        coords_c4 = left.sample(np.flip(xv))
+
+        gx, gy = np.meshgrid(xh, xv)  # TODO: check if this gives correct results
+
+        new_dofs: list[DegreesOfFreedom] = list()
+
+        p_bl = bottom.start
+        p_br = right.start
+        p_tr = top.start
+        p_tl = left.start
+        # TODO: fix
+        for c1, c2, c3, c4, bl, br, tr, tl in zip(
+            coords_c1,
+            coords_c2,
+            coords_c3,
+            coords_c4,
+            p_bl,
+            p_br,
+            p_tr,
+            p_tl,
+            strict=True,
+        ):
+            dof_vals = (
+                c1[None, :] * (1 - gy) / 2
+                + c2[:, None] * (1 + gx) / 2
+                + c3[None, :] * (1 + gy) / 2
+                + c4[:, None] * (1 - gx) / 2
+            ) - (
+                bl * (1 - gy) / 2 * (1 - gx) / 2
+                + br * (1 - gy) / 2 * (1 + gx) / 2
+                + tr * (1 + gy) / 2 * (1 + gx) / 2
+                + tl * (1 + gy) / 2 * (1 - gx) / 2
+            )
+            new_dofs.append(DegreesOfFreedom(fs_quad, dof_vals.T))
+
+        super().__init__(*new_dofs)

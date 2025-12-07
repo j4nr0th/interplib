@@ -33,8 +33,6 @@ dev = [
     "nox",
     "pre-commit",
     "codespell",
-    "trame",
-    "trame-vtk",
     "trame-vuetify",
     "tomli",
 ]
@@ -44,7 +42,6 @@ docs = [
     "sphinx-favicon",
     "sphinx-design",
     "sphinx-gallery",
-    "pyvista[jupyter,trame]",
     "pypandoc",
     "pytest-sphinx",
     "sphinx-autobuild",
@@ -53,6 +50,7 @@ docs = [
     "sphinxcontrib-websupport",
     "sphinxcontrib-asciinema",
     "jupyter-sphinx",
+    "matplotlib",
 ]
 
 

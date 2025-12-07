@@ -24,6 +24,10 @@ from interplib.degrees_of_freedom import (
 )
 from interplib.degrees_of_freedom import reconstruct as reconstruct
 
+# Domains
+from interplib.domains import Line as Line
+from interplib.domains import Quad as Quad
+
 # Enum types
 from interplib.enum_type import BasisType as BasisType
 from interplib.enum_type import IntegrationMethod as IntegrationMethod
