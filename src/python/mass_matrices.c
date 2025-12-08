@@ -2,31 +2,37 @@
 #include "basis_objects.h"
 #include "function_space_objects.h"
 #include "integration_objects.h"
+#include "mappings.h"
 
-PyDoc_STRVAR(compute_mass_matrix_docstring,
-             "compute_mass_matrix(space_in: FunctionSpace, space_out: FunctionSpace, integration_space: "
-             "IntegrationSpace, *,    integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, "
-             "basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,) -> numpy.typing.NDArray[numpy.double]\n"
-             "Compute the mass matrix between two function spaces.\n"
-             "\n"
-             "Parameters\n"
-             "----------\n"
-             "space_in : FunctionSpace\n"
-             "Function space for the input functions.\n"
-             "space_out : FunctionSpace\n"
-             "Function space for the output functions.\n"
-             "integration_space : IntegrationSpace\n"
-             "Integration space used to compute the mass matrix.\n"
-             "integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
-             "Registry used to retrieve the integration rules.\n"
-             "basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY\n"
-             "Registry used to retrieve the basis specifications.\n"
-             "\n"
-             "Returns\n"
-             "-------\n"
-             "array\n"
-             "Mass matrix as a 2D array, which maps the primal degress of freedom of the input\n"
-             "function space to dual degrees of freedom of the output function space.\n");
+PyDoc_STRVAR(
+    compute_mass_matrix_docstring,
+    "compute_mass_matrix(space_in: FunctionSpace, space_out: FunctionSpace, integration: "
+    "IntegrationSpace | SpaceMap, /, *, integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, "
+    "basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY) -> numpy.typing.NDArray[numpy.double]\n"
+    "Compute the mass matrix between two function spaces.\n"
+    "\n"
+    "Parameters\n"
+    "----------\n"
+    "space_in : FunctionSpace\n"
+    "    Function space for the input functions.\n"
+    "space_out : FunctionSpace\n"
+    "    Function space for the output functions.\n"
+    "integration : IntegrationSpace or SpaceMap\n"
+    "    Integration space used to compute the mass matrix or a space mapping.\n"
+    "    If the integration space is provided, the integration is done on the\n"
+    "    reference domain. If the mapping is defined instead, the integration\n"
+    "    space of the mapping is used, along with the integration being done\n"
+    "    on the mapped domain instead.\n"
+    "integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+    "    Registry used to retrieve the integration rules.\n"
+    "basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY\n"
+    "    Registry used to retrieve the basis specifications.\n"
+    "\n"
+    "Returns\n"
+    "-------\n"
+    "array\n"
+    "    Mass matrix as a 2D array, which maps the primal degress of freedom of the input\n"
+    "    function space to dual degrees of freedom of the output function space.\n");
 
 typedef struct
 {
@@ -39,6 +45,7 @@ typedef struct
     const basis_set_t **basis_in;
     unsigned n_dim_out;
     const basis_set_t **basis_out;
+    const double *determinant;
 } mass_matrix_resources_t;
 
 static void mass_matrix_release_resources(mass_matrix_resources_t *resources,
@@ -61,7 +68,7 @@ static void mass_matrix_release_resources(mass_matrix_resources_t *resources,
 }
 
 static int mass_matrix_create_resources(const function_space_object *space_in, const function_space_object *space_out,
-                                        const integration_space_object *integration_space,
+                                        const unsigned n_rules, const integration_spec_t *p_rules, const double *p_det,
                                         integration_rule_registry_t *integration_registry,
                                         basis_set_registry_t *basis_registry, mass_matrix_resources_t *resources)
 {
@@ -69,10 +76,9 @@ static int mass_matrix_create_resources(const function_space_object *space_in, c
     // Create iterators for function spaces and integration rules
     res.iter_in = function_space_iterator(space_in);
     res.iter_out = function_space_iterator(space_out);
-    res.iter_int = integration_space_iterator(integration_space);
-    const Py_ssize_t n_rules = Py_SIZE(integration_space);
+    res.iter_int = integration_specs_iterator(n_rules, p_rules);
     // Get integration rules and basis sets
-    res.rules = python_integration_rules_get(n_rules, integration_space->specs, integration_registry);
+    res.rules = python_integration_rules_get(n_rules, p_rules, integration_registry);
     res.n_rules = n_rules;
     const Py_ssize_t n_basis_in = Py_SIZE(space_in);
     res.basis_in = res.rules ? python_basis_sets_get(n_basis_in, space_in->specs, res.rules, basis_registry) : NULL;
@@ -85,6 +91,7 @@ static int mass_matrix_create_resources(const function_space_object *space_in, c
         mass_matrix_release_resources(&res, integration_registry, basis_registry);
         return -1;
     }
+    res.determinant = p_det;
     *resources = res;
     return 0;
 }
@@ -101,12 +108,13 @@ static int function_spaces_match(const function_space_object *space_in, const fu
     // Space contents might match instead
     for (unsigned i = 0; i < n_space_dim; ++i)
     {
-        if ((space_in->specs[i].order != space_out->specs[i].order) ||
-            (space_in->specs[i].type != space_out->specs[i].type))
+        if (space_in->specs[i].order != space_out->specs[i].order ||
+            space_in->specs[i].type != space_out->specs[i].type)
             return 0;
     }
     return 1;
 }
+
 static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, const Py_ssize_t nargs,
                                      const PyObject *kwnames)
 {
@@ -115,47 +123,86 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
         return NULL;
 
     const function_space_object *space_in, *space_out;
-    const integration_space_object *integration_space;
+    PyObject *py_integration;
     const integration_registry_object *integration_registry =
         (const integration_registry_object *)state->registry_integration;
     const basis_registry_object *basis_registry = (const basis_registry_object *)state->registry_basis;
 
     if (parse_arguments_check(
             (cpyutl_argument_t[]){
-                {.type = CPYARG_TYPE_PYTHON, .p_val = &space_in, .type_check = state->function_space_type},
-                {.type = CPYARG_TYPE_PYTHON, .p_val = &space_out, .type_check = state->function_space_type},
-                {.type = CPYARG_TYPE_PYTHON, .p_val = &integration_space, .type_check = state->integration_space_type},
-                {.type = CPYARG_TYPE_PYTHON,
-                 .p_val = &integration_registry,
-                 .type_check = state->integration_registry_type,
-                 .optional = 1,
-                 .kwname = "integration_registry",
-                 .kw_only = 1},
-                {.type = CPYARG_TYPE_PYTHON,
-                 .p_val = &basis_registry,
-                 .type_check = state->basis_registry_type,
-                 .optional = 1,
-                 .kwname = "basis_registry",
-                 .kw_only = 1},
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &space_in,
+                    .type_check = state->function_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &space_out,
+                    .type_check = state->function_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &py_integration,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &integration_registry,
+                    .type_check = state->integration_registry_type,
+                    .optional = 1,
+                    .kwname = "integration_registry",
+                    .kw_only = 1,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &basis_registry,
+                    .type_check = state->basis_registry_type,
+                    .optional = 1,
+                    .kwname = "basis_registry",
+                    .kw_only = 1,
+                },
                 {},
             },
             args, nargs, kwnames) < 0)
         return NULL;
 
+    unsigned n_int_specs;
+    const integration_spec_t *p_int_specs;
+    const double *p_det;
+    if (PyObject_TypeCheck(py_integration, state->integration_space_type))
+    {
+        const integration_space_object *const integration_space = (const integration_space_object *)py_integration;
+        n_int_specs = Py_SIZE(integration_space);
+        p_int_specs = integration_space->specs;
+        p_det = NULL;
+    }
+    else if (PyObject_TypeCheck(py_integration, state->space_mapping_type))
+    {
+        const space_map_object *const space_map = (const space_map_object *)py_integration;
+        n_int_specs = space_map->ndim;
+        p_int_specs = space_map->int_specs;
+        p_det = space_map->determinant;
+    }
+    else
+    {
+        PyErr_Format(PyExc_TypeError, "Integration space or space map must be passed, instead %s object was passed.",
+                     Py_TYPE(py_integration)->tp_name);
+        return NULL;
+    }
+
     const unsigned n_space_dim = Py_SIZE(space_in);
-    if (Py_SIZE(space_out) != n_space_dim || Py_SIZE(integration_space) != n_space_dim)
+    if (Py_SIZE(space_out) != n_space_dim || n_int_specs != n_space_dim)
     {
         PyErr_Format(
             PyExc_ValueError,
             "Function spaces must have the same dimensionality (space in: %u, space out: %u, integration space: %u).",
-            (unsigned)Py_SIZE(space_in), (unsigned)Py_SIZE(space_out), (unsigned)Py_SIZE(integration_space));
+            (unsigned)Py_SIZE(space_in), (unsigned)Py_SIZE(space_out), n_int_specs);
         return NULL;
     }
 
     // Create resources
     mass_matrix_resources_t resources = {};
-    if (mass_matrix_create_resources(space_in, space_out, integration_space, integration_registry->registry,
-                                     basis_registry->registry, &resources))
+    if (mass_matrix_create_resources(space_in, space_out, n_int_specs, p_int_specs, p_det,
+                                     integration_registry->registry, basis_registry->registry, &resources))
         return NULL;
 
     const npy_intp dims[2] = {(npy_intp)multidim_iterator_total_size(resources.iter_out),
@@ -187,7 +234,9 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
         while (!multidim_iterator_is_at_end(resources.iter_int))
         {
             // Compute weight and basis values for these outer product basis and integration
-            double weight = 1, basis_in = 1, basis_out = 1;
+            double weight =
+                resources.determinant ? resources.determinant[multidim_iterator_get_flat_index(resources.iter_int)] : 1;
+            double basis_in = 1, basis_out = 1;
             for (unsigned idim = 0; idim < n_space_dim; ++idim)
             {
                 const size_t integration_point_idx = multidim_iterator_get_offset(resources.iter_int, idim);
@@ -210,7 +259,7 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
         // Advance the input basis
         multidim_iterator_advance(resources.iter_in, n_space_dim - 1, 1);
         // If we've done enough input basis, we advance the output basis and reset the input iterator
-        if ((is_symmetric && (index_in == index_out)) || multidim_iterator_is_at_end(resources.iter_in))
+        if ((is_symmetric && index_in == index_out) || multidim_iterator_is_at_end(resources.iter_in))
         {
             multidim_iterator_advance(resources.iter_out, n_space_dim - 1, 1);
             multidim_iterator_set_to_start(resources.iter_in);

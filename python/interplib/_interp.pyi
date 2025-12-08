@@ -487,7 +487,33 @@ class FunctionSpace:
         """
         ...
 
-    # TODO: add function to get values at integration points
+    def values_at_integration_nodes(
+        self,
+        integration: IntegrationSpace,
+        /,
+        *,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+    ) -> npt.NDArray[np.double]:
+        """Return values of basis at integration points.
+
+        Parameters
+        ----------
+        integration : IntegrationSpace
+            Integration space, the nodes of which are used to evaluate basis at.
+
+        integration_registry : IntegrationRegistry, defaul: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to obtain the integration rules from.
+
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Registry used to look up basis values.
+
+        Returns
+        -------
+        array
+            Array of basis function values at the integration points locations.
+        """
+        ...
 
 @final
 class IntegrationSpace:
@@ -750,8 +776,8 @@ class SpaceMap:
 def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,
-    integration_space: IntegrationSpace,
-    space_map: SpaceMap | None = None,
+    integration: IntegrationSpace | SpaceMap,
+    /,
     *,
     integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
     basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
@@ -764,8 +790,12 @@ def compute_mass_matrix(
         Function space for the input functions.
     space_out : FunctionSpace
         Function space for the output functions.
-    integration_space : IntegrationSpace
-        Integration space used to compute the mass matrix.
+    integration : IntegrationSpace or SpaceMap
+        Integration space used to compute the mass matrix or a space mapping.
+        If the integration space is provided, the integration is done on the
+        reference domain. If the mapping is defined instead, the integration
+        space of the mapping is used, along with the integration being done
+        on the mapped domain instead.
     integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
         Registry used to retrieve the integration rules.
     basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY

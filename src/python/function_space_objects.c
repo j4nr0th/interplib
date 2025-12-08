@@ -1,6 +1,7 @@
 #include "function_space_objects.h"
 #include "../operations/multidim_iteration.h"
 #include "basis_objects.h"
+#include "integration_objects.h"
 
 function_space_object *function_space_object_create(PyTypeObject *type, const unsigned n_basis,
                                                     const basis_spec_t INTERPLIB_ARRAY_ARG(specs, static n_basis))
@@ -274,6 +275,200 @@ static PyObject *function_space_evaluate(PyObject *self, PyTypeObject *defining_
     return (PyObject *)out;
 }
 
+PyDoc_STRVAR(
+    function_space_values_at_integration_nodes_docstring,
+    "values_at_integration_nodes(integration: IntegrationSpace, /, *, integration_registry: IntegrationRegistry = "
+    "DEFAULT_INTEGRATION_REGISTRY, basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY) -> "
+    "numpy.typing.NDArray[numpy.double]\n"
+    "Return values of basis at integration points.\n"
+    "\n"
+    "Parameters\n"
+    "----------\n"
+    "integration : IntegrationSpace\n"
+    "    Integration space, the nodes of which are used to evaluate basis at.\n"
+    "\n"
+    "integration_registry : IntegrationRegistry, defaul: DEFAULT_INTEGRATION_REGISTRY\n"
+    "    Registry used to obtain the integration rules from.\n"
+    "\n"
+    "basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY\n"
+    "    Registry used to look up basis values.\n"
+    "\n"
+    "Returns\n"
+    "-------\n"
+    "array\n"
+    "    Array of basis function values at the integration points locations.\n");
+
+static PyObject *function_space_values_at_integration_nodes(PyObject *self, PyTypeObject *defining_class,
+                                                            PyObject *const *args, const Py_ssize_t nargs,
+                                                            const PyObject *kwnames)
+{
+    function_space_object *this;
+    const interplib_module_state_t *state;
+    if (ensure_function_space_state(self, defining_class, &this, &state) < 0)
+        return NULL;
+    integration_space_object *integration_space;
+    integration_registry_object *integration_registry = (integration_registry_object *)state->registry_integration;
+    basis_registry_object *basis_registry = (basis_registry_object *)state->registry_basis;
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &integration_space,
+                    .type_check = state->integration_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &integration_registry,
+                    .type_check = state->integration_registry_type,
+                    .kwname = "integration_registry",
+                    .kw_only = 1,
+                    .optional = 1,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &basis_registry,
+                    .type_check = state->basis_registry_type,
+                    .kwname = "basis_registry",
+                    .kw_only = 1,
+                    .optional = 1,
+                },
+                {},
+            },
+            args, nargs, kwnames) < 0)
+        return NULL;
+
+    const unsigned ndim = Py_SIZE(this);
+    if (ndim != Py_SIZE(integration_space))
+    {
+        PyErr_Format(PyExc_ValueError,
+                     "Function space and integration space must have the same number of dimensions (function space had "
+                     "%u, but integration space had %u).",
+                     ndim, (unsigned)Py_SIZE(integration_space));
+        return NULL;
+    }
+
+    npy_intp *const p_dim_out = PyMem_Malloc(2 * ndim * sizeof(*p_dim_out));
+    if (!p_dim_out)
+    {
+        return NULL;
+    }
+    // unsigned total_nodes_cnt = 1;
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+
+        const unsigned n_nodes = integration_space->specs[i].order + 1;
+        p_dim_out[i] = n_nodes;
+        // total_nodes_cnt *= n_nodes;
+    }
+    unsigned total_basis_cnt = 1;
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        const unsigned n_basis = this->specs[i].order + 1;
+        p_dim_out[i + ndim] = n_basis;
+        total_basis_cnt *= n_basis;
+    }
+
+    // Create the output array
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(2 * ndim, p_dim_out, NPY_DOUBLE);
+    PyMem_Free(p_dim_out);
+    if (!out)
+    {
+        return NULL;
+    }
+
+    // Create the iterators for the integration nodes and the basis
+    multidim_iterator_t *const iterator_nodes = integration_specs_iterator(ndim, integration_space->specs);
+    multidim_iterator_t *const iterator_basis = function_space_iterator(this);
+    if (!iterator_nodes || !iterator_basis)
+    {
+        PyMem_Free(iterator_basis);
+        PyMem_Free(iterator_nodes);
+        Py_DECREF(out);
+        return NULL;
+    }
+
+    const basis_set_t **const basis_sets = PyMem_Malloc(ndim * sizeof(*basis_sets));
+    if (!basis_sets)
+    {
+        PyMem_Free(iterator_basis);
+        PyMem_Free(iterator_nodes);
+        Py_DECREF(out);
+        return NULL;
+    }
+
+    for (unsigned idim = 0; idim < ndim; ++idim)
+    {
+        const integration_rule_t *int_rule;
+        interp_result_t res = integration_rule_registry_get_rule(integration_registry->registry,
+                                                                 integration_space->specs[idim], &int_rule);
+        if (res == INTERP_SUCCESS)
+        {
+            const basis_set_t *basis;
+            res = basis_set_registry_get_basis_set(basis_registry->registry, &basis, int_rule, this->specs[idim]);
+            // Release the rule
+            (void)integration_rule_registry_release_rule(integration_registry->registry, int_rule);
+            basis_sets[idim] = basis;
+        }
+
+        if (res != INTERP_SUCCESS)
+        {
+            // Release the basis acquired so far
+            for (unsigned jdim = 0; jdim < idim; ++jdim)
+            {
+                (void)basis_set_registry_release_basis_set(basis_registry->registry, basis_sets[jdim]);
+            }
+            PyMem_Free(basis_sets);
+            PyMem_Free(iterator_basis);
+            PyMem_Free(iterator_nodes);
+            Py_DECREF(out);
+            PyErr_Format(PyExc_ValueError, "Failed to get basis for dimension %u, reason: %s (%s)", idim,
+                         interp_error_str(res), interp_error_msg(res));
+            return NULL;
+        }
+    }
+
+    npy_double *const p_out = (npy_double *)PyArray_DATA(out);
+    multidim_iterator_set_to_start(iterator_basis);
+    while (!multidim_iterator_is_at_end(iterator_basis))
+    {
+        const size_t basis_idx = multidim_iterator_get_flat_index(iterator_basis);
+        npy_double *const ptr = p_out + basis_idx;
+
+        multidim_iterator_set_to_start(iterator_nodes);
+        while (!multidim_iterator_is_at_end(iterator_nodes))
+        {
+            double basis_value = 1;
+            for (unsigned idim = 0; idim < ndim; ++idim)
+            {
+                const double *basis =
+                    basis_set_basis_values(basis_sets[idim], multidim_iterator_get_offset(iterator_basis, idim));
+                basis_value *= basis[multidim_iterator_get_offset(iterator_nodes, idim)];
+            }
+
+            ptr[multidim_iterator_get_flat_index(iterator_nodes) * total_basis_cnt] = basis_value;
+
+            // Advance to the next node
+            multidim_iterator_advance(iterator_nodes, ndim - 1, 1);
+        }
+        // Next basis
+        multidim_iterator_advance(iterator_basis, ndim - 1, 1);
+    }
+
+    // Release all the basis now
+    for (unsigned idim = 0; idim < ndim; ++idim)
+    {
+        (void)basis_set_registry_release_basis_set(basis_registry->registry, basis_sets[idim]);
+    }
+    PyMem_Free(basis_sets);
+
+    // Release the iterators
+    PyMem_Free(iterator_basis);
+    PyMem_Free(iterator_nodes);
+
+    // We are done - return from the function
+    return (PyObject *)out;
+}
+
 PyDoc_STRVAR(function_space_type_docstring,
              "FunctionSpace(*specs: BasisSpec)\n"
              "Function space defined with basis.\n"
@@ -362,6 +557,12 @@ PyType_Spec function_space_type_spec = {
                  .ml_meth = (void *)function_space_evaluate,
                  .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
                  .ml_doc = function_space_evaluate_docstring,
+             },
+             {
+                 .ml_name = "values_at_integration_nodes",
+                 .ml_meth = (void *)function_space_values_at_integration_nodes,
+                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                 .ml_doc = function_space_values_at_integration_nodes_docstring,
              },
              {},
          }},

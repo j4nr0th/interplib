@@ -2,7 +2,12 @@
 
 import numpy as np
 import pytest
-from interplib._interp import BasisSpecs, FunctionSpace
+from interplib._interp import (
+    BasisSpecs,
+    FunctionSpace,
+    IntegrationSpace,
+    IntegrationSpecs,
+)
 
 
 def test_1d_function_space():
@@ -82,7 +87,28 @@ def test_3d_function_space():
     assert values_fs == pytest.approx(expected_values)
 
 
+def test_integration_points() -> None:
+    """Check that integration point values are same as those computed by evaluate."""
+    basis_specs1 = BasisSpecs("legendre", 4)
+    basis_specs2 = BasisSpecs("bernstein", 3)
+    basis_specs3 = BasisSpecs("lagrange-uniform", 6)
+    fs = FunctionSpace(basis_specs1, basis_specs2, basis_specs3)
+
+    int_space = IntegrationSpace(
+        IntegrationSpecs(5, "gauss"),
+        IntegrationSpecs(4, "gauss-lobatto"),
+        IntegrationSpecs(8, "gauss"),
+    )
+
+    nodes = int_space.nodes()
+    expected_values = fs.evaluate(*(nodes[i] for i in range(nodes.shape[0])))
+    computed_values = fs.values_at_integration_nodes(int_space)
+
+    assert expected_values == pytest.approx(computed_values)
+
+
 if __name__ == "__main__":
     test_1d_function_space()
     test_2d_function_space()
     test_3d_function_space()
+    test_integration_points()
