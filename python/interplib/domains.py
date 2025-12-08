@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Self
 
 import numpy as np
 import numpy.typing as npt
@@ -19,10 +20,10 @@ from interplib._interp import (
     IntegrationSpace,
     IntegrationSpecs,
     SpaceMap,
-    compute_mass_matrix,
 )
 from interplib.degrees_of_freedom import reconstruct
 from interplib.enum_type import BasisType
+from interplib.integration import Integrable, integrate_callable
 
 
 @dataclass(frozen=True)
@@ -132,6 +133,70 @@ class HypercubeDomain:
         """Function space used by all the DoFs."""
         return self.dofs[0].function_space
 
+    def integrate(
+        self,
+        fn: Integrable,
+        int_space: IntegrationSpace,
+        *,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+    ) -> float:
+        """Integrates the callable.
+
+        Parameters
+        ----------
+        fn : Integrable
+            Callable to integrate.
+
+        int_space : IntegrationSpace
+            Integration space to use for integration.
+
+        integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Integration registry to use for retrieving integration rules.
+
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Basis registry to use for retrieving basis values.
+
+        Returns
+        -------
+        float
+            Result of integrating the callable on the domain.
+        """
+        return integrate_callable(
+            fn,
+            int_space,
+            self(
+                int_space,
+                integration_registry=integration_registry,
+                basis_registry=basis_registry,
+            ),
+            registry=integration_registry,
+        )
+
+    def subregion(self, *ranges: tuple[float, float]) -> HypercubeDomain:
+        """Split self into a sub-region of the domain."""
+        n_dim_ref = self.ndim_reference
+        if len(ranges) < n_dim_ref:
+            raise ValueError(f"At most {n_dim_ref} pairs of divisions can be specified.")
+        limits: list[tuple[float, float]] = [(float(vl), float(vh)) for vl, vh in ranges]
+        while len(limits) < n_dim_ref:
+            limits.append((-1.0, +1.0))
+
+        shape = self.dofs[0].shape
+
+        grid = np.meshgrid(
+            *(np.linspace(vl, vh, n) for n, (vl, vh) in zip(shape, limits, strict=True)),
+            indexing="ij",
+        )
+        new_fs = FunctionSpace(
+            *(BasisSpecs(BasisType.LAGRANGE_UNIFORM, s - 1) for s in shape)
+        )
+        new_dofs: list[DegreesOfFreedom] = list()
+        for new_vals in self.sample(*grid):
+            new_dofs.append(DegreesOfFreedom(new_fs, new_vals))
+
+        return HypercubeDomain(*new_dofs)
+
 
 @dataclass(frozen=True)
 class Line(HypercubeDomain):
@@ -163,24 +228,6 @@ class Line(HypercubeDomain):
     def end(self) -> npt.NDArray[np.double]:
         """The end point of the line."""
         return self.knots[-1, :]
-
-
-def _transfer_line_dofs(
-    dofs_in: DegreesOfFreedom, fs_out: FunctionSpace, int_space: IntegrationSpace
-) -> DegreesOfFreedom:
-    """Transfer line DoFs to a new function space."""
-    # Function space can be re-interpreted as being 2D
-    fs_in_new = FunctionSpace(
-        dofs_in.function_space.basis_specs[0], BasisSpecs(BasisType.BERNSTEIN, 0)
-    )
-    # Mass matrix to transfer primal in -> dual out
-    mat_mixed = compute_mass_matrix(fs_in_new, fs_out, int_space)
-    dual_out = mat_mixed @ dofs_in.values
-    # Mass matrix to transfer dual out -> primal out
-    mat_mass = compute_mass_matrix(fs_out, fs_out, int_space)
-    vals = np.linalg.solve(mat_mass, dual_out)
-    # Return the new DoFs
-    return DegreesOfFreedom(fs_out, vals)
 
 
 class Quad(HypercubeDomain):
@@ -263,3 +310,19 @@ class Quad(HypercubeDomain):
             new_dofs.append(DegreesOfFreedom(fs_quad, dof_vals.T))
 
         super().__init__(*new_dofs)
+
+    @classmethod
+    def from_corners(
+        cls,
+        bottom_left: npt.ArrayLike,
+        bottom_right: npt.ArrayLike,
+        top_right: npt.ArrayLike,
+        top_left: npt.ArrayLike,
+    ) -> Self:
+        """Create a new (linear) Quad based on four corners."""
+        return cls(
+            bottom=Line(bottom_left, bottom_right),
+            right=Line(bottom_right, top_right),
+            top=Line(top_right, top_left),
+            left=Line(top_left, bottom_left),
+        )

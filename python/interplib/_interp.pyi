@@ -487,6 +487,8 @@ class FunctionSpace:
         """
         ...
 
+    # TODO: add function to get values at integration points
+
 @final
 class IntegrationSpace:
     """Integration space defined with integration rules.
@@ -749,6 +751,7 @@ def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,
     integration_space: IntegrationSpace,
+    space_map: SpaceMap | None = None,
     *,
     integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
     basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
