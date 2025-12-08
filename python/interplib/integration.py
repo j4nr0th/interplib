@@ -38,8 +38,8 @@ class Integrable(Protocol):
 
 def integrate_callable(
     func: Integrable,
-    integration_space: IntegrationSpace,
-    space_map: SpaceMap | None = None,
+    integration: IntegrationSpace | SpaceMap,
+    /,
     registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
 ) -> float:
     """Integrate a callable over a specified integration space with given specs.
@@ -47,14 +47,13 @@ def integrate_callable(
     Parameters
     ----------
     func : Callable
-        The function to integrate.
+        The function to integrate. The function should be defined on the space it will
+        be integrated on.
 
-    integration_space : IntegrationSpace
-        The space over which to integrate the function.
-
-    space_map : SpaceMap, optional
-        Mapping between the integration domain, which is an :math:`N`-dimensional
-        :math:`[-1, +1]` hypercube, and the physical domain.
+    integration_space : IntegrationSpace or SpaceMap
+        The space over which to integrate the function or the mapping between the
+        integration domain, which is an :math:`N`-dimensional :math:`[-1, +1]` hypercube,
+        and the physical domain.
 
     registry : IntegrationRegistry, optional
         The registry to use for obtaining the integrator. If None, the default registry is
@@ -65,10 +64,25 @@ def integrate_callable(
     float
         The result of the integration.
     """
-    nodes = integration_space.nodes(registry)
-    weights = integration_space.weights(registry)
-    if space_map is not None:
-        weights * space_map.determinant
+    match integration:
+        case IntegrationSpace() as int_space:
+            nodes = int_space.nodes(registry)
+            weights = int_space.weights(registry)
+        case SpaceMap() as smap:
+            int_space = smap.integration_space
+            weights = int_space.weights(registry) * smap.determinant
+            nodes = np.array(
+                [
+                    smap.coordinate_map(idim).values
+                    for idim in range(smap.output_dimensions)
+                ]
+            )
+        case _:
+            raise TypeError(
+                f"Only {IntegrationSpace} or {SpaceMap} can be passed, but instead "
+                f"{type(integration)} was passed."
+            )
+
     return float(
         np.sum(
             np.asarray(func(*[nodes[i, ...] for i in range(nodes.shape[0])])) * weights

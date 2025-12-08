@@ -99,3 +99,63 @@ ax.set(aspect="equal")
 ax.legend()
 fig.tight_layout()
 plt.show()
+
+# %%
+#
+# Surfaces
+# --------
+#
+# A :class:`Line` or :class:`Quad` may be define in an any dimensional setting, as
+# long as the space is at least 1D or 2D respectively. As such, it is entirely possible
+# to define a :class:`Quad` as 2D surface in 3D space.
+
+btm_part = Line(
+    (+1, +0, -1),
+    (+1, +1, -1),
+    (+0, +1, -1),
+    (-1, +1, -1),
+    (-1, +0, -1),
+    (-1, -1, -1),
+    (-0, -1, -1),
+    (+1, -1, -1),
+    (+1, +0, -1),
+)
+top_part = Line(
+    (+1, +0, +1),
+    (+1, -1, +1),
+    (-0, -1, +1),
+    (-1, -1, +1),
+    (-1, +0, +1),
+    (-1, +1, +1),
+    (+0, +1, +1),
+    (+1, +1, +1),
+    (+1, +0, +1),
+)
+
+stitch = Line(
+    (+1, +0, +1),
+    (+1, +0, -1),
+)
+
+surf = Quad(top_part, stitch, btm_part, stitch.reverse())
+
+fig = plt.figure()
+ax = plt.subplot(projection="3d")
+xp, yp = np.meshgrid(np.linspace(-1, +1, 31), np.linspace(-1, +1, 31))
+ax.plot_wireframe(*surf.sample(xp, yp))
+ax.set(aspect="equal")
+plt.show()
+
+
+# %%
+#
+# It is of course possible to take a subdomain of this surface.
+
+# This takes the half along the first dimension.
+sub_surf = surf.subregion((-0.5, +0.5), (-1, +1))
+
+fig = plt.figure()
+ax = plt.subplot(projection="3d")
+ax.plot_wireframe(*sub_surf.sample(xp, yp))
+ax.set(aspect="equal")
+plt.show()

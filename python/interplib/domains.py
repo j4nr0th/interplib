@@ -164,7 +164,6 @@ class HypercubeDomain:
         """
         return integrate_callable(
             fn,
-            int_space,
             self(
                 int_space,
                 integration_registry=integration_registry,
@@ -228,6 +227,10 @@ class Line(HypercubeDomain):
     def end(self) -> npt.NDArray[np.double]:
         """The end point of the line."""
         return self.knots[-1, :]
+
+    def reverse(self) -> Line:
+        """Reverse the orientation of the line."""
+        return Line(*np.flip(self.knots, axis=0))
 
 
 class Quad(HypercubeDomain):
