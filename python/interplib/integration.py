@@ -103,7 +103,72 @@ def integrate_callable(
     )
 
 
-def projection_l2(
+def projection_l2_dual(
+    func: Integrable,
+    function_space: FunctionSpace,
+    integration: IntegrationSpace | SpaceMap,
+    /,
+    *,
+    integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+    basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+) -> DegreesOfFreedom:
+    """Compute the dual L2 projection of the function on the function space.
+
+    Parameters
+    ----------
+    func : Integratable
+        Function to project. It has to be possible to integrate it.
+
+    function_space : FunctionSpace
+        Function space on which to project the function.
+
+    integration : IntegrationSpace or SpaceMap
+        Specification of the integration domain.
+
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        The registry to use for obtaining the integrator.
+
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        The registry to use for obtaining the basis values.
+
+    Returns
+    -------
+    DegreesOfFreedom
+        Dual degrees of freedom of the projection.
+    """
+    nodes, weights = _prepare_integration(
+        integration=integration, registry=integration_registry
+    )
+
+    func_vals = (
+        np.asarray(func(*[nodes[i, ...] for i in range(nodes.shape[0])])) * weights
+    )
+    del nodes, weights, func
+
+    int_space: IntegrationSpace
+    match integration:
+        case IntegrationSpace():
+            int_space = integration
+        case SpaceMap():
+            int_space = integration.integration_space
+        case _:
+            assert False
+
+    basis_values = function_space.values_at_integration_nodes(
+        int_space,
+        integration_registry=integration_registry,
+        basis_registry=basis_registry,
+    )
+    del integration_registry, basis_registry
+
+    func_vals = func_vals.flatten()
+    basis_values = basis_values.reshape((func_vals.size, -1))
+    dual_dofs = np.sum(func_vals[:, None] * basis_values, axis=0)
+
+    return DegreesOfFreedom(function_space, dual_dofs)
+
+
+def projection_l2_primal(
     func: Integrable,
     function_space: FunctionSpace,
     integration: IntegrationSpace | SpaceMap,
@@ -136,39 +201,23 @@ def projection_l2(
     DegreesOfFreedom
         Primal degrees of freedom of the projection.
     """
-    nodes, weights = _prepare_integration(
-        integration=integration, registry=integration_registry
-    )
-
-    func_vals = (
-        np.asarray(func(*[nodes[i, ...] for i in range(nodes.shape[0])])) * weights
-    )
-    del nodes, weights, func
-
-    int_space: IntegrationSpace
-    match integration:
-        case IntegrationSpace():
-            int_space = integration
-        case SpaceMap():
-            int_space = integration.integration_space
-        case _:
-            assert False
-
-    basis_values = function_space.values_at_integration_nodes(
-        int_space,
+    dual_dofs = projection_l2_dual(
+        func,
+        function_space,
+        integration,
         integration_registry=integration_registry,
         basis_registry=basis_registry,
     )
-    del integration_registry, basis_registry
 
-    func_vals = func_vals.flatten()
-    basis_values = basis_values.reshape((func_vals.size, -1))
-    dual_dofs = np.sum(func_vals[:, None] * basis_values, axis=0)
-    del func_vals, basis_values
+    mass_matrix = compute_mass_matrix(
+        function_space,
+        function_space,
+        integration,
+        integration_registry=integration_registry,
+        basis_registry=basis_registry,
+    )
+    del integration, integration_registry, basis_registry
 
-    mass_matrix = compute_mass_matrix(function_space, function_space, integration)
-    del integration
-
-    primal_dofs = np.linalg.solve(mass_matrix, dual_dofs)
+    primal_dofs = np.linalg.solve(mass_matrix, dual_dofs.values)
     del dual_dofs, mass_matrix
     return DegreesOfFreedom(function_space, primal_dofs)

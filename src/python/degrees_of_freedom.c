@@ -507,7 +507,7 @@ PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObject *de
     return (PyObject *)out_array;
 }
 
-static int *reconstruction_derivative_indices(const unsigned ndim, PyObject *py_indices)
+int *reconstruction_derivative_indices(const unsigned ndim, PyObject *py_indices)
 {
     int *const indices = PyMem_Malloc(sizeof(*indices) * ndim);
     if (!indices)

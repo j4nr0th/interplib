@@ -14,6 +14,12 @@ typedef struct
 INTERPLIB_INTERNAL
 extern PyType_Spec coordinate_map_type_spec;
 
+INTERPLIB_INTERNAL
+const double *coordinate_map_values(const coordinate_map_object *map);
+
+INTERPLIB_INTERNAL
+const double *coordinate_map_gradient(const coordinate_map_object *map, unsigned dim);
+
 typedef struct
 {
     PyObject_VAR_HEAD;

@@ -104,6 +104,20 @@ static PyObject *coordinate_map_get_dimension(PyObject *self, void *Py_UNUSED(cl
     return PyLong_FromLong(this->ndim);
 }
 
+const double *coordinate_map_values(const coordinate_map_object *map)
+{
+    return map->values;
+}
+
+const double *coordinate_map_gradient(const coordinate_map_object *map, const unsigned dim)
+{
+    CPYUTL_ASSERT(dim < map->ndim, "Dimension index out of bounds.");
+    size_t total_points = 1;
+    for (unsigned i = 0; i < map->ndim; ++i)
+        total_points *= map->int_specs[i].order + 1;
+    return map->values + (dim + 1) * total_points;
+}
+
 static PyObject *coordinate_map_get_values(PyObject *self, void *Py_UNUSED(closure))
 {
     const coordinate_map_object *const this = (coordinate_map_object *)self;
@@ -168,8 +182,8 @@ static int ensure_coordinate_map_and_state(PyObject *self, PyTypeObject *definin
     return 0;
 }
 
-static PyObject *coordinate_map_gradient(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
-                                         const Py_ssize_t nargs, const PyObject *const kwnames)
+static PyObject *coordinate_map_object_gradient(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                                const Py_ssize_t nargs, const PyObject *const kwnames)
 {
     const interplib_module_state_t *state;
     coordinate_map_object *this;
@@ -250,11 +264,14 @@ PyType_Spec coordinate_map_type_spec = {
         {
             Py_tp_methods,
             (PyMethodDef[]){
-                {.ml_name = "gradient",
-                 .ml_meth = (void *)coordinate_map_gradient,
-                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
-                 .ml_doc = "gradient(idim: int, /) -> numpy.typing.NDArray[numpy.double]\nRetrieve the gradient of the "
-                           "coordinate map in given dimension."},
+                {
+                    .ml_name = "gradient",
+                    .ml_meth = (void *)coordinate_map_object_gradient,
+                    .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                    .ml_doc =
+                        "gradient(idim: int, /) -> numpy.typing.NDArray[numpy.double]\nRetrieve the gradient of the "
+                        "coordinate map in given dimension.",
+                },
                 {},
             },
         },

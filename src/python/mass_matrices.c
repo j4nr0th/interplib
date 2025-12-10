@@ -1,8 +1,10 @@
 #include "mass_matrices.h"
 #include "basis_objects.h"
+#include "degrees_of_freedom.h"
 #include "function_space_objects.h"
 #include "integration_objects.h"
 #include "mappings.h"
+#include <stdbool.h>
 
 PyDoc_STRVAR(
     compute_mass_matrix_docstring,
@@ -282,12 +284,299 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
     return (PyObject *)out;
 }
 
+static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const *args, const Py_ssize_t nargs,
+                                              const PyObject *kwnames)
+{
+    const interplib_module_state_t *state = PyModule_GetState(module);
+    if (!state)
+        return NULL;
+
+    const function_space_object *space_in, *space_out;
+    PyObject *py_integration;
+    PyObject *py_indices_in, *py_indices_out;
+    const integration_registry_object *integration_registry =
+        (const integration_registry_object *)state->registry_integration;
+    const basis_registry_object *basis_registry = (const basis_registry_object *)state->registry_basis;
+
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &space_in,
+                    .type_check = state->function_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &py_indices_in,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &space_out,
+                    .type_check = state->function_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &py_indices_out,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &py_integration,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &integration_registry,
+                    .type_check = state->integration_registry_type,
+                    .optional = 1,
+                    .kwname = "integration_registry",
+                    .kw_only = 1,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &basis_registry,
+                    .type_check = state->basis_registry_type,
+                    .optional = 1,
+                    .kwname = "basis_registry",
+                    .kw_only = 1,
+                },
+                {},
+            },
+            args, nargs, kwnames) < 0)
+        return NULL;
+
+    unsigned n_int_specs;
+    const integration_spec_t *p_int_specs;
+    const double *p_det;
+    const double **p_grads;
+    if (PyObject_TypeCheck(py_integration, state->integration_space_type))
+    {
+        const integration_space_object *const integration_space = (const integration_space_object *)py_integration;
+        n_int_specs = Py_SIZE(integration_space);
+        p_int_specs = integration_space->specs;
+        p_det = NULL;
+        p_grads = NULL;
+    }
+    else if (PyObject_TypeCheck(py_integration, state->space_mapping_type))
+    {
+        const space_map_object *const space_map = (const space_map_object *)py_integration;
+        n_int_specs = space_map->ndim;
+        p_int_specs = space_map->int_specs;
+        p_det = space_map->determinant;
+
+        const unsigned n_coords = Py_SIZE(space_map);
+        p_grads = PyMem_Malloc(n_int_specs * n_coords * sizeof(const double *));
+        if (!p_grads)
+            return NULL;
+        for (unsigned idim = 0; idim < n_coords; ++idim)
+        {
+            const coordinate_map_object *const cmap = space_map->maps[idim];
+            for (unsigned igrad = 0; igrad < n_int_specs; ++igrad)
+            {
+                p_grads[idim * n_int_specs + igrad] = coordinate_map_gradient(cmap, igrad);
+            }
+        }
+    }
+    else
+    {
+        PyErr_Format(PyExc_TypeError, "Integration space or space map must be passed, instead %s object was passed.",
+                     Py_TYPE(py_integration)->tp_name);
+        return NULL;
+    }
+
+    const unsigned n_space_dim = Py_SIZE(space_in);
+    if (Py_SIZE(space_out) != n_space_dim || n_int_specs != n_space_dim)
+    {
+        PyMem_Free(p_grads);
+        PyErr_Format(
+            PyExc_ValueError,
+            "Function spaces must have the same dimensionality (space in: %u, space out: %u, integration space: %u).",
+            (unsigned)Py_SIZE(space_in), (unsigned)Py_SIZE(space_out), n_int_specs);
+        return NULL;
+    }
+
+    int *const indices_in = reconstruction_derivative_indices(n_space_dim, py_indices_in);
+    if (!indices_in)
+    {
+        PyMem_Free(p_grads);
+        return NULL;
+    }
+    int *const indices_out = reconstruction_derivative_indices(n_space_dim, py_indices_out);
+    if (!indices_out)
+    {
+        PyMem_Free(indices_in);
+        PyMem_Free(p_grads);
+        return NULL;
+    }
+
+    // Create resources
+    mass_matrix_resources_t resources = {};
+    if (mass_matrix_create_resources(space_in, space_out, n_int_specs, p_int_specs, p_det,
+                                     integration_registry->registry, basis_registry->registry, &resources))
+    {
+        PyMem_Free(indices_out);
+        PyMem_Free(indices_in);
+        PyMem_Free(p_grads);
+        return NULL;
+    }
+
+    const npy_intp dims[2] = {(npy_intp)multidim_iterator_total_size(resources.iter_out),
+                              (npy_intp)multidim_iterator_total_size(resources.iter_in)};
+
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+    if (!out)
+    {
+        mass_matrix_release_resources(&resources, integration_registry->registry, basis_registry->registry);
+        PyMem_Free(indices_out);
+        PyMem_Free(indices_in);
+        PyMem_Free(p_grads);
+        return NULL;
+    }
+    npy_double *const p_out = PyArray_DATA(out);
+
+    // Matrix is symmetric if spaces match
+    const int is_symmetric = function_spaces_match(space_in, space_out);
+    multidim_iterator_set_to_start(resources.iter_in);
+    multidim_iterator_set_to_start(resources.iter_out);
+    while (!multidim_iterator_is_at_end(resources.iter_out))
+    {
+        const size_t index_out = multidim_iterator_get_flat_index(resources.iter_out);
+        CPYUTL_ASSERT(index_out < (size_t)dims[0], "Out index out of bounds.");
+        const size_t index_in = multidim_iterator_get_flat_index(resources.iter_in);
+        CPYUTL_ASSERT(index_in < (size_t)dims[1], "In index out of bounds.");
+
+        // integrate the respective basis
+        multidim_iterator_set_to_start(resources.iter_int);
+        double result = 0;
+        // Integrate the basis product
+        while (!multidim_iterator_is_at_end(resources.iter_int))
+        {
+            // Compute weight and basis values for these outer product basis and integration
+            double weight =
+                resources.determinant ? resources.determinant[multidim_iterator_get_flat_index(resources.iter_int)] : 1;
+            double basis_in = 1, basis_out = 1;
+            for (unsigned idim = 0; idim < n_space_dim; ++idim)
+            {
+                const size_t integration_point_idx = multidim_iterator_get_offset(resources.iter_int, idim);
+                weight *= integration_rule_weights_const(resources.rules[idim])[integration_point_idx];
+                double in_basis_val, out_basis_val;
+                // double grad_in = 1, grad_out = 1;
+
+                const size_t idx_in = multidim_iterator_get_offset(resources.iter_in, idim);
+                if (indices_in[idim])
+                {
+                    in_basis_val = basis_set_basis_derivatives(resources.basis_in[idim], idx_in)[integration_point_idx];
+                }
+                else
+                {
+                    in_basis_val = basis_set_basis_values(resources.basis_in[idim], idx_in)[integration_point_idx];
+                }
+
+                const size_t idx_out = multidim_iterator_get_offset(resources.iter_out, idim);
+                if (indices_out[idim])
+                {
+                    out_basis_val =
+                        basis_set_basis_derivatives(resources.basis_out[idim], idx_out)[integration_point_idx];
+                }
+                else
+                {
+                    out_basis_val = basis_set_basis_values(resources.basis_out[idim], idx_out)[integration_point_idx];
+                }
+
+                basis_in *= in_basis_val;
+                basis_out *= out_basis_val;
+            }
+            multidim_iterator_advance(resources.iter_int, n_space_dim - 1, 1);
+            // Add the contributions to the result
+            result += weight * basis_in * basis_out;
+        }
+
+        // Write the output
+        p_out[index_out * dims[1] + index_in] = result;
+
+        // Advance the input basis
+        multidim_iterator_advance(resources.iter_in, n_space_dim - 1, 1);
+        // If we've done enough input basis, we advance the output basis and reset the input iterator
+        if ((is_symmetric && index_in == index_out) || multidim_iterator_is_at_end(resources.iter_in))
+        {
+            multidim_iterator_advance(resources.iter_out, n_space_dim - 1, 1);
+            multidim_iterator_set_to_start(resources.iter_in);
+        }
+    }
+
+    // Calculations done, free the indices and gradients.
+
+    PyMem_Free(p_grads);
+    PyMem_Free(indices_out);
+    PyMem_Free(indices_in);
+
+    // If we're symmetric, we have to fill up the upper diagonal part
+    if (is_symmetric)
+    {
+        for (npy_intp i = 0; i < dims[0]; ++i)
+        {
+            for (npy_intp j = i + 1; j < dims[1]; ++j)
+            {
+                p_out[i * dims[1] + j] = p_out[j * dims[1] + i];
+            }
+        }
+    }
+
+    mass_matrix_release_resources(&resources, integration_registry->registry, basis_registry->registry);
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(compute_gradient_mass_matrix_docstring,
+             "compute_gradient_mass_matrix(space_in: FunctionSpace, idims_in: typing.Sequence[int], space_out: "
+             "FunctionSpace, idims_out: typing.Sequence[int], integration: IntegrationSpace | SpaceMap, /, *, "
+             "integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, basis_registry: BasisRegistry "
+             "= DEFAULT_BASIS_REGISTRY) -> numpy.typing.NDArray[numpy.double]\n"
+             "Compute the mass matrix between two function spaces.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "space_in : FunctionSpace\n"
+             "    Function space for the input functions.\n"
+             "\n"
+             "idim_in : Sequence of int\n"
+             "    Indices of the dimension that input space is to be differentiated along.\n"
+             "\n"
+             "space_out : FunctionSpace\n"
+             "    Function space for the output functions.\n"
+             "\n"
+             "idim_out : Sequence of int\n"
+             "    Indices of the dimension that input space is to be differentiated along.\n"
+             "\n"
+             "integration : IntegrationSpace or SpaceMap\n"
+             "    Integration space used to compute the mass matrix or a space mapping.\n"
+             "    If the integration space is provided, the integration is done on the\n"
+             "    reference domain. If the mapping is defined instead, the integration\n"
+             "    space of the mapping is used, along with the integration being done\n"
+             "    on the mapped domain instead.\n"
+             "\n"
+             "\n"
+             "integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY\n"
+             "    Registry used to retrieve the integration rules.\n"
+             "\n"
+             "basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY\n"
+             "    Registry used to retrieve the basis specifications.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Mass matrix as a 2D array, which maps the primal degrees of freedom of the input\n"
+             "    function space to dual degrees of freedom of the output function space.\n");
+
 PyMethodDef mass_matrices_methods[] = {
     {
         .ml_name = "compute_mass_matrix",
         .ml_meth = (void *)compute_mass_matrix,
         .ml_flags = METH_FASTCALL | METH_KEYWORDS,
         .ml_doc = compute_mass_matrix_docstring,
+    },
+    {
+        .ml_name = "compute_gradient_mass_matrix",
+        .ml_meth = (void *)compute_gradient_mass_matrix,
+        .ml_flags = METH_FASTCALL | METH_KEYWORDS,
+        .ml_doc = compute_gradient_mass_matrix_docstring,
     },
     {},
 };

@@ -137,7 +137,7 @@ endif ()
 target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} cpyutl/src)
 
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(_interp PRIVATE -Wall -Wextra -Werror -fwhole-program -flto=auto)
+    target_compile_options(_interp PRIVATE -Wall -Wextra -Werror -flto=auto)
 endif ()
 
 

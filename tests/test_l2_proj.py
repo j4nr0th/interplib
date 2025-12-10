@@ -14,7 +14,7 @@ from interplib._interp import (
 from interplib.degrees_of_freedom import reconstruct
 from interplib.domains import Quad
 from interplib.enum_type import BasisType
-from interplib.integration import projection_l2
+from interplib.integration import projection_l2_primal
 
 
 @pytest.mark.parametrize("order", (1, 2, 4, 10))
@@ -30,7 +30,7 @@ def test_projection_1d(order: int, btype: BasisType) -> None:
 
     int_space = IntegrationSpace(IntegrationSpecs(order + 2, method="gauss"))
 
-    proj = projection_l2(partial(reconstruct, dofs), fs, int_space)
+    proj = projection_l2_primal(partial(reconstruct, dofs), fs, int_space)
 
     assert proj.values == pytest.approx(dofs.values)
 
@@ -56,7 +56,7 @@ def test_projection_2d(o1: int, b1: BasisType, o2: int, b2: BasisType) -> None:
         IntegrationSpecs(o1 + 2, method="gauss"), IntegrationSpecs(o2 + 2, method="gauss")
     )
 
-    proj = projection_l2(partial(reconstruct, dofs), fs, int_space)
+    proj = projection_l2_primal(partial(reconstruct, dofs), fs, int_space)
 
     assert proj.values == pytest.approx(dofs.values)
 
@@ -86,7 +86,7 @@ def test_projection_3d(
         IntegrationSpecs(o3 + 2, method="gauss"),
     )
 
-    proj = projection_l2(partial(reconstruct, dofs), fs, int_space)
+    proj = projection_l2_primal(partial(reconstruct, dofs), fs, int_space)
 
     assert proj.values == pytest.approx(dofs.values)
 
@@ -116,7 +116,7 @@ def test_deformed_2d_to_3d() -> None:
     )
     smap = domain(int_space)
 
-    proj = projection_l2(test_function, fs, smap)
+    proj = projection_l2_primal(test_function, fs, smap)
 
     r1, r2 = np.meshgrid(np.linspace(-1, +1, 11), np.linspace(-1, +1, 11))
     tx, ty, tz = domain.sample(r1, r2)

@@ -788,16 +788,20 @@ def compute_mass_matrix(
     ----------
     space_in : FunctionSpace
         Function space for the input functions.
+
     space_out : FunctionSpace
         Function space for the output functions.
+
     integration : IntegrationSpace or SpaceMap
         Integration space used to compute the mass matrix or a space mapping.
         If the integration space is provided, the integration is done on the
         reference domain. If the mapping is defined instead, the integration
         space of the mapping is used, along with the integration being done
         on the mapped domain instead.
+
     integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
         Registry used to retrieve the integration rules.
+
     basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
         Registry used to retrieve the basis specifications.
 
@@ -805,6 +809,55 @@ def compute_mass_matrix(
     -------
     array
         Mass matrix as a 2D array, which maps the primal degress of freedom of the input
+        function space to dual degrees of freedom of the output function space.
+    """
+    ...
+
+def compute_gradient_mass_matrix(
+    space_in: FunctionSpace,
+    idims_in: Sequence[int],
+    space_out: FunctionSpace,
+    idims_out: Sequence[int],
+    integration: IntegrationSpace | SpaceMap,
+    /,
+    *,
+    integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+    basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+) -> npt.NDArray[np.double]:
+    """Compute the mass matrix between two function spaces.
+
+    Parameters
+    ----------
+    space_in : FunctionSpace
+        Function space for the input functions.
+
+    idim_in : Sequence of int
+        Indices of the dimension that input space is to be differentiated along.
+
+    space_out : FunctionSpace
+        Function space for the output functions.
+
+    idim_out : Sequence of int
+        Indices of the dimension that input space is to be differentiated along.
+
+    integration : IntegrationSpace or SpaceMap
+        Integration space used to compute the mass matrix or a space mapping.
+        If the integration space is provided, the integration is done on the
+        reference domain. If the mapping is defined instead, the integration
+        space of the mapping is used, along with the integration being done
+        on the mapped domain instead.
+
+
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        Registry used to retrieve the integration rules.
+
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        Registry used to retrieve the basis specifications.
+
+    Returns
+    -------
+    array
+        Mass matrix as a 2D array, which maps the primal degrees of freedom of the input
         function space to dual degrees of freedom of the output function space.
     """
     ...
