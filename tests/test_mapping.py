@@ -179,7 +179,7 @@ def test_space_map_2_to_2(n_int: int, n_b: int, btype: BasisType) -> None:
     print(" with no survivors!")
     # Check that the determinant checks out
     det_smap = smap.determinant
-    assert pytest.approx(det_smap) == np.abs(det_real)
+    assert pytest.approx(det_smap) == det_real
 
 
 @pytest.mark.parametrize("n_int", (1, 2, 4))
@@ -207,11 +207,18 @@ def test_space_map_1_to_3(n_int: int, n_b: int, btype: BasisType) -> None:
     map_1 = CoordinateMap(dofs_1, int_space)
     map_2 = CoordinateMap(dofs_2, int_space)
     map_3 = CoordinateMap(dofs_3, int_space)
-    det_real = map_1.gradient(0) ** 2 + map_2.gradient(0) ** 2 + map_3.gradient(0) ** 2
+    det_real = np.sqrt(
+        map_1.gradient(0) ** 2 + map_2.gradient(0) ** 2 + map_3.gradient(0) ** 2
+    )
     # Make the space map
     print("Crashing this code...", end="")
     smap = SpaceMap(map_1, map_2, map_3)
     print(" with no survivors!")
     # Check that the determinant checks out
     det_smap = smap.determinant
-    assert pytest.approx(det_smap) == np.abs(det_real)
+    assert pytest.approx(det_smap) == det_real
+
+
+if __name__ == "__main__":
+    test_space_map_2_to_2(2, 2, BasisType.BERNSTEIN)
+    pass

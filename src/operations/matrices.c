@@ -2,20 +2,8 @@
 
 #include <math.h>
 
-static void debug_print_matrix(const matrix_t *m)
-{
-    for (unsigned i = 0; i < m->rows; ++i)
-    {
-        for (unsigned j = 0; j < m->cols; ++j)
-            printf("%8.3g ", m->values[i * m->cols + j]);
-        printf("\n");
-    }
-}
-
 interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *const q)
 {
-    printf("Decompose called with A as:");
-    debug_print_matrix(ar);
 
     const unsigned rows = ar->rows;
     if (q->rows != rows || q->cols != rows)

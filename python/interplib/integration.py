@@ -218,6 +218,6 @@ def projection_l2_primal(
     )
     del integration, integration_registry, basis_registry
 
-    primal_dofs = np.linalg.solve(mass_matrix, dual_dofs.values)
+    primal_dofs = np.linalg.solve(mass_matrix, dual_dofs.values.flatten())
     del dual_dofs, mass_matrix
     return DegreesOfFreedom(function_space, primal_dofs)

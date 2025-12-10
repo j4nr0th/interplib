@@ -1,5 +1,6 @@
 #include "mappings.h"
 
+#include "../operations/matrices.h"
 #include "basis_objects.h"
 #include "degrees_of_freedom.h"
 #include "integration_objects.h"
@@ -286,6 +287,10 @@ static void space_map_object_dealloc(PyObject *self)
     this->ndim = 0;
     PyMem_Free(this->int_specs);
     this->int_specs = NULL;
+    PyMem_Free(this->determinant);
+    this->determinant = NULL;
+    PyMem_Free(this->inverse_maps);
+    this->inverse_maps = NULL;
     for (unsigned i = 0; i < Py_SIZE(this); ++i)
     {
         coordinate_map_object *const map = this->maps[i];
@@ -294,74 +299,6 @@ static void space_map_object_dealloc(PyObject *self)
     }
     type->tp_free((PyObject *)this);
     Py_DECREF(type);
-}
-
-/**
- * Compute determinant of transformation from gradients of coordinates.
- *
- * This function performs pivoted Gaussian elimination (or pivoted LU decomposition I guess) to reduce
- * the gradient matrix to an upper triangular form, at which point the product of diagonal entries is
- * the determinant.
- *
- * @param ndims[in] Number of dimensions.
- * @param metric_tensor[in, out] Square matrix with gradients of a single coordinate contiguous. Will be overwritten.
- * @param pivoted[out] Buffer array used to store pivot indices. Will be overwritten
- * @return Determinant of the matrix.
- */
-static double compute_metric_determinant(const unsigned ndims, double metric_tensor[ndims][ndims],
-                                         unsigned pivoted[ndims])
-{
-    if (ndims == 1)
-        return fabs(metric_tensor[0][0]);
-
-    // Initialize the pivoted array
-    for (unsigned i = 0; i < ndims; ++i)
-        pivoted[i] = i;
-
-    double det = 1;
-    for (unsigned i = 0; i < ndims; ++i)
-    {
-        // Get a new pivot for the current row
-        unsigned pivot = i;
-        for (unsigned i_pivot = i + 1; i_pivot < ndims; ++i_pivot)
-        {
-            // If this is the first row that was available, choose it as a pivot.
-            // Otherwise, check if this row is a good candidate
-            if (fabs(metric_tensor[pivoted[i_pivot]][i]) > fabs(metric_tensor[pivoted[pivot]][i]))
-            {
-                pivot = i_pivot;
-            }
-        }
-
-        // Swap the rows
-        if (pivot != i)
-        {
-            const unsigned tmp = pivoted[pivot];
-            pivoted[pivot] = pivoted[i];
-            pivoted[i] = tmp;
-            det *= -1;
-        }
-
-        // Eliminate the rows in the gradient matrix using already used pivots
-        for (unsigned i_row = i + 1; i_row < ndims; ++i_row)
-        {
-            const double factor = metric_tensor[pivoted[i_row]][i] / metric_tensor[pivoted[i]][i];
-            for (unsigned j = i; j < ndims; ++j)
-            {
-                metric_tensor[pivoted[i_row]][j] -= metric_tensor[pivoted[i]][j] * factor;
-            }
-        }
-    }
-
-    // Compute the determinant from the pivoted diagonal
-    for (unsigned i = 0; i < ndims; ++i)
-    {
-        det *= metric_tensor[pivoted[i]][i];
-    }
-
-    CPYUTL_ASSERT(det > 0, "Determinant should be positive, but it is %g.", det);
-
-    return sqrt(det);
 }
 
 static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
@@ -399,11 +336,21 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
     this->ndim = 0;
     this->int_specs = NULL;
     this->determinant = NULL;
+    this->inverse_maps = NULL;
     for (unsigned i = 0; i < n_maps; ++i)
         this->maps[i] = NULL;
 
     // Copy the integration space from the first space, then check all others comply
     coordinate_map_object *const first_map = (coordinate_map_object *)PyTuple_GET_ITEM(args, 0);
+    if (first_map->ndim > n_maps)
+    {
+        PyErr_Format(PyExc_ValueError,
+                     "Can not construct a space map from reference domain with %u dimensions to %u physical "
+                     "dimensions. The number of physical dimensions must be equal to, or greater than the number of "
+                     "dimensions of the reference space.",
+                     first_map->ndim, n_maps);
+        return NULL;
+    }
     this->ndim = first_map->ndim;
     this->int_specs = PyMem_Malloc(this->ndim * sizeof(*this->int_specs));
     if (!this->int_specs)
@@ -471,22 +418,27 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         Py_DECREF(this);
         return NULL;
     }
-
-    // Allocate work arrays
-    const unsigned n_dim_in = this->ndim;
-    const unsigned n_dim_out = n_maps;
-    double *const metric_tensor = PyMem_RawMalloc(sizeof(*metric_tensor) * n_dim_in * n_dim_in);
-    if (!metric_tensor)
+    const size_t jacobian_size = this->ndim * n_maps;
+    double *const inverse_maps = PyMem_Malloc(sizeof(*inverse_maps) * total_points * jacobian_size);
+    if (!inverse_maps)
     {
         PyMem_Free(determinant);
         Py_DECREF(this);
         return NULL;
     }
 
-    unsigned *const pivoted = PyMem_RawMalloc(sizeof(*pivoted) * this->ndim);
-    if (!pivoted)
+    // Allocate work arrays
+    double *const jacobian = PyMem_RawMalloc(sizeof(*jacobian) * jacobian_size);
+    if (!jacobian)
     {
-        PyMem_RawFree(metric_tensor);
+        PyMem_Free(determinant);
+        Py_DECREF(this);
+        return NULL;
+    }
+    double *const q_mat = PyMem_RawMalloc(sizeof(*q_mat) * n_maps * n_maps);
+    if (!q_mat)
+    {
+        PyMem_Free(jacobian);
         PyMem_Free(determinant);
         Py_DECREF(this);
         return NULL;
@@ -498,38 +450,107 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         // Get the index of the point
         const size_t i_pt = multidim_iterator_get_flat_index(it);
 
-        for (unsigned idim = 0; idim < n_dim_in; ++idim)
+        // Fill in the Jacobian
+        const unsigned rows = n_maps;
+        const unsigned cols = this->ndim;
+        for (unsigned idim = 0; idim < rows; ++idim)
         {
-            // Exploit symmetry
-            for (unsigned jdim = 0; jdim < idim + 1; ++jdim)
+            for (unsigned jdim = 0; jdim < cols; ++jdim)
             {
-                double metric_value = 0;
-                // #pragma omp simd reduction(+ : metric_value)
-                for (unsigned k = 0; k < n_dim_out; ++k)
-                {
-                    metric_value += this->maps[k]->values[(jdim + 1) * total_points + i_pt] *
-                                    this->maps[k]->values[(idim + 1) * total_points + i_pt];
-                }
-                // Symmetry to the rescue!
-                metric_tensor[idim * n_dim_in + jdim] = metric_value;
-                metric_tensor[jdim * n_dim_in + idim] = metric_value;
+                jacobian[idim * cols + jdim] = coordinate_map_gradient(this->maps[idim], jdim)[i_pt];
             }
         }
 
-        determinant[i_pt] = compute_metric_determinant(n_dim_in, (double (*)[n_dim_in])metric_tensor, pivoted);
+        // printf("Jacobian at point %zu:\n", i_pt);
+        // for (unsigned i = 0; i < rows; ++i)
+        // {
+        //     for (unsigned j = 0; j < cols; ++j)
+        //     {
+        //         printf("%5.3g ", jacobian[i * cols + j]);
+        //     }
+        //     printf("\n");
+        // }
+        // printf("\n");
+
+        const matrix_t jacobian_mat = (matrix_t){.rows = rows, .cols = cols, .values = jacobian};
+        const matrix_t q_matrix = (matrix_t){.rows = rows, .cols = rows, .values = q_mat};
+
+        // Decompose Jacobian into QR decomposition
+        interp_result_t res = matrix_qr_decompose(&jacobian_mat, &q_matrix);
+        (void)res;
+        CPYUTL_ASSERT(res == INTERP_SUCCESS, "QR decomposition failed.");
+        // Compute the determinant from the diagonal of the matrix
+        double det = 1;
+        for (unsigned i = 0; i < cols; ++i)
+        {
+            det *= jacobian[i * cols + i];
+        }
+        determinant[i_pt] = det;
+
+        double *const p_inv_map = inverse_maps + i_pt * jacobian_size;
+        const matrix_t out_mat = (matrix_t){.rows = cols, .cols = rows, .values = p_inv_map};
+        // Copy the top part of q into out
+        for (unsigned irow = 0; irow < cols; ++irow)
+        {
+            for (unsigned icol = 0; icol < rows; ++icol)
+            {
+                p_inv_map[irow * rows + icol] = q_mat[icol * rows + irow];
+            }
+        }
+
+        // printf("Decomposition of the Jacobian was:\n");
+        // printf("\tDeterminant: %g\n", determinant[i_pt]);
+        // printf("\tQ matrix:\n");
+        // for (unsigned i = 0; i < rows; ++i)
+        // {
+        //     printf("\t");
+        //     for (unsigned j = 0; j < rows; ++j)
+        //     {
+        //         printf("%5.3g ", q_mat[i * rows + j]);
+        //     }
+        //     printf("\n");
+        // }
+        // printf("\tR matrix:\n");
+        // for (unsigned irow = 0; irow < rows; ++irow)
+        // {
+        //     printf("\t");
+        //     for (unsigned icol = 0; icol < cols; ++icol)
+        //     {
+        //         printf("%5.3g ", jacobian[irow * cols + icol]);
+        //     }
+        //     printf("\n");
+        // }
+
+        // Use decomposition to compute "inverse". This is done simply by applying inverse of the
+        // upper triangular (rows x rows) part of the jacobian to the matrix q_mat.
+        res = matrix_back_substitute(&jacobian_mat, &out_mat);
+        CPYUTL_ASSERT(res == INTERP_SUCCESS, "Back substitution failed.");
+        (void)res;
+
+        // printf("Computed inverse was:\n");
+        // for (unsigned irow = 0; irow < cols; ++irow)
+        // {
+        //     for (unsigned icol = 0; icol < rows; ++icol)
+        //     {
+        //         printf("%5.3g ", p_inv_map[irow * rows + icol]);
+        //     }
+        //     printf("\n");
+        // }
+        // printf("-------------------------------\n");
 
         multidim_iterator_advance(it, this->ndim - 1, 1);
     }
 
     // Free work arrays
-    PyMem_RawFree(pivoted);
-    PyMem_RawFree(metric_tensor);
+    PyMem_RawFree(q_mat);
+    PyMem_RawFree(jacobian);
 
     // Free the iterator
     PyMem_Free(it);
 
     // Store the output
     this->determinant = determinant;
+    this->inverse_maps = inverse_maps;
     // Return
     return (PyObject *)this;
 }
@@ -670,6 +691,46 @@ static PyObject *space_map_get_integration_space(PyObject *self, void *Py_UNUSED
     return (PyObject *)res;
 }
 
+static PyObject *space_map_get_inverse_map(PyObject *self, void *Py_UNUSED(closure))
+{
+    const space_map_object *const this = (space_map_object *)self;
+    npy_intp *const dims = PyMem_Malloc(sizeof(*dims) * (this->ndim + 2));
+    if (!dims)
+        return NULL;
+
+    for (unsigned idim = 0; idim < this->ndim; ++idim)
+    {
+        dims[idim] = this->int_specs[idim].order + 1;
+    }
+    dims[this->ndim] = this->ndim;
+    dims[this->ndim + 1] = Py_SIZE(this);
+
+    PyArrayObject *const res =
+        (PyArrayObject *)PyArray_SimpleNewFromData(this->ndim + 2, dims, NPY_DOUBLE, this->inverse_maps);
+    PyMem_Free(dims);
+    if (!res)
+    {
+        return NULL;
+    }
+    if (PyArray_SetBaseObject(res, (PyObject *)this) < 0)
+    {
+        Py_DECREF(res);
+        return NULL;
+    }
+    Py_INCREF(this);
+    return (PyObject *)res;
+}
+
+PyDoc_STRVAR(space_map_get_inverse_map_docstring,
+             "numpy.typing.NDArray[numpy.double] : Local inverse transformation at each integration point.\n"
+             "\n"
+             "This array contains inverse mapping matrix, which is used\n"
+             "for the contravarying components. When the dimension of the\n"
+             "mapping space (as counted by :meth:`SpaceMap.output_dimensions`)\n"
+             "is greater than the dimension of the reference space, this is a\n"
+             "rectangular matrix, such that it maps the (rectangular) Jacobian\n"
+             "to the identity matrix.\n");
+
 PyType_Spec space_map_type_spec = {
     .name = "interplib._interp.SpaceMap",
     .basicsize = sizeof(space_map_object),
@@ -703,6 +764,11 @@ PyType_Spec space_map_type_spec = {
                      .name = "integration_space",
                      .get = space_map_get_integration_space,
                      .doc = "IntegrationSpace : Integration space used by the mapping.",
+                 },
+                 {
+                     .name = "inverse_map",
+                     .get = space_map_get_inverse_map,
+                     .doc = space_map_get_inverse_map_docstring,
                  },
                  {},
              }},

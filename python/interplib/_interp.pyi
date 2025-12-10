@@ -773,6 +773,19 @@ class SpaceMap:
         """Array with the values of determinant at integration points."""
         ...
 
+    @property
+    def inverse_transform(self) -> npt.NDArray[np.double]:
+        """Local inverse transformation at each integration point.
+
+        This array contains inverse mapping matrix, which is used
+        for the contravarying components. When the dimension of the
+        mapping space (as counted by :meth:`SpaceMap.output_dimensions`)
+        is greater than the dimension of the reference space, this is a
+        rectangular matrix, such that it maps the (rectangular) Jacobian
+        to the identity matrix.
+        """
+        ...
+
 def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,

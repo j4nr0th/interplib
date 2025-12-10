@@ -26,10 +26,14 @@ typedef struct
     unsigned ndim;
     integration_spec_t *int_specs;
     double *determinant;
+    double *inverse_maps;
     coordinate_map_object *maps[];
 } space_map_object;
 
 INTERPLIB_INTERNAL
 extern PyType_Spec space_map_type_spec;
+
+INTERPLIB_INTERNAL
+const double *space_map_inverse_at_integration_point(const space_map_object *map, size_t flat_index);
 
 #endif // INTERPLIB_MAPPINGS_H
