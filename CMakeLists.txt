@@ -58,10 +58,13 @@ set(INTEGRATION_HEADER_FILES
 set(OPERATIONS_SOURCE_FILES
         src/operations/multidim_iteration.c
         src/operations/reconstruction.c
+        src/operations/matrices.c
 )
 
 set(OPERATIONS_HEADER_FILES
         src/operations/multidim_iteration.h
+        src/operations/reconstruction.h
+        src/operations/matrices.h
 )
 
 set(POLYNOMIALS_SOURCE_FILES
@@ -95,7 +98,7 @@ add_library(interp STATIC
 
 set_property(TARGET interp PROPERTY C_STANDARD 17)
 target_compile_definitions(interp PRIVATE INTERPLIB_ASSERTS)
-target_link_libraries(interp PRIVATE m)
+target_link_libraries(interp PUBLIC m OpenMP::OpenMP_C)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(interp PRIVATE -Wall -Wextra -Werror -fanalyzer -Werror)
 endif ()
@@ -126,7 +129,7 @@ Python_add_library(_interp MODULE
 
 add_subdirectory(cpyutl)
 
-target_link_libraries(_interp PRIVATE interp cpyutl OpenMP::OpenMP_C)
+target_link_libraries(_interp PRIVATE interp cpyutl)
 set_property(TARGET _interp PROPERTY C_STANDARD 17)
 install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
 target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS CPYUTL_ENABLE_ASSERTS)

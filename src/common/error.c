@@ -20,6 +20,7 @@ static const struct
     ERROR_ENUM_ENTRY(INTERP_ERROR_GEOID_OUT_OF_RANGE, "GeoID was not within allowed range."),
     ERROR_ENUM_ENTRY(INTERP_ERROR_GEOID_NOT_VALID, "GeoID was invalid."),
     ERROR_ENUM_ENTRY(INTERP_ERROR_SURFACE_NOT_CLOSED, "Surface did not have a closed boundary."),
+    ERROR_ENUM_ENTRY(INTERP_ERROR_MATRIX_DIMS_MISMATCH, "Matrix dimensions do not match."),
 };
 
 const char *interp_error_str(interp_result_t error)

@@ -52,3 +52,15 @@ add_test(NAME multidim_iterator_2d COMMAND test_multidim_iterator_2d 12 40)
 add_executable(test_multidim_iterator_3d operations/test_multidim_iterator_3d.c)
 target_link_libraries(test_multidim_iterator_3d PRIVATE interp m)
 add_test(NAME multidim_iterator_3d COMMAND test_multidim_iterator_3d 13 7 17)
+
+add_executable(test_qr_decomposition operations/test_qr_decomposition.c)
+target_link_libraries(test_qr_decomposition PRIVATE interp m)
+add_test(NAME qr_decomposition COMMAND test_qr_decomposition)
+
+add_executable(test_back_substitute operations/test_back_substitute.c)
+target_link_libraries(test_back_substitute PRIVATE interp m)
+add_test(NAME back_substitute COMMAND test_back_substitute)
+
+add_executable(test_qr_decomposition_2 operations/test_qr_decomposition_2.c)
+target_link_libraries(test_qr_decomposition_2 PRIVATE interp m)
+add_test(NAME qr_decomposition_2 COMMAND test_qr_decomposition_2)

@@ -4,7 +4,9 @@
 #ifdef __GNUC__
 #define INTERPLIB_INTERNAL __attribute__((visibility("hidden")))
 #define INTERPLIB_EXTERNAL __attribute__((visibility("default")))
-
+#ifdef _DEBUG
+#define INTERPLIB_BREAK __builtin_trap()
+#endif
 #define INTERPLIB_ARRAY_ARG(arr, sz) arr[sz]
 
 #define INTERPLIB_EXPECT_CONDITION(x) (__builtin_expect(x, 1))
@@ -23,11 +25,14 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef INTERPLIB_BREAK
+#define INTERPLIB_BREAK exit(EXIT_FAILURE)
+#endif
 #define ASSERT(condition, message, ...)                                                                                \
     ((condition) ? (void)0                                                                                             \
                  : (fprintf(stderr, "%s:%d: %s: Assertion '%s' failed - " message "\n", __FILE__, __LINE__, __func__,  \
                             #condition __VA_OPT__(, ) __VA_ARGS__),                                                    \
-                    exit(EXIT_FAILURE)))
+                    INTERPLIB_BREAK))
 #else
 #ifndef ASSERT
 #define ASSERT(condition, message) 0
