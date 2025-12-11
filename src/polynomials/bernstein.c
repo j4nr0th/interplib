@@ -5,7 +5,7 @@
 #include "bernstein.h"
 
 INTERPLIB_INTERNAL
-void bernstein_from_power_series(unsigned n, double INTERPLIB_ARRAY_ARG(coeffs, static n))
+void bernstein_from_power_series(const unsigned n, double INTERPLIB_ARRAY_ARG(coeffs, static n))
 {
     unsigned base_coefficient = 1;
     for (unsigned k = 0; k < n; ++k)
@@ -98,7 +98,12 @@ void bernstein_interpolation_value_derivative_matrix(const unsigned n_in,
             out_derivative[i * n_in + i_pos] =
                 n * (out_derivative[i * n_in + i_pos] - out_derivative[(i - 1) * n_in + i_pos]);
         }
-        out_derivative[0 * n_in + i_pos] *= n;
+        out_derivative[0 * n_in + i_pos] *= (double)n;
+        // Apply the chain rule and scale the gradient!
+        for (unsigned i = 0; i < n + 1; ++i)
+        {
+            out_derivative[i * n_in + i_pos] /= 2.0;
+        }
         // if (i_pos == n_in / 2)
         // {
         //     printf("Computed Bernstein basis at i_pos = %u (t = %f):", i_pos, x);

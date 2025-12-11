@@ -44,10 +44,12 @@ def plot_basis_set(basis_type: BasisType, order: int, ax: Axes) -> None:
 
 fig, axes = plt.subplots(2, 3, figsize=(12, 8), sharey=True)
 
-for ax, btype in zip(axes.flat, BasisType):
-    plot_basis_set(BasisType(btype), order=4, ax=ax)
+ORDER = 1
 
-fig.suptitle("Comparison of Basis Sets for Order=4", fontsize=14)
+for ax, btype in zip(axes.flat, BasisType):
+    plot_basis_set(BasisType(btype), order=ORDER, ax=ax)
+
+fig.suptitle(f"Comparison of Basis Sets for {ORDER=}", fontsize=14)
 
 plt.tight_layout(rect=(0, 0.05, 1, 0.95))
 plt.show()

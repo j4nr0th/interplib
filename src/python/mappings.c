@@ -785,3 +785,13 @@ PyType_Spec space_map_type_spec = {
             {},
         },
 };
+
+size_t space_map_inverse_size_per_integration_point(const space_map_object *map)
+{
+    return map->ndim * Py_SIZE(map);
+}
+
+const double *space_map_inverse_at_integration_point(const space_map_object *map, const size_t flat_index)
+{
+    return map->inverse_maps + flat_index * space_map_inverse_size_per_integration_point(map);
+}

@@ -2,8 +2,20 @@
 
 #include <math.h>
 
+// static void dbg_print_matrix(const matrix_t *m)
+// {
+//     for (unsigned i = 0; i < m->rows; ++i)
+//     {
+//         for (unsigned j = 0; j < m->cols; ++j)
+//             printf("%g ", m->values[i * m->cols + j]);
+//         printf("\n");
+//     }
+// }
+
 interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *const q)
 {
+    // printf("matrix_qr_decompose called with A:\n");
+    // dbg_print_matrix(ar);
 
     const unsigned rows = ar->rows;
     if (q->rows != rows || q->cols != rows)
@@ -34,6 +46,11 @@ interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *co
             double givens_c = r[col * cols + col];
             double givens_s = r[row * cols + col];
             const double givens_mag = hypot(givens_c, givens_s);
+            if (givens_mag < 1e-12)
+            {
+                // We're probably on a zeroed out part, just skip
+                continue;
+            }
             givens_c /= givens_mag;
             givens_s /= givens_mag;
 

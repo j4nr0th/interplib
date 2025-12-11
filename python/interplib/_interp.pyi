@@ -828,11 +828,10 @@ def compute_mass_matrix(
 
 def compute_gradient_mass_matrix(
     space_in: FunctionSpace,
-    idims_in: Sequence[int],
     space_out: FunctionSpace,
-    idims_out: Sequence[int],
     integration: IntegrationSpace | SpaceMap,
     /,
+    idim_in: int,
     *,
     integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
     basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
@@ -844,14 +843,11 @@ def compute_gradient_mass_matrix(
     space_in : FunctionSpace
         Function space for the input functions.
 
-    idim_in : Sequence of int
-        Indices of the dimension that input space is to be differentiated along.
-
     space_out : FunctionSpace
         Function space for the output functions.
 
-    idim_out : Sequence of int
-        Indices of the dimension that input space is to be differentiated along.
+    idim_im : int
+        Index of the dimension to take the derivative of the input space on.
 
     integration : IntegrationSpace or SpaceMap
         Integration space used to compute the mass matrix or a space mapping.
