@@ -473,6 +473,62 @@ static PyObject *function_space_values_at_integration_nodes(PyObject *self, PyTy
     return (PyObject *)out;
 }
 
+PyDoc_STRVAR(function_space_object_lower_order_docstring,
+             "lower_order(idim: int) -> FunctionSpace\n"
+             "Create a copy of the space with a lowered order in the specified dimension.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "idim : int\n"
+             "    Index of the dimension to lower the order on.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "FunctionSpace\n"
+             "    New function space with a lower order in the specified dimension.\n");
+
+static PyObject *function_space_object_lower_order(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                                   const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    function_space_object *this;
+    const interplib_module_state_t *state;
+    if (ensure_function_space_state(self, defining_class, &this, &state) < 0)
+        return NULL;
+    Py_ssize_t idim;
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {
+                    .type = CPYARG_TYPE_SSIZE,
+                    .p_val = &idim,
+                    .kwname = "idim",
+                },
+                {},
+            },
+            args, nargs, kwnames) < 0)
+        return NULL;
+
+    if (idim < 0 || (npy_intp)idim >= Py_SIZE(this))
+    {
+        PyErr_Format(PyExc_ValueError, "Dimension %zd is out of bounds for a function space with %zd dimensions.", idim,
+                     Py_SIZE(this));
+        return NULL;
+    }
+
+    if (this->specs[idim].order == 0)
+    {
+        PyErr_Format(PyExc_ValueError, "Cannot lower order of dimension %zd as it has order 0.", idim);
+        return NULL;
+    }
+
+    const unsigned ndim = Py_SIZE(this);
+    function_space_object *const new_space =
+        function_space_object_create(state->function_space_type, ndim, this->specs);
+    if (!new_space)
+        return NULL;
+    new_space->specs[idim].order -= 1;
+    return (PyObject *)new_space;
+}
+
 PyDoc_STRVAR(function_space_type_docstring,
              "FunctionSpace(*specs: BasisSpec)\n"
              "Function space defined with basis.\n"
@@ -567,6 +623,12 @@ PyType_Spec function_space_type_spec = {
                  .ml_meth = (void *)function_space_values_at_integration_nodes,
                  .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
                  .ml_doc = function_space_values_at_integration_nodes_docstring,
+             },
+             {
+                 .ml_name = "lower_order",
+                 .ml_meth = (void *)function_space_object_lower_order,
+                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                 .ml_doc = function_space_object_lower_order_docstring,
              },
              {},
          }},

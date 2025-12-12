@@ -532,6 +532,21 @@ class FunctionSpace:
         """
         ...
 
+    def lower_order(self, idim: int) -> FunctionSpace:
+        """Create a copy of the space with a lowered order in the specified dimension.
+
+        Parameters
+        ----------
+        idim : int
+            Index of the dimension to lower the order on.
+
+        Returns
+        -------
+        FunctionSpace
+            New function space with a lower order in the specified dimension.
+        """
+        ...
+
 @final
 class IntegrationSpace:
     """Integration space defined with integration rules.
