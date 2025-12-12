@@ -13,17 +13,16 @@ static void print_matrix(const matrix_t *m)
 
 enum
 {
-    DIM_1 = 3,
+    DIM_1 = 2,
     DIM_2 = 1,
 };
 
 int main()
 {
-    // 3 x 1 matrix
+    // 2 x 1 matrix
     double matrix_a[DIM_1 * DIM_2] = {
-        -0.41,
-        0.031,
-        0.138,
+        0,
+        1,
     };
 
     const matrix_t a = {.rows = DIM_1, .cols = DIM_2, .values = matrix_a};
@@ -65,6 +64,23 @@ int main()
             TEST_NUMBERS_CLOSE(va, vb, 1e-12, 1e-10);
         }
     }
+
+    const matrix_t inv = {.rows = DIM_2, .cols = DIM_1, .values = (double[DIM_2 * DIM_1]){}};
+    // Copy Transpose of Q to inv
+    for (unsigned i = 0; i < DIM_2; ++i)
+    {
+        for (unsigned j = 0; j < DIM_1; ++j)
+        {
+            inv.values[i * DIM_1 + j] = q.values[i * DIM_1 + j];
+        }
+    }
+    printf("Top part of Q^T:\n");
+    print_matrix(&inv);
+    // Invert R on Q
+    res = matrix_back_substitute(&r, &inv);
+    TEST_ASSERTION(res == INTERP_SUCCESS, "Back substitution failed");
+    printf("Computed R^(-1)Q^T:\n");
+    print_matrix(&inv);
 
     // Transpose matrix Q back
     for (unsigned i = 0; i < DIM_1; ++i)

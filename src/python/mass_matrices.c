@@ -394,14 +394,6 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
             args, nargs, kwnames) < 0)
         return NULL;
 
-    // Process input index
-    if (idx_in < 0 || idx_in >= Py_SIZE(space_in))
-    {
-        PyErr_Format(PyExc_ValueError, "Index %zd out of bounds for function space with %zd dimensions.", idx_in,
-                     (Py_ssize_t)Py_SIZE(space_in));
-        return NULL;
-    }
-
     unsigned n_int_specs;
     const integration_spec_t *p_int_specs;
     const double *p_det;
@@ -432,6 +424,14 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
     {
         PyErr_Format(PyExc_TypeError, "Integration space or space map must be passed, instead %s object was passed.",
                      Py_TYPE(py_integration)->tp_name);
+        return NULL;
+    }
+
+    // Process input index
+    if (idx_in < 0 || idx_in >= n_coords)
+    {
+        PyErr_Format(PyExc_ValueError, "Index %zd out of bounds for resulting space with %u dimensions.", idx_in,
+                     n_coords);
         return NULL;
     }
 

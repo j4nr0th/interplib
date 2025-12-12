@@ -403,7 +403,87 @@ static PyObject *basis_specs_values(PyObject *self, PyTypeObject *defining_class
     }
 
     basis_compute_at_point_prepare(this->spec.type, this->spec.order, work);
-    basis_compute_at_point_compute(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
+    basis_compute_at_point_values(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
+
+    PyMem_Free(work);
+
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(basis_specs_derivatives_docstring,
+             "derivatives(x: numpy.typing.ArrayLike, /) -> numpy.typing.NDArray[numpy.double]\n"
+             "Evaluate basis function derivatives at given locations.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "x : array_like\n"
+             "    Locations where the basis function derivatives should be evaluated.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of basis function derivatives at the specified locations.\n"
+             "    It has one more dimension than ``x``, with the last dimension\n"
+             "    corresponding to the basis function index.\n");
+
+static PyObject *basis_specs_derivatives(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                         const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    basis_specs_object *this;
+    if (ensure_basis_specs_and_state(self, defining_class, &state, &this) < 0)
+        return NULL;
+
+    if (nargs != 1 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "values() takes exactly one positional-only argument.");
+        return NULL;
+    }
+
+    const PyArrayObject *const x = (PyArrayObject *)args[0];
+    const npy_intp dummy[] = {0};
+    if (check_input_array(x, 0, dummy, NPY_DOUBLE, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED, "x") < 0)
+    {
+        return NULL;
+    }
+
+    const unsigned ndims = PyArray_NDIM(x);
+    const npy_intp *const dims = PyArray_DIMS(x);
+    const npy_double *const x_data = PyArray_DATA(x);
+
+    npy_intp *const out_dims = PyMem_Malloc((ndims + 1) * sizeof(*out_dims));
+    if (!out_dims)
+    {
+        return NULL;
+    }
+
+    unsigned cnt = 1;
+    for (unsigned i = 0; i < ndims; ++i)
+    {
+        out_dims[i] = dims[i];
+        cnt *= dims[i];
+    }
+
+    out_dims[ndims] = this->spec.order + 1;
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(ndims + 1, out_dims, NPY_DOUBLE);
+    PyMem_Free(out_dims);
+
+    if (!out)
+    {
+        return NULL;
+    }
+
+    double *const work = PyMem_Malloc((this->spec.order + 1) * sizeof(*work));
+    if (!work)
+    {
+        Py_DECREF(out);
+        return NULL;
+    }
+
+    basis_compute_at_point_prepare(this->spec.type, this->spec.order, work);
+    CPYUTL_ASSERT(PyArray_SIZE(out) == (npy_intp)(this->spec.order + 1) * cnt,
+                  "Output array is not as large as expected!");
+    basis_compute_at_point_derivatives(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
 
     PyMem_Free(work);
 
@@ -439,7 +519,7 @@ static PyObject *basis_specs_richcompare(PyObject *self, PyObject *other, const 
     return PyBool_FromLong(equal);
 }
 
-/* Spec for heap type */
+/* Spec for the heap type */
 PyType_Spec basis_specs_type_spec = {
     .name = "interplib._interp.BasisSpecs",
     .basicsize = sizeof(basis_specs_object),
@@ -454,10 +534,16 @@ PyType_Spec basis_specs_type_spec = {
             {Py_tp_methods,
              (PyMethodDef[]){
                  {
-                     "values",
-                     (void *)basis_specs_values,
-                     METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
-                     (void *)basis_specs_values_docstring,
+                     .ml_name = "values",
+                     .ml_meth = (void *)basis_specs_values,
+                     .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                     .ml_doc = (void *)basis_specs_values_docstring,
+                 },
+                 {
+                     .ml_name = "derivatives",
+                     .ml_meth = (void *)basis_specs_derivatives,
+                     .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                     .ml_doc = basis_specs_derivatives_docstring,
                  },
                  {},
              }},

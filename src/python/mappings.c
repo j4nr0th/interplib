@@ -494,7 +494,7 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         {
             for (unsigned icol = 0; icol < rows; ++icol)
             {
-                p_inv_map[irow * rows + icol] = q_mat[icol * rows + irow];
+                p_inv_map[irow * rows + icol] = q_mat[irow * rows + icol];
             }
         }
 

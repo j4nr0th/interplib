@@ -437,6 +437,23 @@ class BasisSpecs:
         """
         ...
 
+    def derivatives(self, x: npt.ArrayLike, /) -> npt.NDArray[np.double]:
+        """Evaluate basis function derivatives at given locations.
+
+        Parameters
+        ----------
+        x : array_like
+            Locations where the basis function derivatives should be evaluated.
+
+        Returns
+        -------
+        array
+            Array of basis function derivatives at the specified locations.
+            It has one more dimension than ``x``, with the last dimension
+            corresponding to the basis function index.
+        """
+        ...
+
 @final
 class FunctionSpace:
     """Function space defined with basis.

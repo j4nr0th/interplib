@@ -387,6 +387,10 @@ static PyObject *function_space_values_at_integration_nodes(PyObject *self, PyTy
         return NULL;
     }
 
+    CPYUTL_ASSERT((size_t)PyArray_SIZE(out) ==
+                      multidim_iterator_total_size(iterator_basis) * multidim_iterator_total_size(iterator_nodes),
+                  "Incorrect output size.");
+
     const basis_set_t **const basis_sets = PyMem_Malloc(ndim * sizeof(*basis_sets));
     if (!basis_sets)
     {

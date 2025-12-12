@@ -91,10 +91,15 @@ void basis_compute_at_point_prepare(basis_set_type_t type, unsigned order,
  *
  */
 INTERPLIB_INTERNAL
-void basis_compute_at_point_compute(basis_set_type_t type, unsigned order, unsigned cnt,
-                                    const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
-                                    double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
-                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+void basis_compute_at_point_values(basis_set_type_t type, unsigned order, unsigned cnt,
+                                   const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                   double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                   double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+
+void basis_compute_at_point_derivatives(basis_set_type_t type, unsigned order, unsigned cnt,
+                                        const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                        double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                        double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
 
 INTERPLIB_INTERNAL
 void basis_compute_outer_product_basis_required_memory(unsigned n_basis,

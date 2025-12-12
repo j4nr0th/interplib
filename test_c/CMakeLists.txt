@@ -64,3 +64,7 @@ add_test(NAME back_substitute COMMAND test_back_substitute)
 add_executable(test_qr_decomposition_2 operations/test_qr_decomposition_2.c)
 target_link_libraries(test_qr_decomposition_2 PRIVATE interp m)
 add_test(NAME qr_decomposition_2 COMMAND test_qr_decomposition_2)
+
+add_executable(test_qr_decomposition_3 operations/test_qr_decomposition_3.c)
+target_link_libraries(test_qr_decomposition_3 PRIVATE interp m)
+add_test(NAME qr_decomposition_3 COMMAND test_qr_decomposition_3)

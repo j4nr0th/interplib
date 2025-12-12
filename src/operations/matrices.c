@@ -44,7 +44,7 @@ interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *co
         for (unsigned col = 0; col < cols && col < row; ++col)
         {
             double givens_c = r[col * cols + col];
-            double givens_s = r[row * cols + col];
+            double givens_s = -r[row * cols + col];
             const double givens_mag = hypot(givens_c, givens_s);
             if (givens_mag < 1e-12)
             {
@@ -55,7 +55,7 @@ interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *co
             givens_s /= givens_mag;
 
             // Apply the rotation to the rows involved in the rotation
-            ASSERT(fabs(-givens_s * r[col * cols + col] + givens_c * r[row * cols + col]) < 1e-12,
+            ASSERT(fabs(givens_s * r[col * cols + col] + givens_c * r[row * cols + col]) < 1e-12,
                    "Givens rotation somehow does not properly eliminate the entries (c: %g, s:%g, with matrix entries "
                    "%g and %g).",
                    givens_c, givens_s, r[col * cols + col], r[row * cols + col]);
@@ -64,8 +64,8 @@ interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *co
             {
                 const double v1 = r[col * cols + k];
                 const double v2 = r[row * cols + k];
-                r[col * cols + k] = +givens_c * v1 + givens_s * v2;
-                r[row * cols + k] = -givens_s * v1 + givens_c * v2;
+                r[col * cols + k] = +givens_c * v1 - givens_s * v2;
+                r[row * cols + k] = +givens_s * v1 + givens_c * v2;
             }
 
             ASSERT(fabs(r[row * cols + col]) < 1e-12,
@@ -76,8 +76,8 @@ interp_result_t matrix_qr_decompose(const matrix_t *const ar, const matrix_t *co
             for (unsigned k = 0; k < rows; ++k)
             {
                 const double temp = qt[col * rows + k];
-                qt[col * rows + k] = +givens_c * temp + givens_s * qt[row * rows + k];
-                qt[row * rows + k] = -givens_s * temp + givens_c * qt[row * rows + k];
+                qt[col * rows + k] = +givens_c * temp - givens_s * qt[row * rows + k];
+                qt[row * rows + k] = +givens_s * temp + givens_c * qt[row * rows + k];
             }
         }
     }

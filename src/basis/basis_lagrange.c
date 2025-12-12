@@ -34,7 +34,7 @@ interp_result_t lagrange_basis_create(basis_set_t **out, const basis_spec_t spec
     case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
         for (unsigned i = 0; i < spec.order + 1; ++i)
         {
-            roots[i] = cos(M_PI * (double)(2 * i + 1) / (double)(2 * (spec.order + 1)));
+            roots[i] = -cos(M_PI * (double)(2 * i + 1) / (double)(2 * (spec.order + 1)));
         }
         break;
 
