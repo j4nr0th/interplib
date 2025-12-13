@@ -348,6 +348,7 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
     const function_space_object *space_in, *space_out;
     PyObject *py_integration;
     Py_ssize_t idx_in;
+    Py_ssize_t idx_out;
     const integration_registry_object *integration_registry =
         (const integration_registry_object *)state->registry_integration;
     const basis_registry_object *basis_registry = (const basis_registry_object *)state->registry_basis;
@@ -372,6 +373,11 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
                     .type = CPYARG_TYPE_SSIZE,
                     .p_val = &idx_in,
                     .kwname = "idx_in",
+                },
+                {
+                    .type = CPYARG_TYPE_SSIZE,
+                    .p_val = &idx_out,
+                    .kwname = "idx_out",
                 },
                 {
                     .type = CPYARG_TYPE_PYTHON,
@@ -427,10 +433,17 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
         return NULL;
     }
 
-    // Process input index
-    if (idx_in < 0 || idx_in >= n_coords)
+    // Check input index
+    if (idx_in < 0 || idx_in >= n_int_specs)
     {
-        PyErr_Format(PyExc_ValueError, "Index %zd out of bounds for resulting space with %u dimensions.", idx_in,
+        PyErr_Format(PyExc_ValueError, "Index %zd out of bounds for input space with %u dimensions.", idx_in,
+                     n_int_specs);
+        return NULL;
+    }
+    // Check output index
+    if (idx_out < 0 || idx_out >= n_coords)
+    {
+        PyErr_Format(PyExc_ValueError, "Index %zd out of bounds for output space with %u dimensions.", idx_out,
                      n_coords);
         return NULL;
     }
@@ -443,6 +456,21 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
             "Function spaces must have the same dimensionality (space in: %u, space out: %u, integration space: %u).",
             (unsigned)Py_SIZE(space_in), (unsigned)Py_SIZE(space_out), n_int_specs);
         return NULL;
+    }
+
+    // Quick check. If there's no space map (p_det = NULL) and idx_in != idx_out,
+    // then every entry is zero and we do a quick return.
+    if (p_det == NULL && idx_in != idx_out)
+    {
+        // Compute input and output space sizes
+        npy_intp dims[2] = {1, 1};
+        for (unsigned i = 0; i < n_int_specs; ++i)
+        {
+            dims[0] *= space_out->specs[i].order + 1;
+            dims[1] *= space_in->specs[i].order + 1;
+        }
+        // Return already
+        return PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
     }
 
     // Create resources
@@ -481,12 +509,13 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
         // Integrate the basis product
         while (!multidim_iterator_is_at_end(resources.iter_int))
         {
+            const size_t integration_point_flat_idx = multidim_iterator_get_flat_index(resources.iter_int);
             // Compute weight and basis values for these outer product basis and integration
-            double weight =
-                resources.determinant ? resources.determinant[multidim_iterator_get_flat_index(resources.iter_int)] : 1;
             const double *const local_inverse =
-                inverse_map ? inverse_map + inv_map_stride * multidim_iterator_get_flat_index(resources.iter_int)
-                            : NULL;
+                inverse_map ? inverse_map + inv_map_stride * integration_point_flat_idx : NULL;
+            double weight = resources.determinant ? resources.determinant[integration_point_flat_idx] *
+                                                        local_inverse[(size_t)idx_in * n_coords + idx_out]
+                                                  : 1;
 
             for (unsigned idim = 0; idim < n_space_dim; ++idim)
             {
@@ -494,26 +523,9 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
                 weight *= integration_rule_weights_const(resources.rules[idim])[integration_point_idx];
             }
 
-            double basis_in = 0;
             // Chain rule for derivatives
-            if (local_inverse)
-            {
-                for (unsigned idim = 0; idim < n_space_dim; ++idim)
-                {
-                    // Raw derivative
-                    const double derivative_val = evaluate_basis_derivative_at_integration_point(
-                        n_space_dim, idim, resources.iter_int, resources.iter_in, resources.basis_in);
-                    // Scale by inverse transform
-                    const double scaled_derivative_val =
-                        derivative_val * local_inverse[(size_t)idim * n_coords + idx_in];
-                    basis_in += scaled_derivative_val;
-                }
-            }
-            else
-            {
-                basis_in = evaluate_basis_derivative_at_integration_point(n_space_dim, idx_in, resources.iter_int,
-                                                                          resources.iter_in, resources.basis_in);
-            }
+            const double basis_in = evaluate_basis_derivative_at_integration_point(
+                n_space_dim, idx_in, resources.iter_int, resources.iter_in, resources.basis_in);
 
             const double basis_out = evaluate_basis_at_integration_point(n_space_dim, resources.iter_int,
                                                                          resources.iter_out, resources.basis_out);

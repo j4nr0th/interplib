@@ -864,11 +864,16 @@ def compute_gradient_mass_matrix(
     integration: IntegrationSpace | SpaceMap,
     /,
     idim_in: int,
+    idim_out: int,
     *,
     integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
     basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
 ) -> npt.NDArray[np.double]:
     """Compute the mass matrix between two function spaces.
+
+    The purpose of this function is to compute the matrix, which transfers
+    the contribution of derivative along the reference space dimension
+    to the physical space derivative.
 
     Parameters
     ----------
@@ -880,6 +885,10 @@ def compute_gradient_mass_matrix(
 
     idim_im : int
         Index of the dimension to take the derivative of the input space on.
+
+    idim_out : int
+        Index of the output space on which the component of the derivative should
+        be returned on.
 
     integration : IntegrationSpace or SpaceMap
         Integration space used to compute the mass matrix or a space mapping.
