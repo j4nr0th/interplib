@@ -109,6 +109,16 @@ void lagrange_polynomial_values_2(const unsigned n_pos, const double INTERPLIB_A
                                   const unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
                                   double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos))
 {
+    // Special case: n_roots == 1, where there is 1 basis, which is 1 everywhere
+    if (n_roots == 1)
+    {
+        // Constant everywhere, then just return
+        for (unsigned k = 0; k < n_pos; ++k)
+            values[k] = 1.0;
+
+        return;
+    }
+
     double *const denominators = values + n_roots * (n_pos - 1);
     // Store denominators in the last row
     lagrange_polynomial_denominators(n_roots, p_roots, denominators);

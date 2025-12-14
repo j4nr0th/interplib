@@ -119,6 +119,7 @@ set(PYTHON_NUMERICS_SOURCE_FILES
         src/python/mass_matrices.c
         src/python/degrees_of_freedom.c
         src/python/mappings.c
+        src/python/incidence.c
 )
 
 Python_add_library(_interp MODULE

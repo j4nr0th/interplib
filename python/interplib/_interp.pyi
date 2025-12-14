@@ -818,6 +818,22 @@ class SpaceMap:
         """
         ...
 
+def incidence_matrix(specs: BasisSpecs) -> npt.NDArray[np.double]:
+    """Return the incidence matrix to transfer derivative degrees of freedom.
+
+    Parameters
+    ----------
+    specs : BasisSpecs
+        Basis specs for which this incidence matrix should be computed.
+
+    Returns
+    -------
+    array
+        One dimensional incidence matrix. It transfers primal degrees of freedom
+        for a derivative to a function space one order less than the original.
+    """
+    ...
+
 def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,

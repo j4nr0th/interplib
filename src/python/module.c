@@ -22,6 +22,7 @@
 #include "cpyutl.h"
 #include "degrees_of_freedom.h"
 #include "function_space_objects.h"
+#include "incidence.h"
 #include "topology/geoid_object.h"
 #include "topology/line_object.h"
 #include "topology/manifold1d_object.h"
@@ -831,7 +832,7 @@ static int interplib_add_functions(PyObject *mod)
         return -1;
     }
 
-    if (PyModule_AddFunctions(mod, mass_matrices_methods) < 0)
+    if (PyModule_AddFunctions(mod, mass_matrices_methods) < 0 || PyModule_AddFunctions(mod, incidence_methods) < 0)
         return -1;
 
     return 0;

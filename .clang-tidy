@@ -38,4 +38,5 @@ google-runtime-int,
 modernize-*,
 -modernize-avoid-variadic-functions,
 -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
--bugprone-assignment-in-if-condition'
+-bugprone-assignment-in-if-condition,
+-bugprone-easily-swappable-parameters'
