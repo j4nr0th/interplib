@@ -55,6 +55,18 @@ set(INTEGRATION_HEADER_FILES
         src/integration/gauss_lobatto.h
 )
 
+set(OPERATIONS_SOURCE_FILES
+        src/operations/multidim_iteration.c
+        src/operations/reconstruction.c
+        src/operations/matrices.c
+)
+
+set(OPERATIONS_HEADER_FILES
+        src/operations/multidim_iteration.h
+        src/operations/reconstruction.h
+        src/operations/matrices.h
+)
+
 set(POLYNOMIALS_SOURCE_FILES
         src/polynomials/bernstein.c
         src/polynomials/lagrange.c
@@ -79,15 +91,16 @@ add_library(interp STATIC
         ${BASIS_SOURCE_FILES}
         ${COMMON_SOURCE_FILES}
         ${INTEGRATION_SOURCE_FILES}
+        ${OPERATIONS_SOURCE_FILES}
         ${TOPOLOGY_SOURCE_FILES}
         ${POLYNOMIALS_SOURCE_FILES}
 )
 
 set_property(TARGET interp PROPERTY C_STANDARD 17)
 target_compile_definitions(interp PRIVATE INTERPLIB_ASSERTS)
-target_link_libraries(interp PRIVATE m)
+target_link_libraries(interp PUBLIC m OpenMP::OpenMP_C)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(interp PRIVATE -Wall -Wextra -fanalyzer -Werror)
+    target_compile_options(interp PRIVATE -Wall -Wextra -Werror -fanalyzer -Werror)
 endif ()
 
 set(PYTHON_TOPOLOGY_SOURCE_FILES
@@ -102,6 +115,11 @@ set(PYTHON_TOPOLOGY_SOURCE_FILES
 set(PYTHON_NUMERICS_SOURCE_FILES
         src/python/integration_objects.c
         src/python/basis_objects.c
+        src/python/function_space_objects.c
+        src/python/mass_matrices.c
+        src/python/degrees_of_freedom.c
+        src/python/mappings.c
+        src/python/incidence.c
 )
 
 Python_add_library(_interp MODULE
@@ -115,15 +133,15 @@ add_subdirectory(cpyutl)
 target_link_libraries(_interp PRIVATE interp cpyutl)
 set_property(TARGET _interp PROPERTY C_STANDARD 17)
 install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
-target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS)
+target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS CPYUTL_ENABLE_ASSERTS)
 
 if ("${NumPy_INCLUDE_DIRS}" STREQUAL "")
     message(FATAL_ERROR "NumPy_INCLUDE_DIRS was empty.")
 endif ()
 target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} cpyutl/src)
 
-if (CMAKE_C_COMPILER_ID EQUAL "GNU")
-    target_compile_options(_interp PRIVATE -Wall -Wextra -fwhole-program -flto=auto)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(_interp PRIVATE -Wall -Wextra -Werror -flto=auto)
 endif ()
 
 

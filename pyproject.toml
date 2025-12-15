@@ -3,7 +3,7 @@ name = "interplib"
 version = "0.0.1a"
 authors = [{ name = "Jan Roth", email = "r0th.j4n@gmail.com" }]
 description = "Interpolation library designed to handle different topologies."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["numpy>=2.0.0", "scipy"]
 
 
@@ -19,14 +19,13 @@ build.verbose = true
 logging.level = "INFO"
 editable.verbose = true
 editable.rebuild = false
-# wheel.py-api = "cp310"
 
 
 [project.optional-dependencies]
 dev = [
     "build",
     "scikit-build-core",
-    "mypy",
+    "pyrefly",
     "npt-promote",
     "pytest",
     "pytest-cov",
@@ -34,8 +33,6 @@ dev = [
     "nox",
     "pre-commit",
     "codespell",
-    "trame",
-    "trame-vtk",
     "trame-vuetify",
     "tomli",
 ]
@@ -45,7 +42,6 @@ docs = [
     "sphinx-favicon",
     "sphinx-design",
     "sphinx-gallery",
-    "pyvista[jupyter,trame]",
     "pypandoc",
     "pytest-sphinx",
     "sphinx-autobuild",
@@ -54,16 +50,16 @@ docs = [
     "sphinxcontrib-websupport",
     "sphinxcontrib-asciinema",
     "jupyter-sphinx",
+    "matplotlib",
 ]
 
 
-[tool.mypy]
-mypy_path = "python/interplib"
-plugins = ["npt_promote"]
-ignore_missing_imports = true
-warn_unused_configs = true
-warn_unused_ignores = true
-strict_equality = true
+[tool.pyrefly]
+project-includes = ["python/interplib/**/*.py", "python/interplib/**/*.pyi"]
+use-ignore-files = true
+search-path = ["python/interplib"]
+ignore-missing-imports = ["*"]
+
 
 [tool.codespell]
 skip = "sandbox/*"
@@ -90,10 +86,20 @@ unfixable = []
 convention = "numpy"
 
 [tool.pytest]
-exclude_also = ["if TYPE_CHECKING:", "@(abc\\.)?abstractmethod"]
-addopts = ["--doctest-modules", "-ra", "--cov=interplib"]
+addopts = ["--doctest-modules", "-ra", "--cov=interplib", "--ignore=cpyutl"]
 testpaths = ["tests", "src"]
 console_output_style = "count"
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "@(abc\\.)?abstractmethod",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
 
 
 [tool.interrogate]

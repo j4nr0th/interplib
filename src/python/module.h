@@ -27,6 +27,10 @@
 #endif
 
 #include <Python.h>
+#include <numpy/ndarrayobject.h>
+
+// This must be after the NumPy include
+#include <cpyutl.h>
 
 INTERPLIB_INTERNAL
 extern allocator_callbacks SYSTEM_ALLOCATOR;
@@ -45,10 +49,19 @@ typedef struct
     // Integration
     PyTypeObject *integration_spec_type;
     PyTypeObject *integration_registry_type;
+    PyTypeObject *integration_space_type;
 
     // Basis
     PyTypeObject *basis_registry_type;
     PyTypeObject *basis_spec_type;
+
+    // Function Spaces
+    PyTypeObject *function_space_type;
+
+    // DoFs
+    PyTypeObject *degrees_of_freedom_type;
+    PyTypeObject *coordinate_mapping_type;
+    PyTypeObject *space_mapping_type;
 
     // Topology
     PyTypeObject *geoid_type;

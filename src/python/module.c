@@ -15,9 +15,14 @@
 #include "../polynomials/lagrange.h"
 #include "basis_objects.h"
 #include "integration_objects.h"
+#include "mappings.h"
+#include "mass_matrices.h"
 
 // Topology
 #include "cpyutl.h"
+#include "degrees_of_freedom.h"
+#include "function_space_objects.h"
+#include "incidence.h"
 #include "topology/geoid_object.h"
 #include "topology/line_object.h"
 #include "topology/manifold1d_object.h"
@@ -267,7 +272,6 @@ PyDoc_STRVAR(interp_lagrange_doc,
              "    >>> plt.grid()\n"
              "    >>> plt.show()\n"
              "\n"
-
              "Accuracy is retained even at very high polynomial order. The following\n"
              "snippet shows that even at absurdly high order of 51, the results still\n"
              "have high accuracy and don't suffer from rounding errors. It also performs\n"
@@ -324,8 +328,8 @@ static PyObject *interp_dlagrange(PyObject *Py_UNUSED(module), PyObject *args)
     const npy_intp n_dim = PyArray_NDIM(positions);
     const npy_intp *const p_dim = PyArray_DIMS(positions);
 
-    size_t size_work = sizeof(double) * 2 * n_roots;
-    size_t size_buffet = sizeof(npy_intp) * (n_dim + 1);
+    const size_t size_work = sizeof(double) * 2 * n_roots;
+    const size_t size_buffet = sizeof(npy_intp) * (n_dim + 1);
     void *const mem_buffer = PyMem_Malloc(size_buffet > size_work ? size_buffet : size_work);
     if (!mem_buffer)
     {
@@ -746,13 +750,13 @@ static PyMethodDef module_methods[] = {
     },
     {
         "bernstein1d",
-        (PyCFunction)bernstein_interpolation_matrix,
+        (void *)bernstein_interpolation_matrix,
         METH_FASTCALL,
         bernstein_interpolation_matrix_doc,
     },
     {
         "bernstein_coefficients",
-        (PyCFunction)bernstein_coefficients,
+        (void *)bernstein_coefficients,
         METH_O,
         bernstein_coefficients_doc,
     },
@@ -778,6 +782,9 @@ static void free_module_state(void *module)
 
 static int interplib_add_types(PyObject *mod)
 {
+    if (PyArray_ImportNumPyAPI() < 0)
+        return -1;
+
     interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
     if (!module_state)
     {
@@ -792,6 +799,16 @@ static int interplib_add_types(PyObject *mod)
             NULL ||
         (module_state->basis_registry_type =
              cpyutl_add_type_from_spec_to_module(mod, &basis_registry_type_specs, NULL)) == NULL ||
+        (module_state->function_space_type =
+             cpyutl_add_type_from_spec_to_module(mod, &function_space_type_spec, NULL)) == NULL ||
+        (module_state->integration_space_type =
+             cpyutl_add_type_from_spec_to_module(mod, &integration_space_type_spec, NULL)) == NULL ||
+        (module_state->degrees_of_freedom_type =
+             cpyutl_add_type_from_spec_to_module(mod, &degrees_of_freedom_type_spec, NULL)) == NULL ||
+        (module_state->coordinate_mapping_type =
+             cpyutl_add_type_from_spec_to_module(mod, &coordinate_map_type_spec, NULL)) == NULL ||
+        (module_state->space_mapping_type = cpyutl_add_type_from_spec_to_module(mod, &space_map_type_spec, NULL)) ==
+            NULL ||
         (module_state->geoid_type = cpyutl_add_type_from_spec_to_module(mod, &geo_id_type_spec, NULL)) == NULL ||
         (module_state->line_type = cpyutl_add_type_from_spec_to_module(mod, &line_type_spec, NULL)) == NULL ||
         (module_state->surf_type = cpyutl_add_type_from_spec_to_module(mod, &surface_type_spec, NULL)) == NULL ||
@@ -803,6 +820,20 @@ static int interplib_add_types(PyObject *mod)
     {
         return -1;
     }
+
+    return 0;
+}
+
+static int interplib_add_functions(PyObject *mod)
+{
+    interplib_module_state_t *const module_state = (interplib_module_state_t *)PyModule_GetState(mod);
+    if (!module_state)
+    {
+        return -1;
+    }
+
+    if (PyModule_AddFunctions(mod, mass_matrices_methods) < 0 || PyModule_AddFunctions(mod, incidence_methods) < 0)
+        return -1;
 
     return 0;
 }
@@ -849,6 +880,7 @@ PyModuleDef interplib_module = {
     .m_slots =
         (PyModuleDef_Slot[]){
             {.slot = Py_mod_exec, .value = interplib_add_types},
+            {.slot = Py_mod_exec, .value = interplib_add_functions},
             {.slot = Py_mod_exec, .value = interplib_add_registries},
             {.slot = Py_mod_multiple_interpreters, .value = Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED},
             {},
@@ -858,8 +890,6 @@ PyModuleDef interplib_module = {
 PyMODINIT_FUNC PyInit__interp(void)
 {
     import_array();
-    if (PyArray_ImportNumPyAPI() < 0)
-        return NULL;
 
     return PyModuleDef_Init(&interplib_module);
 }

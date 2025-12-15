@@ -5,7 +5,7 @@
 #include "bernstein.h"
 
 INTERPLIB_INTERNAL
-void bernstein_from_power_series(unsigned n, double INTERPLIB_ARRAY_ARG(coeffs, static n))
+void bernstein_from_power_series(const unsigned n, double INTERPLIB_ARRAY_ARG(coeffs, static n))
 {
     unsigned base_coefficient = 1;
     for (unsigned k = 0; k < n; ++k)
@@ -57,6 +57,17 @@ void bernstein_interpolation_value_derivative_matrix(const unsigned n_in,
                                                      double INTERPLIB_ARRAY_ARG(out_value, restrict(n + 1) * n_in),
                                                      double INTERPLIB_ARRAY_ARG(out_derivative, restrict(n + 1) * n_in))
 {
+    // Quick bail if n is 0
+    if (n == 0)
+    {
+        for (unsigned i_pos = 0; i_pos < n_in; ++i_pos)
+        {
+            out_value[0 * n_in + i_pos] = 1.0;
+            out_derivative[0 * n_in + i_pos] = 0.0;
+        }
+        return;
+    }
+
     //  Bernstein polynomials follow the following recursion:
     //
     //  B^{N+1}_k(t) = t B^{N}_{k-1}(t) + (1-t) B^{N}_k(t)
@@ -92,11 +103,17 @@ void bernstein_interpolation_value_derivative_matrix(const unsigned n_in,
         out_value[0 * n + i_pos] = out_derivative[0 * n + i_pos] * a;
 
         // Convert the order n - 1 from the derivative output into the derivative in place
-        for (unsigned i = n; i > 0; --i)
+        out_derivative[n * n_in + i_pos] = n * out_derivative[(n - 1) * n_in + i_pos];
+        for (unsigned i = n - 1; i > 0; --i)
         {
             out_derivative[i * n_in + i_pos] =
-                n * (out_derivative[i * n_in + i_pos] - out_derivative[(i - 1) * n_in + i_pos]);
+                n * (out_derivative[(i - 1) * n_in + i_pos] - out_derivative[i * n_in + i_pos]);
         }
-        out_derivative[0 * n_in + i_pos] = 1.0;
+        out_derivative[0 * n_in + i_pos] *= -(double)n;
+        // Apply the chain rule and scale the gradient!
+        for (unsigned i = 0; i < n + 1; ++i)
+        {
+            out_derivative[i * n_in + i_pos] /= 2.0;
+        }
     }
 }

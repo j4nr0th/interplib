@@ -10,7 +10,7 @@ supported rules:
 """  # noqa: D205 D400
 
 import numpy as np
-from interplib import IntegrationMethod, IntegrationRule, bernstein1d
+from interplib import IntegrationMethod, IntegrationSpecs, bernstein1d
 from matplotlib import pyplot as plt
 
 # %%
@@ -24,12 +24,12 @@ from matplotlib import pyplot as plt
 # endpoints of the domain, which makes it useful for some cases, but it reduces the
 # accuracy of integration to order :math:`2n - 3` for a rule of order :math:`n`.
 
-rule_gauss = IntegrationRule(5, IntegrationMethod.GAUSS)
-rule_gl = IntegrationRule(5, IntegrationMethod.GAUSS_LOBATTO)
+rule_gauss = IntegrationSpecs(5, IntegrationMethod.GAUSS)
+rule_gl = IntegrationSpecs(5, IntegrationMethod.GAUSS_LOBATTO)
 
 fig, ax = plt.subplots()
-ax.scatter(rule_gauss.nodes, rule_gauss.weights, label="Gauss")
-ax.scatter(rule_gl.nodes, rule_gl.weights, label="Gauss-Lobatto")
+ax.scatter(rule_gauss.nodes(), rule_gauss.weights(), label="Gauss")
+ax.scatter(rule_gl.nodes(), rule_gl.weights(), label="Gauss-Lobatto")
 ax.grid()
 ax.legend()
 ax.set_ylim(0)
@@ -65,8 +65,8 @@ gauss_integral_values: list[float] = list()
 
 gauss_order = 0
 while True:
-    rule = IntegrationRule(gauss_order, IntegrationMethod.GAUSS)
-    value = np.dot(rule.weights, eval_polynomial((rule.nodes - 1) / 2)) / 2
+    rule = IntegrationSpecs(gauss_order, IntegrationMethod.GAUSS)
+    value = np.dot(rule.weights(), eval_polynomial((rule.nodes() - 1) / 2)) / 2
     gauss_integral_values.append(value)
     if rule.accuracy >= N_POLY + 2:
         # Go one further
@@ -84,8 +84,8 @@ gauss_lobatto_integral_values: list[float] = list()
 
 gauss_lobatto_order = 0
 while True:
-    rule = IntegrationRule(gauss_lobatto_order, IntegrationMethod.GAUSS_LOBATTO)
-    value = np.dot(rule.weights, eval_polynomial((rule.nodes - 1) / 2)) / 2
+    rule = IntegrationSpecs(gauss_lobatto_order, IntegrationMethod.GAUSS_LOBATTO)
+    value = np.dot(rule.weights(), eval_polynomial((rule.nodes() - 1) / 2)) / 2
     gauss_lobatto_integral_values.append(value)
     if rule.accuracy >= N_POLY + 2:
         # Go one further

@@ -409,7 +409,7 @@ class BasisSpecs:
         Order of the basis in the set.
     """
 
-    def __new__(cls, basis_type: _BasisTypeHint, order: int) -> Self: ...
+    def __new__(cls, basis_type: _BasisTypeHint, order: int, /) -> Self: ...
     @property
     def basis_type(self) -> _BasisTypeHint:
         """Type of the basis used for the set."""
@@ -420,6 +420,528 @@ class BasisSpecs:
         """Order of the basis in the set."""
         ...
 
+    def values(self, x: npt.ArrayLike, /) -> npt.NDArray[np.double]:
+        """Evaluate basis functions at given locations.
+
+        Parameters
+        ----------
+        x : array_like
+            Locations where the basis functions should be evaluated.
+
+        Returns
+        -------
+        array
+            Array of basis function values at the specified locations.
+            It has one more dimension than ``x``, with the last dimension
+            corresponding to the basis function index.
+        """
+        ...
+
+    def derivatives(self, x: npt.ArrayLike, /) -> npt.NDArray[np.double]:
+        """Evaluate basis function derivatives at given locations.
+
+        Parameters
+        ----------
+        x : array_like
+            Locations where the basis function derivatives should be evaluated.
+
+        Returns
+        -------
+        array
+            Array of basis function derivatives at the specified locations.
+            It has one more dimension than ``x``, with the last dimension
+            corresponding to the basis function index.
+        """
+        ...
+
+@final
+class FunctionSpace:
+    """Function space defined with basis.
+
+    Function space defined by tensor product of basis functions in each dimension.
+    Basis for each dimension are defined by a BasisSpecs object.
+
+    Parameters
+    ----------
+    *basis_specs : BasisSpecs
+        Basis specifications for each dimension of the function space.
+    """
+
+    def __new__(cls, *basis_specs: BasisSpecs) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the function space."""
+        ...
+    @property
+    def basis_specs(self) -> tuple[BasisSpecs, ...]:
+        """Basis specifications that define the function space."""
+        ...
+    @property
+    def orders(self) -> tuple[int, ...]:
+        """Orders of the basis in each dimension."""
+        ...
+
+    def evaluate(
+        self, *x: npt.NDArray[np.double], out: npt.NDArray[np.double] | None = None
+    ) -> npt.NDArray[np.double]:
+        """Evaluate basis functions at given locations.
+
+        Parameters
+        ----------
+        *x : array
+            Coordinates where the basis functions should be evaluated.
+            Each array corresponds to a dimension in the function space.
+        out : array, optional
+            Array where the results should be written to. If not given, a new one
+            will be created and returned. It should have the same shape as ``x``,
+            but with an extra dimension added, the length of which is the total
+            number of basis functions in the function space.
+
+        Returns
+        -------
+        array
+            Array of basis function values at the specified locations.
+        """
+        ...
+
+    def values_at_integration_nodes(
+        self,
+        integration: IntegrationSpace,
+        /,
+        *,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+    ) -> npt.NDArray[np.double]:
+        """Return values of basis at integration points.
+
+        Parameters
+        ----------
+        integration : IntegrationSpace
+            Integration space, the nodes of which are used to evaluate basis at.
+
+        integration_registry : IntegrationRegistry, defaul: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to obtain the integration rules from.
+
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Registry used to look up basis values.
+
+        Returns
+        -------
+        array
+            Array of basis function values at the integration points locations.
+        """
+        ...
+
+    def lower_order(self, idim: int) -> FunctionSpace:
+        """Create a copy of the space with a lowered order in the specified dimension.
+
+        Parameters
+        ----------
+        idim : int
+            Index of the dimension to lower the order on.
+
+        Returns
+        -------
+        FunctionSpace
+            New function space with a lower order in the specified dimension.
+        """
+        ...
+
+@final
+class IntegrationSpace:
+    """Integration space defined with integration rules.
+
+    Integration space defined by tensor product of integration rules in each
+    dimension. Integration rule for each dimension are defined by an
+    IntegrationSpecs object.
+
+    Parameters
+    ----------
+    *integration_specs : IntegrationSpecs
+        Integration specifications for each dimension of the integration space.
+    """
+
+    def __new__(cls, *integration_specs: IntegrationSpecs) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the integration space."""
+        ...
+    @property
+    def integration_specs(self) -> tuple[IntegrationSpecs, ...]:
+        """Integration specifications that define the integration space."""
+        ...
+    @property
+    def orders(self) -> tuple[int, ...]:
+        """Orders of the integration rules in each dimension."""
+        ...
+
+    def nodes(
+        self, registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, /
+    ) -> npt.NDArray[np.double]:
+        """Get the integration nodes of the space.
+
+        registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+
+        Returns
+        -------
+        array
+            Array of integration nodes.
+        """
+        ...
+
+    def weights(
+        self, registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY, /
+    ) -> npt.NDArray[np.double]:
+        """Get the integration weights of the space.
+
+        registry : interplib.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+
+        Returns
+        -------
+        array
+            Array of integration weights.
+        """
+        ...
+
+@final
+class DegreesOfFreedom:
+    """Degrees of freedom associated with a function space.
+
+    Parameters
+    ----------
+    function_space : FunctionSpace
+        Function space the degrees of freedom belong to.
+    values : array_like, optional
+        Values of the degrees of freedom. When not specified, they are zero initialized.
+    """
+
+    def __new__(
+        cls, function_space: FunctionSpace, values: npt.ArrayLike | None = None, /
+    ) -> Self: ...
+    @property
+    def function_space(self) -> FunctionSpace:
+        """Function space the degrees of freedom belong to."""
+        ...
+    @property
+    def n_dofs(self) -> int:
+        """Total number of degrees of freedom."""
+        ...
+    @property
+    def values(self) -> npt.NDArray[np.double]:
+        """Values of the degrees of freedom."""
+        ...
+    @values.setter
+    def values(self, value: npt.ArrayLike) -> None:
+        """Assign new values to the degrees of freedom."""
+        ...
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Shape of the degrees of freedom."""
+        ...
+
+    def reconstruct_at_integration_points(
+        self,
+        integration_space: IntegrationSpace,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+        *,
+        out: npt.NDArray[np.double] | None = None,
+    ) -> npt.NDArray[np.double]:
+        """Reconstruct the function at the integration points of the given space.
+
+        Parameters
+        ----------
+        integration_space : IntegrationSpace
+            Integration space where the function should be reconstructed.
+        integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Registry used to retrieve the basis specifications.
+        out : array, optional
+            Array where the results should be written to. If not given, a new one
+            will be created and returned. It should have the same shape as the
+            integration points.
+
+        Returns
+        -------
+        array
+            Array of reconstructed function values at the integration points.
+        """
+        ...
+
+    def reconstruct_derivative_at_integration_points(
+        self,
+        integration_space: IntegrationSpace,
+        idim: Sequence[int],
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+        *,
+        out: npt.NDArray[np.double] | None = None,
+    ) -> npt.NDArray[np.double]:
+        """Reconstruct the derivative of the function in given dimension.
+
+        Parameters
+        ----------
+        integration_space : IntegrationSpace
+            Integration space where the function derivative should be reconstructed.
+        idim : Sequence[int]
+            Dimensions in which the derivative should be computed. All values
+            should appear at most once.
+        integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+            Registry used to retrieve the integration rules.
+        basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+            Registry used to retrieve the basis specifications.
+        out : array, optional
+            Array where the results should be written to. If not given, a new one
+            will be created and returned. It should have the same shape as the
+            integration points.
+
+        Returns
+        -------
+        array
+            Array of reconstructed function derivative values at the integration points.
+        """
+        ...
+
+    def derivative(self, idim: int) -> DegreesOfFreedom:
+        """Return degrees of freedom of the derivative along the reference dimension.
+
+        Parameters
+        ----------
+        idim : int
+            Index of the reference dimension along which the derivative should be taken.
+
+        Returns
+        -------
+        DegreesOfFreedom
+            Degrees of freedom of the computed derivative.
+        """
+        ...
+
+@final
+class CoordinateMap:
+    """Mapping between reference and physical coordinates.
+
+    This is type is a glorified wrapper around
+    :meth:`DegreesOfFreedom.reconstruct_at_integration_points()`
+    that represents a coordinate mapping for one dimension. In N-dimensional space,
+    N such maps are used to represent the full mapping.
+
+    Parameters
+    ----------
+    dofs : DegreesOfFreedom
+        Degrees of freedom that define the coordinate map.
+    integration_space : IntegrationSpace
+        Integration space used for the mapping.
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        Registry used to retrieve the integration rules.
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        Registry used to retrieve the basis specifications.
+    """
+
+    def __new__(
+        cls,
+        dofs: DegreesOfFreedom,
+        integration_space: IntegrationSpace,
+        integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+        basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+        /,
+    ) -> Self: ...
+    @property
+    def dimension(self) -> int:
+        """Number of dimensions in the coordinate map."""
+        ...
+
+    @property
+    def integration_space(self) -> IntegrationSpace:
+        """Integration space used for the mapping."""
+        ...
+
+    @property
+    def values(self) -> npt.NDArray[np.double]:
+        """Values of the coordinate map at the integration points."""
+        ...
+
+    def gradient(self, idim: int, /) -> npt.NDArray[np.double]:
+        """Retrieve the gradient of the coordinate map in given dimension."""
+        ...
+
+@final
+class SpaceMap:
+    """Mapping between a reference space and a physical space.
+
+    A mapping from a reference space to a physical space, which maps the
+    :math:`N`-dimensional reference space to an :math:`M`-dimensional
+    physical space. With this mapping, it is possible to integrate a
+    quantity on a deformed element.
+
+    Parameters
+    ----------
+    *coordinates : CoordinateMap
+        Maps for each coordinate of physical space. All of these must be
+        defined on the same :class:`IntegrationSpace`.
+    """
+
+    def __new__(cls, *coordinates: CoordinateMap) -> Self: ...
+    def coordinate_map(self, idx: int) -> CoordinateMap:
+        """Return the coordinate map for the specified dimension.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the dimension for which the map shoudl be returned.
+
+        Returns
+        -------
+        CoordinateMap
+            Map used for the specified coordinate.
+        """
+        ...
+
+    @property
+    def integration_space(self) -> IntegrationSpace:
+        """Integration space used by the map."""
+        ...
+
+    @property
+    def input_dimensions(self) -> int:
+        """Dimension of the input/reference space."""
+        ...
+
+    @property
+    def output_dimensions(self) -> int:
+        """Dimension of the output/physical space."""
+        ...
+
+    @property
+    def determinant(self) -> npt.NDArray[np.double]:
+        """Array with the values of determinant at integration points."""
+        ...
+
+    @property
+    def inverse_transform(self) -> npt.NDArray[np.double]:
+        """Local inverse transformation at each integration point.
+
+        This array contains inverse mapping matrix, which is used
+        for the contravarying components. When the dimension of the
+        mapping space (as counted by :meth:`SpaceMap.output_dimensions`)
+        is greater than the dimension of the reference space, this is a
+        rectangular matrix, such that it maps the (rectangular) Jacobian
+        to the identity matrix.
+        """
+        ...
+
+def incidence_matrix(specs: BasisSpecs) -> npt.NDArray[np.double]:
+    """Return the incidence matrix to transfer derivative degrees of freedom.
+
+    Parameters
+    ----------
+    specs : BasisSpecs
+        Basis specs for which this incidence matrix should be computed.
+
+    Returns
+    -------
+    array
+        One dimensional incidence matrix. It transfers primal degrees of freedom
+        for a derivative to a function space one order less than the original.
+    """
+    ...
+
+def compute_mass_matrix(
+    space_in: FunctionSpace,
+    space_out: FunctionSpace,
+    integration: IntegrationSpace | SpaceMap,
+    /,
+    *,
+    integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+    basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+) -> npt.NDArray[np.double]:
+    """Compute the mass matrix between two function spaces.
+
+    Parameters
+    ----------
+    space_in : FunctionSpace
+        Function space for the input functions.
+
+    space_out : FunctionSpace
+        Function space for the output functions.
+
+    integration : IntegrationSpace or SpaceMap
+        Integration space used to compute the mass matrix or a space mapping.
+        If the integration space is provided, the integration is done on the
+        reference domain. If the mapping is defined instead, the integration
+        space of the mapping is used, along with the integration being done
+        on the mapped domain instead.
+
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        Registry used to retrieve the integration rules.
+
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        Registry used to retrieve the basis specifications.
+
+    Returns
+    -------
+    array
+        Mass matrix as a 2D array, which maps the primal degress of freedom of the input
+        function space to dual degrees of freedom of the output function space.
+    """
+    ...
+
+def compute_gradient_mass_matrix(
+    space_in: FunctionSpace,
+    space_out: FunctionSpace,
+    integration: IntegrationSpace | SpaceMap,
+    /,
+    idim_in: int,
+    idim_out: int,
+    *,
+    integration_registry: IntegrationRegistry = DEFAULT_INTEGRATION_REGISTRY,
+    basis_registry: BasisRegistry = DEFAULT_BASIS_REGISTRY,
+) -> npt.NDArray[np.double]:
+    """Compute the mass matrix between two function spaces.
+
+    The purpose of this function is to compute the matrix, which transfers
+    the contribution of derivative along the reference space dimension
+    to the physical space derivative.
+
+    Parameters
+    ----------
+    space_in : FunctionSpace
+        Function space for the input functions.
+
+    space_out : FunctionSpace
+        Function space for the output functions.
+
+    idim_im : int
+        Index of the dimension to take the derivative of the input space on.
+
+    idim_out : int
+        Index of the output space on which the component of the derivative should
+        be returned on.
+
+    integration : IntegrationSpace or SpaceMap
+        Integration space used to compute the mass matrix or a space mapping.
+        If the integration space is provided, the integration is done on the
+        reference domain. If the mapping is defined instead, the integration
+        space of the mapping is used, along with the integration being done
+        on the mapped domain instead.
+
+
+    integration_registry : IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY
+        Registry used to retrieve the integration rules.
+
+    basis_registry : BasisRegistry, default: DEFAULT_BASIS_REGISTRY
+        Registry used to retrieve the basis specifications.
+
+    Returns
+    -------
+    array
+        Mass matrix as a 2D array, which maps the primal degrees of freedom of the input
+        function space to dual degrees of freedom of the output function space.
+    """
+    ...
 @final
 class GeoID:
     """Type used to identify a geometrical object with an index and orientation.

@@ -44,7 +44,7 @@ interp_result_t integration_rule_for_order(integration_rule_t **out, const integ
     if (!this)
         return INTERP_ERROR_FAILED_ALLOCATION;
     this->n_nodes = order + 1;
-    this->spec = (integration_rule_spec_t){.type = type, .order = order};
+    this->spec = (integration_spec_t){.type = type, .order = order};
 
     const double DEFAULT_TOLERANCE = 1e-14;
     enum
@@ -184,8 +184,7 @@ void integration_rule_registry_destroy(integration_rule_registry_t *this)
 }
 
 INTERPLIB_INTERNAL
-interp_result_t integration_rule_registry_get_rule(integration_rule_registry_t *this,
-                                                   const integration_rule_spec_t spec,
+interp_result_t integration_rule_registry_get_rule(integration_rule_registry_t *this, const integration_spec_t spec,
                                                    const integration_rule_t **p_rule)
 {
     rw_lock_acquire_read(&this->lock);
@@ -342,7 +341,7 @@ void integration_rule_registry_release_all_rules(integration_rule_registry_t *th
 }
 
 unsigned integration_rule_get_rules(integration_rule_registry_t *this, const unsigned max_count,
-                                    integration_rule_spec_t INTERPLIB_ARRAY_ARG(specs, max_count))
+                                    integration_spec_t INTERPLIB_ARRAY_ARG(specs, max_count))
 {
     rw_lock_acquire_read(&this->lock);
     unsigned count = 0;
@@ -362,14 +361,18 @@ unsigned integration_rule_get_rules(integration_rule_registry_t *this, const uns
 
     return count;
 }
-unsigned integration_rule_spec_get_accuracy(const integration_rule_spec_t spec)
+unsigned integration_rule_spec_get_accuracy(const integration_spec_t spec)
 {
     switch (spec.type)
     {
     case INTEGRATION_RULE_TYPE_GAUSS_LEGENDRE:
-        return 2 * spec.order - 1;
+        if (spec.order > 0)
+            return 2 * spec.order - 1;
+        return 1;
     case INTEGRATION_RULE_TYPE_GAUSS_LOBATTO:
-        return 2 * spec.order - 3;
+        if (spec.order > 2)
+            return 2 * spec.order - 3;
+        return 1;
     default:
         return 0;
     }

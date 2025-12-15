@@ -18,4 +18,7 @@ static inline const double *lagrange_basis_roots(const basis_set_t *this)
     return this->_data + (this->spec.order + 1) * (2 * (this->integration_spec.order + 1));
 }
 
+INTERPLIB_INTERNAL
+interp_result_t generate_lagrange_roots(unsigned order, basis_set_type_t type, double roots[const order + 1]);
+
 #endif // INTERPLIB_BASIS_LAGRANGE_H

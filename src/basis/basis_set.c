@@ -5,9 +5,17 @@
 #include "basis_set.h"
 #include "../common/rw_lock.h"
 
+#include "../integration/gauss_legendre.h"
+#include "../integration/gauss_lobatto.h"
+#include "../polynomials/bernstein.h"
+#include "../polynomials/lagrange.h"
+#include "../polynomials/legendre.h"
 #include "basis_bernstein.h"
 #include "basis_lagrange.h"
 #include "basis_legendre.h"
+
+#include <math.h>
+#include <stddef.h>
 #include <string.h>
 
 // Bucket containing all basis sets of the same integration type
@@ -202,7 +210,7 @@ static inline interp_result_t basis_set_registry_add_basis_set(const basis_set_r
 }
 
 interp_result_t basis_set_registry_get_basis_set(basis_set_registry_t *this, const basis_set_t **p_basis,
-                                                 const integration_rule_t *integration_rule, basis_spec_t spec)
+                                                 const integration_rule_t *integration_rule, const basis_spec_t spec)
 {
     rw_lock_acquire_read(&this->lock);
     enum
@@ -389,7 +397,7 @@ void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *const th
 }
 unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_count,
                                      basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, const max_count),
-                                     integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, const max_count))
+                                     integration_spec_t INTERPLIB_ARRAY_ARG(integration_spec, const max_count))
 {
     rw_lock_acquire_read(&this->lock);
     unsigned count = 0;
@@ -414,4 +422,212 @@ unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_co
 
     rw_lock_release_read(&this->lock);
     return count;
+}
+
+void basis_compute_at_point_prepare(const basis_set_type_t type, const unsigned order,
+                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
+{
+    // Prepare the roots for Lagrange multipliers
+    switch (type)
+    {
+    case BASIS_LAGRANGE_UNIFORM:
+        for (unsigned i = 0; i < order + 1; ++i)
+        {
+            work[i] = (2.0 * i) / (double)(order)-1.0;
+        }
+        break;
+
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+        for (unsigned i = 0; i < order + 1; ++i)
+        {
+            work[i] = -cos(M_PI * (double)(2 * i + 1) / (double)(2 * (order + 1)));
+        }
+        break;
+
+    case BASIS_LAGRANGE_GAUSS:
+        // TODO: replace the hard-coded values by some parameters?
+        gauss_legendre_nodes(order + 1, 1e-12, 100, work);
+        break;
+
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+        gauss_lobatto_nodes(order + 1, 1e-12, 100, work);
+        break;
+
+    default:
+        // Nothing to do here
+        break;
+    }
+}
+
+void basis_compute_at_point_values(const basis_set_type_t type, const unsigned order, const unsigned cnt,
+                                   const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                   double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                   double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
+{
+    switch (type)
+    {
+    case BASIS_LEGENDRE:
+        for (unsigned i = 0; i < cnt; ++i)
+            legendre_eval_bonnet_all(order, x[i], out + (size_t)(i * (order + 1)));
+        break;
+
+    case BASIS_BERNSTEIN:
+        for (unsigned i = 0; i < cnt; ++i)
+            bernstein_interpolation_vector((x[i] + 1) / 2, order, out + (size_t)(i * (order + 1)));
+        break;
+
+    case BASIS_LAGRANGE_UNIFORM:
+    case BASIS_LAGRANGE_GAUSS:
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+        lagrange_polynomial_values_2(cnt, x, order + 1, work, out);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void basis_compute_at_point_derivatives(const basis_set_type_t type, const unsigned order, const unsigned cnt,
+                                        const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                        double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                        double INTERPLIB_ARRAY_ARG(work, restrict order + 1))
+{
+    switch (type)
+    {
+    case BASIS_LEGENDRE:
+        for (unsigned i = 0; i < cnt; ++i)
+        {
+            const double v = x[i];
+            double *const ptr = out + (size_t)(i * (order + 1));
+            // Compute values of polynomials one order less
+            legendre_eval_bonnet_all(order, v, ptr);
+            // Convert Legendre polynomials one order less to derivatives
+            // Value of previously handled polynomial
+            double val = ptr[0];
+            // The first basis is a constant, so no derivative
+            ptr[0] = 0;
+            for (unsigned n = 0; n < order; ++n)
+            {
+                // Store value about to be overwritten
+                const double tmp = ptr[n + 1];
+                // Overwrite with the value of the derivative
+                ptr[n + 1] = (n + 1) * val + v * ptr[n];
+                // Carry over to the next iteration
+                val = tmp;
+            }
+        }
+        break;
+
+    case BASIS_BERNSTEIN:
+        for (unsigned i = 0; i < cnt; ++i)
+        {
+            double *const ptr = out + (size_t)(i * (order + 1));
+            // Compute one order less
+            bernstein_interpolation_vector((x[i] + 1) / 2, order - 1, ptr);
+            // Convert the order n - 1 from the derivative output into the derivative in place
+            {
+                const unsigned n = order;
+                ptr[n] = n * ptr[n - 1];
+                for (unsigned j = n - 1; j > 0; --j)
+                {
+                    ptr[j] = n * (ptr[j - 1] - ptr[j]);
+                }
+                ptr[0] *= -(double)n;
+                // Apply the chain rule and scale the gradient!
+                for (unsigned j = 0; j < n + 1; ++j)
+                {
+                    ptr[j] /= 2.0;
+                }
+            }
+        }
+        break;
+
+    case BASIS_LAGRANGE_UNIFORM:
+    case BASIS_LAGRANGE_GAUSS:
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+        lagrange_polynomial_first_derivative_2(cnt, x, order + 1, work, out);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void basis_compute_outer_product_basis_required_memory(const unsigned n_basis,
+                                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
+                                                       const unsigned cnt, unsigned *out_elements,
+                                                       unsigned *work_elements, unsigned *tmp_elements,
+                                                       size_t *iterator_size)
+{
+    unsigned max_order = 1, total_basis = 1;
+    for (unsigned i = 0; i < n_basis; ++i)
+    {
+        const unsigned i_order = basis_specs[i].order;
+        max_order = max_order > i_order ? max_order : i_order;
+        total_basis *= (i_order + 1);
+    }
+    *out_elements = cnt * total_basis;
+    *work_elements = max_order + 1;
+    *tmp_elements = (max_order + 1) * cnt;
+    *iterator_size = multidim_iterator_needed_memory(n_basis);
+}
+
+void basis_compute_outer_product_basis(const unsigned n_basis_dims,
+                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis_dims),
+                                       const unsigned cnt, const double *INTERPLIB_ARRAY_ARG(x, restrict n_basis_dims),
+                                       double out[restrict], double work[restrict], double tmp[restrict],
+                                       multidim_iterator_t *const iter)
+{
+    size_t size_out = cnt, max_size_basis = 1;
+    for (unsigned dim = 0; dim < n_basis_dims; ++dim)
+    {
+        const unsigned dim_size = basis_specs[dim].order + 1;
+        multidim_iterator_init_dim(iter, dim, dim_size);
+        size_out *= dim_size;
+        max_size_basis = max_size_basis > dim_size ? max_size_basis : dim_size;
+    }
+    (void)size_out;
+    (void)max_size_basis;
+    // memset(out, 0, size_out * sizeof(*out));
+
+    const size_t basis_count = multidim_iterator_total_size(iter);
+    for (unsigned i_point = 0; i_point < cnt; ++i_point)
+    {
+        out[i_point * basis_count] = 1;
+    }
+
+    for (unsigned i_dim = 0; i_dim < n_basis_dims; ++i_dim)
+    {
+        const basis_spec_t *const specs = basis_specs + i_dim;
+        const unsigned n_basis = specs->order + 1;
+        // Prepare for computations
+        basis_compute_at_point_prepare(specs->type, specs->order, work);
+        // Compute point values and write it to the buffer
+        basis_compute_at_point_values(specs->type, specs->order, cnt, (double *)x[i_dim], tmp, work);
+
+        for (unsigned i_point = 0; i_point < cnt; ++i_point)
+        {
+            double *const ptr = out + i_point * basis_count;
+            multidim_iterator_set_to_start(iter);
+            while (!multidim_iterator_is_at_end(iter))
+            {
+                const double prev_v = ptr[multidim_iterator_get_flat_index(iter)];
+                for (unsigned i_basis = 0; i_basis < n_basis; ++i_basis)
+                {
+                    ASSERT(!multidim_iterator_is_at_end(iter), "Iterator should not be at end at this point ()");
+                    const size_t idx = multidim_iterator_get_flat_index(iter);
+                    ASSERT(idx + i_point * basis_count < size_out,
+                           "Iterator index should be within bounds ((%zu + %zu) vs %zu)", idx, i_point * basis_count,
+                           size_out);
+                    ASSERT(i_basis + n_basis * i_point < max_size_basis * cnt,
+                           "Basis buffer index is out of bounds ((%u + %u) vs %zu).", i_basis, n_basis * i_point,
+                           max_size_basis * cnt);
+                    ptr[idx] = prev_v * tmp[i_basis + n_basis * i_point];
+                    multidim_iterator_advance(iter, i_dim, 1);
+                }
+            }
+        }
+    }
 }

@@ -133,9 +133,9 @@ static PyObject *basis_registry_usage(PyObject *self, PyTypeObject *defining_cla
         return NULL;
     }
 
-    unsigned usage = basis_set_registry_get_sets(this->registry, 0, (basis_spec_t[]){}, (integration_rule_spec_t[]){});
+    unsigned usage = basis_set_registry_get_sets(this->registry, 0, (basis_spec_t[]){}, (integration_spec_t[]){});
 
-    integration_rule_spec_t *const specs = PyMem_Malloc(usage * sizeof(*specs));
+    integration_spec_t *const specs = PyMem_Malloc(usage * sizeof(*specs));
     if (!specs)
         return NULL;
     basis_spec_t *const basis_specs = PyMem_Malloc(usage * sizeof(*basis_specs));
@@ -313,7 +313,213 @@ PyDoc_STRVAR(basis_specs_docstring, "BasisSpecs(basis_type: interplib._typing.Ba
                                     "order : int\n"
                                     "    Order of the basis in the set.\n");
 
-/* Spec for heap type */
+static int ensure_basis_specs_and_state(PyObject *self, PyTypeObject *defining_class,
+                                        const interplib_module_state_t **p_state, basis_specs_object **p_this)
+{
+    const interplib_module_state_t *const state =
+        defining_class ? PyType_GetModuleState(defining_class) : interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        return -1;
+    }
+    if (!PyObject_TypeCheck(self, state->basis_spec_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected %s, got %s", state->basis_spec_type->tp_name, Py_TYPE(self)->tp_name);
+        return -1;
+    }
+    *p_this = (basis_specs_object *)self;
+    *p_state = state;
+    return 0;
+}
+
+PyDoc_STRVAR(basis_specs_values_docstring,
+             "values(x: numpy.typing.ArrayLike, /) -> numpy.typing.NDArray[numpy.double]\n"
+             "Evaluate basis functions at given locations.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "x : array_like\n"
+             "    Locations where the basis functions should be evaluated.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of basis function values at the specified locations.\n"
+             "    It has one more dimension than ``x``, with the last dimension\n"
+             "    corresponding to the basis function index.\n");
+
+static PyObject *basis_specs_values(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                    const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    basis_specs_object *this;
+    if (ensure_basis_specs_and_state(self, defining_class, &state, &this) < 0)
+        return NULL;
+
+    if (nargs != 1 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "values() takes exactly one positional-only argument.");
+        return NULL;
+    }
+
+    PyArrayObject *const x = (PyArrayObject *)args[0];
+    const npy_intp dummy[] = {0};
+    if (check_input_array(x, 0, dummy, NPY_DOUBLE, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED, "x") < 0)
+    {
+        return NULL;
+    }
+
+    const unsigned ndims = PyArray_NDIM(x);
+    const npy_intp *const dims = PyArray_DIMS(x);
+    const npy_double *const x_data = PyArray_DATA(x);
+
+    npy_intp *const out_dims = PyMem_Malloc((ndims + 1) * sizeof(*out_dims));
+    if (!out_dims)
+    {
+        return NULL;
+    }
+
+    unsigned cnt = 1;
+    for (unsigned i = 0; i < ndims; ++i)
+    {
+        out_dims[i] = dims[i];
+        cnt *= dims[i];
+    }
+
+    out_dims[ndims] = this->spec.order + 1;
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(ndims + 1, out_dims, NPY_DOUBLE);
+    PyMem_Free(out_dims);
+
+    if (!out)
+    {
+        return NULL;
+    }
+
+    double *const work = PyMem_Malloc((this->spec.order + 1) * sizeof(*work));
+    if (!work)
+    {
+        Py_DECREF(out);
+        return NULL;
+    }
+
+    basis_compute_at_point_prepare(this->spec.type, this->spec.order, work);
+    basis_compute_at_point_values(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
+
+    PyMem_Free(work);
+
+    return (PyObject *)out;
+}
+
+PyDoc_STRVAR(basis_specs_derivatives_docstring,
+             "derivatives(x: numpy.typing.ArrayLike, /) -> numpy.typing.NDArray[numpy.double]\n"
+             "Evaluate basis function derivatives at given locations.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "x : array_like\n"
+             "    Locations where the basis function derivatives should be evaluated.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "array\n"
+             "    Array of basis function derivatives at the specified locations.\n"
+             "    It has one more dimension than ``x``, with the last dimension\n"
+             "    corresponding to the basis function index.\n");
+
+static PyObject *basis_specs_derivatives(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                         const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    basis_specs_object *this;
+    if (ensure_basis_specs_and_state(self, defining_class, &state, &this) < 0)
+        return NULL;
+
+    if (nargs != 1 || kwnames != NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "values() takes exactly one positional-only argument.");
+        return NULL;
+    }
+
+    const PyArrayObject *const x = (PyArrayObject *)args[0];
+    const npy_intp dummy[] = {0};
+    if (check_input_array(x, 0, dummy, NPY_DOUBLE, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED, "x") < 0)
+    {
+        return NULL;
+    }
+
+    const unsigned ndims = PyArray_NDIM(x);
+    const npy_intp *const dims = PyArray_DIMS(x);
+    const npy_double *const x_data = PyArray_DATA(x);
+
+    npy_intp *const out_dims = PyMem_Malloc((ndims + 1) * sizeof(*out_dims));
+    if (!out_dims)
+    {
+        return NULL;
+    }
+
+    unsigned cnt = 1;
+    for (unsigned i = 0; i < ndims; ++i)
+    {
+        out_dims[i] = dims[i];
+        cnt *= dims[i];
+    }
+
+    out_dims[ndims] = this->spec.order + 1;
+    PyArrayObject *const out = (PyArrayObject *)PyArray_SimpleNew(ndims + 1, out_dims, NPY_DOUBLE);
+    PyMem_Free(out_dims);
+
+    if (!out)
+    {
+        return NULL;
+    }
+
+    double *const work = PyMem_Malloc((this->spec.order + 1) * sizeof(*work));
+    if (!work)
+    {
+        Py_DECREF(out);
+        return NULL;
+    }
+
+    basis_compute_at_point_prepare(this->spec.type, this->spec.order, work);
+    CPYUTL_ASSERT(PyArray_SIZE(out) == (npy_intp)(this->spec.order + 1) * cnt,
+                  "Output array is not as large as expected!");
+    basis_compute_at_point_derivatives(this->spec.type, this->spec.order, cnt, x_data, PyArray_DATA(out), work);
+
+    PyMem_Free(work);
+
+    return (PyObject *)out;
+}
+
+static PyObject *basis_specs_richcompare(PyObject *self, PyObject *other, const int op)
+{
+    const interplib_module_state_t *state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        PyErr_Clear();
+        state = interplib_get_module_state(Py_TYPE(other));
+        if (!state)
+        {
+            return NULL;
+        }
+    }
+
+    if (!PyObject_TypeCheck(other, state->basis_spec_type) || !PyObject_TypeCheck(self, state->basis_spec_type) ||
+        (op != Py_EQ && op != Py_NE))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
+    const basis_specs_object *const this = (basis_specs_object *)self;
+    const basis_specs_object *const that = (basis_specs_object *)other;
+    int equal = this->spec.order == that->spec.order && this->spec.type == that->spec.type;
+    if (op == Py_NE)
+    {
+        equal = !equal;
+    }
+    return PyBool_FromLong(equal);
+}
+
+/* Spec for the heap type */
 PyType_Spec basis_specs_type_spec = {
     .name = "interplib._interp.BasisSpecs",
     .basicsize = sizeof(basis_specs_object),
@@ -325,6 +531,23 @@ PyType_Spec basis_specs_type_spec = {
             {Py_tp_getset, (void *)basis_getset},
             {Py_tp_doc, (void *)basis_specs_docstring},
             {Py_tp_traverse, heap_type_traverse_type},
+            {Py_tp_methods,
+             (PyMethodDef[]){
+                 {
+                     .ml_name = "values",
+                     .ml_meth = (void *)basis_specs_values,
+                     .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                     .ml_doc = (void *)basis_specs_values_docstring,
+                 },
+                 {
+                     .ml_name = "derivatives",
+                     .ml_meth = (void *)basis_specs_derivatives,
+                     .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                     .ml_doc = basis_specs_derivatives_docstring,
+                 },
+                 {},
+             }},
+            {Py_tp_richcompare, basis_specs_richcompare},
             {},
         },
 };
@@ -352,4 +575,54 @@ basis_specs_object *basis_specs_object_create(PyTypeObject *type, const basis_sp
         return NULL;
     this->spec = spec;
     return this;
+}
+
+const basis_set_t **python_basis_sets_get(const unsigned n_basis, const basis_spec_t specs[const static n_basis],
+                                          const integration_rule_t *rules[const static n_basis],
+                                          basis_set_registry_t *registry)
+{
+    const basis_set_t **const array = PyMem_Malloc(n_basis * sizeof(*array));
+    if (!array)
+        return NULL;
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        const interp_result_t res =
+            basis_set_registry_get_basis_set(registry, array + ibasis, rules[ibasis], specs[ibasis]);
+        if (res != INTERP_SUCCESS)
+        {
+            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve basis set: %s (%s).", interp_error_str(res),
+                         interp_error_msg(res));
+            for (unsigned i = 0; i < ibasis; ++i)
+            {
+                basis_set_registry_release_basis_set(registry, array[i]);
+            }
+            PyMem_Free(array);
+            return NULL;
+        }
+    }
+    return array;
+}
+
+void python_basis_sets_release(const unsigned n_basis, const basis_set_t *sets[static n_basis],
+                               basis_set_registry_t *registry)
+{
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        basis_set_registry_release_basis_set(registry, sets[ibasis]);
+        sets[ibasis] = NULL;
+    }
+    PyMem_Free(sets);
+}
+multidim_iterator_t *python_basis_iterator(const unsigned n_basis, const basis_spec_t specs[const static n_basis])
+{
+    multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(n_basis));
+    if (!iter)
+        return NULL;
+
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        multidim_iterator_init_dim(iter, ibasis, specs[ibasis].order + 1);
+    }
+
+    return iter;
 }

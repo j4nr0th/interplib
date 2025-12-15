@@ -6,6 +6,7 @@
 #define INTERPLIB_BASIS_H
 #include "../common/error.h"
 #include "../integration/integration_rules.h"
+#include "../operations/multidim_iteration.h"
 
 typedef enum
 {
@@ -26,9 +27,9 @@ typedef struct
 
 typedef struct
 {
-    basis_spec_t spec;                        // Specifications for the Basis
-    integration_rule_spec_t integration_spec; // Specifications for the Integration rule
-    double _data[];                           // Values of the basis_sets and their derivatives at integration nodes
+    basis_spec_t spec;                   // Specifications for the Basis
+    integration_spec_t integration_spec; // Specifications for the Integration rule
+    double _data[];                      // Values of the basis_sets and their derivatives at integration nodes
 } basis_set_t;
 
 static inline const double *basis_set_values_all(const basis_set_t *this)
@@ -50,7 +51,7 @@ static inline const double *basis_set_derivatives_all(const basis_set_t *this)
 static inline const double *basis_set_basis_derivatives(const basis_set_t *this, const unsigned index)
 {
     ASSERT(index <= this->spec.order, "Index was out of bounds.");
-    return this->_data + index * (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
+    return this->_data + (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
 }
 
 typedef struct basis_set_registry_t basis_set_registry_t;
@@ -78,6 +79,39 @@ void basis_set_registry_release_all_basis_sets(const basis_set_registry_t *this)
 INTERPLIB_INTERNAL
 unsigned basis_set_registry_get_sets(basis_set_registry_t *this, unsigned max_count,
                                      basis_spec_t INTERPLIB_ARRAY_ARG(basis_spec, max_count),
-                                     integration_rule_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
+                                     integration_spec_t INTERPLIB_ARRAY_ARG(integration_spec, max_count));
+
+/**
+ *
+ */
+INTERPLIB_INTERNAL
+void basis_compute_at_point_prepare(basis_set_type_t type, unsigned order,
+                                    double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+/**
+ *
+ */
+INTERPLIB_INTERNAL
+void basis_compute_at_point_values(basis_set_type_t type, unsigned order, unsigned cnt,
+                                   const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                   double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                   double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+
+void basis_compute_at_point_derivatives(basis_set_type_t type, unsigned order, unsigned cnt,
+                                        const double INTERPLIB_ARRAY_ARG(x, restrict static cnt),
+                                        double INTERPLIB_ARRAY_ARG(out, restrict cnt *(order + 1)),
+                                        double INTERPLIB_ARRAY_ARG(work, restrict order + 1));
+
+INTERPLIB_INTERNAL
+void basis_compute_outer_product_basis_required_memory(unsigned n_basis,
+                                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis),
+                                                       unsigned cnt, unsigned *out_elements, unsigned *work_elements,
+                                                       unsigned *tmp_elements, size_t *iterator_size);
+
+INTERPLIB_INTERNAL
+void basis_compute_outer_product_basis(unsigned n_basis_dims,
+                                       const basis_spec_t INTERPLIB_ARRAY_ARG(basis_specs, n_basis_dims), unsigned cnt,
+                                       const double *INTERPLIB_ARRAY_ARG(x, restrict n_basis_dims),
+                                       double out[restrict], double work[restrict], double tmp[restrict],
+                                       multidim_iterator_t *iter);
 
 #endif // INTERPLIB_BASIS_H

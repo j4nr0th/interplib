@@ -249,7 +249,7 @@ static PyObject *surface_sequence_item(PyObject *self, Py_ssize_t idx)
     {
         idx = (Py_ssize_t)(this->n_lines + 1) - idx;
     }
-    if (idx >= this->n_lines)
+    if ((size_t)idx >= this->n_lines)
     {
         PyErr_SetString(PyExc_IndexError, "Index is out of bounds.");
         return NULL;
