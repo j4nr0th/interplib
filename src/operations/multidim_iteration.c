@@ -208,3 +208,21 @@ size_t multidim_iterator_total_size(const multidim_iterator_t *this)
     }
     return total_size;
 }
+void multidim_iterator_copy(const multidim_iterator_t *this, multidim_iterator_t *that)
+{
+    ASSERT(this->ndims == that->ndims, "Dimensions must match");
+    // Copy the dims
+    const size_t *const dims_in = multidim_iterator_dims_const_ptr(this);
+    size_t *const dims_out = multidim_iterator_dims_ptr(that);
+    for (unsigned idim = 0; idim < this->ndims; ++idim)
+    {
+        dims_out[idim] = dims_in[idim];
+    }
+    // Copy the offsets
+    const size_t *const offsets_in = multidim_iterator_offsets_const_ptr(this);
+    size_t *const offsets_out = multidim_iterator_offsets_ptr(that);
+    for (unsigned idim = 0; idim < this->ndims; ++idim)
+    {
+        offsets_out[idim] = offsets_in[idim];
+    }
+}

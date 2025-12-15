@@ -705,6 +705,21 @@ class DegreesOfFreedom:
         """
         ...
 
+    def derivative(self, idim: int) -> DegreesOfFreedom:
+        """Return degrees of freedom of the derivative along the reference dimension.
+
+        Parameters
+        ----------
+        idim : int
+            Index of the reference dimension along which the derivative should be taken.
+
+        Returns
+        -------
+        DegreesOfFreedom
+            Degrees of freedom of the computed derivative.
+        """
+        ...
+
 @final
 class CoordinateMap:
     """Mapping between reference and physical coordinates.
