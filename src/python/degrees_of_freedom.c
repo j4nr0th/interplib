@@ -1,5 +1,7 @@
 #include "degrees_of_freedom.h"
 
+#include "../basis/basis_lagrange.h"
+#include "../polynomials/lagrange.h"
 #include "basis_objects.h"
 #include "function_space_objects.h"
 #include "integration_objects.h"
@@ -507,7 +509,7 @@ PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObject *de
     return (PyObject *)out_array;
 }
 
-static int *reconstruction_derivative_indices(const unsigned ndim, PyObject *py_indices)
+int *reconstruction_derivative_indices(const unsigned ndim, PyObject *py_indices)
 {
     int *const indices = PyMem_Malloc(sizeof(*indices) * ndim);
     if (!indices)
@@ -719,6 +721,229 @@ PyObject *dof_reconstruct_derivative_at_integration_points(PyObject *self, PyTyp
     return (PyObject *)out_array;
 }
 
+PyDoc_STRVAR(dof_derivative_docstring,
+             "derivative(idim: int) -> DegreesOfFreedom\n"
+             "Return degrees of freedom of the derivative along the reference dimension.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "idim : int\n"
+             "    Index of the reference dimension along which the derivative should be taken.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "DegreesOfFreedom\n"
+             "    Degrees of freedom of the computed derivative.\n");
+
+void bernstein_apply_incidence_operator(
+    const unsigned n, const size_t pre_stride, const size_t post_stride,
+    const double values_in[restrict const static pre_stride * (n + 1) * post_stride],
+    double values_out[restrict const pre_stride * n * post_stride])
+{
+    for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
+    {
+        for (size_t i_post = 0; i_post < post_stride; ++i_post)
+        {
+            double *const ptr_out = values_out + i_pre * n * post_stride + i_post;
+            const double *const ptr_in = values_in + i_pre * (n + 1) * post_stride + i_post;
+
+            const npy_double coeff = (double)n / 2.0;
+            // data[0 * (n + 1) + 0] = -coeff;
+            ptr_out[0] -= coeff * ptr_in[0];
+            for (unsigned col = 1; col < n; ++col)
+            {
+                // data[col * (n + 1) + col] = -coeff;
+                // data[(col - 1) * (n + 1) + col] = +coeff;
+                const npy_double x = coeff * ptr_in[col * post_stride];
+                ptr_out[col * post_stride] -= x;
+                ptr_out[(col - 1) * post_stride] += x;
+            }
+            // data[(n - 1) * (n + 1) + n] = +coeff;
+            ptr_out[(n - 1) * post_stride] += coeff * ptr_in[n * post_stride];
+        }
+    }
+}
+
+void legendre_apply_incidence_operator(const unsigned n, const size_t pre_stride, const size_t post_stride,
+                                       const double values_in[restrict const static pre_stride * (n + 1) * post_stride],
+                                       double values_out[restrict const pre_stride * n * post_stride])
+{
+    for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
+    {
+        for (size_t i_post = 0; i_post < post_stride; ++i_post)
+        {
+            double *const ptr_out = values_out + i_pre * n * post_stride + i_post;
+            const double *const ptr_in = values_in + i_pre * (n + 1) * post_stride + i_post;
+
+            for (unsigned col = n; col > 0; --col)
+            {
+                unsigned coeff = 2 * col - 1;
+                for (unsigned c_row = 0; 2 * c_row < col; ++c_row)
+                {
+                    const unsigned r = (col - 1 - 2 * c_row);
+                    // data[r * (n + 1) + col] = coeff;
+                    ptr_out[r * post_stride] += coeff * ptr_in[col * post_stride];
+                    coeff -= 4;
+                }
+            }
+        }
+    }
+}
+
+int lagrange_apply_incidence_matrix(const basis_set_type_t type, const unsigned n, const size_t pre_stride,
+                                    const size_t post_stride,
+                                    const double values_in[restrict const static pre_stride * (n + 1) * post_stride],
+                                    double values_out[restrict const pre_stride * n * post_stride])
+{
+    // Compute nodes for the output set
+    double *const out_nodes = PyMem_Malloc(sizeof(*out_nodes) * n);
+    if (!out_nodes)
+    {
+        return -1;
+    }
+    interp_result_t res = generate_lagrange_roots(n - 1, type, out_nodes);
+    (void)res;
+    CPYUTL_ASSERT(res == INTERP_SUCCESS, "Somehow an invalid enum?");
+    double *const in_nodes = PyMem_Malloc(sizeof(*in_nodes) * (n + 1));
+    if (!in_nodes)
+    {
+        PyMem_Free(out_nodes);
+        return -1;
+    }
+    res = generate_lagrange_roots(n, type, in_nodes);
+    (void)res;
+    CPYUTL_ASSERT(res == INTERP_SUCCESS, "Somehow an invalid enum?");
+
+    double *const trans_matrix = PyMem_Malloc(sizeof(*trans_matrix) * n * (n + 1));
+    if (!trans_matrix)
+    {
+        PyMem_Free(out_nodes);
+        PyMem_Free(in_nodes);
+        return -1;
+    }
+
+    lagrange_polynomial_first_derivative_2(n, out_nodes, n + 1, in_nodes, trans_matrix);
+    PyMem_Free(out_nodes);
+    PyMem_Free(in_nodes);
+    for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
+    {
+        for (size_t i_post = 0; i_post < post_stride; ++i_post)
+        {
+            double *const ptr_out = values_out + i_pre * n * post_stride + i_post;
+            const double *const ptr_in = values_in + i_pre * (n + 1) * post_stride + i_post;
+
+            // Apply the transformation matrix
+            for (unsigned row = 0; row < n; ++row)
+            {
+                double v = 0;
+                for (unsigned col = 0; col < n + 1; ++col)
+                {
+                    v += trans_matrix[row * (n + 1) + col] * ptr_in[col * post_stride];
+                }
+                ptr_out[row * post_stride] = v;
+            }
+        }
+    }
+
+    PyMem_Free(trans_matrix);
+    return 0;
+}
+
+PyObject *dof_derivative(PyObject *self, PyTypeObject *defining_class, PyObject *const *args, const Py_ssize_t nargs,
+                         const PyObject *kwnames)
+{
+    const interplib_module_state_t *state;
+    const dof_object *this;
+    if (ensure_dof_and_state(self, defining_class, &state, (dof_object **)&this) < 0)
+        return NULL;
+
+    Py_ssize_t index;
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {.type = CPYARG_TYPE_SSIZE, .p_val = &index, .kwname = "idim"},
+                {},
+            },
+            args, nargs, kwnames) < 0)
+        return NULL;
+
+    // Check input parameters
+    if (index < 0 || index >= this->n_dims)
+    {
+        PyErr_Format(PyExc_ValueError, "Expected an index between 0 and %u, but got %zd.", this->n_dims - 1, index);
+        return NULL;
+    }
+
+    if (this->basis_specs[index].order == 0)
+    {
+        PyErr_Format(PyExc_ValueError, "Cannot compute the derivative of a function with order 0 in dimension %zd.",
+                     index);
+        return NULL;
+    }
+
+    // Create a new DoF object
+    function_space_object *const function_space_object =
+        function_space_object_create(state->function_space_type, this->n_dims, this->basis_specs);
+    if (!function_space_object)
+        return NULL;
+    function_space_object->specs[index].order -= 1;
+
+    dof_object *const new_dofs = (dof_object *)PyObject_Vectorcall(
+        (PyObject *)state->degrees_of_freedom_type, (PyObject *[]){(PyObject *)function_space_object}, 1, NULL);
+    Py_DECREF(function_space_object);
+    if (!new_dofs)
+    {
+        return NULL;
+    }
+
+    const basis_set_type_t type = this->basis_specs[index].type;
+    const unsigned n = this->basis_specs[index].order;
+    size_t pre_stride = 1, post_stride = 1;
+    for (unsigned idim = 0; idim < index; ++idim)
+    {
+        pre_stride *= this->basis_specs[idim].order + 1;
+    }
+    for (unsigned idim = index + 1; idim < this->n_dims; ++idim)
+    {
+        post_stride *= this->basis_specs[idim].order + 1;
+    }
+
+    const double *const values_in = this->values;
+    double *const values_out = new_dofs->values;
+
+    switch (type)
+    {
+    case BASIS_BERNSTEIN:
+        // Use recurrence relation
+        bernstein_apply_incidence_operator(n, pre_stride, post_stride, values_in, values_out);
+        break;
+
+    case BASIS_LEGENDRE:
+        // Use recurrence relation
+        legendre_apply_incidence_operator(n, pre_stride, post_stride, values_in, values_out);
+        break;
+
+    case BASIS_LAGRANGE_GAUSS:
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+    case BASIS_LAGRANGE_UNIFORM:
+        // Use the real transformation matrix
+        if (lagrange_apply_incidence_matrix(type, n, pre_stride, post_stride, values_in, values_out) < 0)
+        {
+            Py_DECREF(new_dofs);
+            return NULL;
+        }
+        break;
+
+    default: {
+        PyErr_Format(PyExc_ValueError, "Unsupported basis type %d.", type);
+        Py_DECREF(new_dofs);
+        return NULL;
+    }
+    }
+
+    return (PyObject *)new_dofs;
+}
+
 static void dof_dealloc(dof_object *self)
 {
     PyObject_GC_UnTrack(self);
@@ -776,6 +1001,12 @@ PyType_Spec degrees_of_freedom_type_spec = {
                  .ml_meth = (void *)dof_reconstruct_derivative_at_integration_points,
                  .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
                  .ml_doc = (void *)dof_reconstruct_derivative_at_integration_points_docstring,
+             },
+             {
+                 .ml_name = "derivative",
+                 .ml_meth = (void *)dof_derivative,
+                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                 .ml_doc = dof_derivative_docstring,
              },
              {},
          }},

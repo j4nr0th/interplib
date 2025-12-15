@@ -109,6 +109,16 @@ void lagrange_polynomial_values_2(const unsigned n_pos, const double INTERPLIB_A
                                   const unsigned n_roots, const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
                                   double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos))
 {
+    // Special case: n_roots == 1, where there is 1 basis, which is 1 everywhere
+    if (n_roots == 1)
+    {
+        // Constant everywhere, then just return
+        for (unsigned k = 0; k < n_pos; ++k)
+            values[k] = 1.0;
+
+        return;
+    }
+
     double *const denominators = values + n_roots * (n_pos - 1);
     // Store denominators in the last row
     lagrange_polynomial_denominators(n_roots, p_roots, denominators);
@@ -366,6 +376,151 @@ void lagrange_polynomial_first_derivative(const unsigned n_pos, const double INT
             //  Initialize the row of weights about to be computed
             weights[n_roots * ipos + j] *= work1[j];
         }
+    }
+}
+
+INTERPLIB_INTERNAL
+void lagrange_polynomial_first_derivative_2(const unsigned n_pos, const double INTERPLIB_ARRAY_ARG(p_pos, static n_pos),
+                                            const unsigned n_roots,
+                                            const double INTERPLIB_ARRAY_ARG(p_roots, static n_roots),
+                                            double INTERPLIB_ARRAY_ARG(values, restrict n_roots *n_pos))
+{
+    // Ideally, we would have two extra arrays - one to store denominators and another
+    // to use as per-node storage for numerator terms. Since that would require extra buffers,
+    // we instead re-use the `values` array up until the last two positions that have to be
+    // computed. At that point we compute the numerator on-the-go and apply the denominators
+    // to the result.
+
+    // compute denominators (if necessary
+    if (n_pos > 2)
+        lagrange_polynomial_denominators(n_roots, p_roots, values + (size_t)(n_pos - 1) * n_roots);
+
+    //  Now loop per node (until the last two)
+    for (unsigned i_pos = 0; i_pos + 2 < n_pos; ++i_pos)
+    {
+        const double v = p_pos[i_pos];
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Compute the differences
+            values[(i_pos + 1) * n_roots + j] = v - p_roots[j];
+            //  Initialize the row of weights about to be computed
+            values[i_pos * n_roots + j] = 0.0;
+        }
+
+        //  Compute term d (L_i^j) / d x
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            for (unsigned j = 0; j < i; ++j)
+            {
+                double dlijdx = 1.0;
+                //  Loop split into three parts to enforce k != {i,
+                //  j}
+                for (unsigned k = 0; k < j; ++k)
+                {
+                    dlijdx *= values[(i_pos + 1) * n_roots + k];
+                }
+                for (unsigned k = j + 1; k < i; ++k)
+                {
+                    dlijdx *= values[(i_pos + 1) * n_roots + k];
+                }
+                for (unsigned k = i + 1; k < n_roots; ++k)
+                {
+                    dlijdx *= values[(i_pos + 1) * n_roots + k];
+                }
+                //  L_i^j and L_j^i have same numerators
+                values[i_pos * n_roots + j] += dlijdx;
+                values[i_pos * n_roots + i] += dlijdx;
+            }
+        }
+
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Divide by the denominator
+            values[i_pos * n_roots + j] /= values[(n_pos - 1) * n_roots + j];
+        }
+    }
+
+    //  Second to last node
+    if (n_pos > 1)
+    {
+        const unsigned i_pos = n_pos - 2;
+        const double v = p_pos[i_pos];
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Compute the differences
+            values[(i_pos + 1) * n_roots + j] = v - p_roots[j];
+            //  Initialize the row of weights about to be computed
+            values[i_pos * n_roots + j] = 0.0;
+        }
+
+        //  Compute term d (L_i^j) / d x
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            for (unsigned j = 0; j < i; ++j)
+            {
+                double dlijdx = 1.0;
+                //  Loop split into three parts to enforce k != {i,
+                //  j}
+                for (unsigned k = 0; k < j; ++k)
+                {
+                    dlijdx *= values[(i_pos + 1) * n_roots + k];
+                }
+                for (unsigned k = j + 1; k < i; ++k)
+                {
+                    dlijdx *= values[(i_pos + 1) * n_roots + k];
+                }
+                for (unsigned k = i + 1; k < n_roots; ++k)
+                {
+                    dlijdx *= values[(i_pos + 1) * n_roots + k];
+                }
+                //  L_i^j and L_j^i have same numerators
+                values[i_pos * n_roots + j] += dlijdx;
+                values[i_pos * n_roots + i] += dlijdx;
+            }
+        }
+
+        // Apply the denominator
+        lagrange_polynomial_denominators_apply_stride(n_roots, p_roots, 1, values + (size_t)(n_pos - 2) * n_roots);
+    }
+
+    // The last node
+    if (n_pos > 0)
+    {
+        const double v = p_pos[n_pos - 1];
+        for (unsigned j = 0; j < n_roots; ++j)
+        {
+            //  Initialize the row of weights about to be computed
+            values[(n_pos - 1) * n_roots + j] = 0.0;
+        }
+
+        //  Compute term d (L_i^j) / d x
+        for (unsigned i = 0; i < n_roots; ++i)
+        {
+            for (unsigned j = 0; j < i; ++j)
+            {
+                double dlijdx = 1.0;
+                //  Loop split into three parts to enforce k != {i,
+                //  j}
+                for (unsigned k = 0; k < j; ++k)
+                {
+                    dlijdx *= v - p_roots[k];
+                }
+                for (unsigned k = j + 1; k < i; ++k)
+                {
+                    dlijdx *= v - p_roots[k];
+                }
+                for (unsigned k = i + 1; k < n_roots; ++k)
+                {
+                    dlijdx *= v - p_roots[k];
+                }
+                //  L_i^j and L_j^i have same numerators
+                values[(n_pos - 1) * n_roots + j] += dlijdx;
+                values[(n_pos - 1) * n_roots + i] += dlijdx;
+            }
+        }
+
+        // Apply the denominator
+        lagrange_polynomial_denominators_apply_stride(n_roots, p_roots, 1, values + (size_t)(n_pos - 1) * n_roots);
     }
 }
 

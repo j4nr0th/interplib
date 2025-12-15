@@ -243,13 +243,13 @@ class Quad(HypercubeDomain):
                 raise TypeError(f"Only {Line} objects can be used as inputs for a Quad")
 
         # Check the surface is closed
-        if np.all(bottom.end != right.start):
+        if np.any(bottom.end != right.start):
             raise ValueError("The right side does not start where the bottom ends.")
-        if np.all(right.end != top.start):
+        if np.any(right.end != top.start):
             raise ValueError("The top side does not start where the right ends.")
-        if np.all(top.end != left.start):
+        if np.any(top.end != left.start):
             raise ValueError("The left side does not start where the top ends.")
-        if np.all(left.end != bottom.start):
+        if np.any(left.end != bottom.start):
             raise ValueError("The bottom side does not start where the left ends.")
 
         # Determine the function spaces we're dealing with

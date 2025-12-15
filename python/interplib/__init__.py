@@ -34,6 +34,8 @@ from interplib.enum_type import IntegrationMethod as IntegrationMethod
 
 # Integration functions
 from interplib.integration import integrate_callable as integrate_callable
+from interplib.integration import projection_l2_dual as projection_l2_dual
+from interplib.integration import projection_l2_primal as projection_l2_primal
 
 # C wrapper functions
 from interplib.lagrange import (

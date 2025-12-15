@@ -149,4 +149,6 @@ size_t multidim_iterator_get_offset(const multidim_iterator_t *this, size_t dim)
 
 size_t multidim_iterator_total_size(const multidim_iterator_t *this);
 
+void multidim_iterator_copy(const multidim_iterator_t *this, multidim_iterator_t *that);
+
 #endif // INTERPLIB_ND_ITERATION_H

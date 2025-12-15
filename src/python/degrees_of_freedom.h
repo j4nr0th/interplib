@@ -23,4 +23,7 @@ PyObject *dof_reconstruct_derivative_at_integration_points(PyObject *self, PyTyp
                                                            PyObject *const *args, Py_ssize_t nargs,
                                                            const PyObject *kwnames);
 
+INTERPLIB_INTERNAL
+int *reconstruction_derivative_indices(unsigned ndim, PyObject *py_indices);
+
 #endif // INTERPLIB_DEGREES_OF_FREEDOM_H
