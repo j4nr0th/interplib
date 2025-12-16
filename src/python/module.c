@@ -19,6 +19,7 @@
 #include "mass_matrices.h"
 
 // Topology
+#include "covector_basis.h"
 #include "cpyutl.h"
 #include "degrees_of_freedom.h"
 #include "function_space_objects.h"
@@ -799,6 +800,8 @@ static int interplib_add_types(PyObject *mod)
             NULL ||
         (module_state->basis_registry_type =
              cpyutl_add_type_from_spec_to_module(mod, &basis_registry_type_specs, NULL)) == NULL ||
+        (module_state->covector_basis_type =
+             cpyutl_add_type_from_spec_to_module(mod, &covector_basis_type_spec, NULL)) == NULL ||
         (module_state->function_space_type =
              cpyutl_add_type_from_spec_to_module(mod, &function_space_type_spec, NULL)) == NULL ||
         (module_state->integration_space_type =

@@ -27,7 +27,7 @@ typedef struct
 } covector_basis_t;
 
 // When the dimension is zero, the basis is assumed to be zero.
-static const covector_basis_t COVECTOR_BASIS_ZERO = {.dimension = 0};
+static const covector_basis_t COVECTOR_BASIS_ZERO = {};
 
 INTERPLIB_INTERNAL
 int covector_basis_has_component(covector_basis_t basis, unsigned dim);
@@ -66,13 +66,14 @@ unsigned covector_basis_rank(covector_basis_t basis);
  * @param dimension The dimension of the covector space. Must be less than COVECTOR_BASIS_MAX_DIM.
  * @param sign The sign of the covector basis. Negative values mean the basis have a negative sign.
  * @param rank The number of active components in the covector basis. Must not exceed the dimension.
- * @param ... A variable number of arguments specifying the indices of the components to be set in the basis.
+ * @param indices Sorted indices specifying the indices of the components to be set in the basis.
  *           Each index must be within the bounds of the dimension and must be unique.
- *           Behavior is undefined if an index is repeated or out of bounds.
+ *           Behavior is undefined if an index is repeated, out of bounds, or unsorted.
  * @return The constructed covector_basis_t structure representing the basis.
  */
 INTERPLIB_INTERNAL
-covector_basis_t covector_basis_make(unsigned dimension, int sign, unsigned rank, ...);
+covector_basis_t covector_basis_make(unsigned dimension, int sign, unsigned rank,
+                                     const unsigned INTERPLIB_ARRAY_ARG(indices, static rank));
 
 /**
  * Computes the result of applying a contravector basis on the covector basis bundle.
@@ -111,5 +112,10 @@ typedef enum
  */
 INTERPLIB_INTERNAL
 covector_basis_order_relation_t covector_basis_determine_order(covector_basis_t basis_1, covector_basis_t basis_2);
+
+INTERPLIB_INTERNAL
+int covector_basis_is_zero(covector_basis_t basis);
+
+covector_basis_t covector_basis_hodge(covector_basis_t basis);
 
 #endif // INTERPLIB_COVECTOR_BASIS_H

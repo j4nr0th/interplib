@@ -65,23 +65,22 @@ unsigned covector_basis_rank(const covector_basis_t basis)
     return popcnt_uint(basis.basis_bits);
 }
 
-covector_basis_t covector_basis_make(const unsigned dimension, const int sign, const unsigned rank, ...)
+covector_basis_t covector_basis_make(const unsigned dimension, const int sign, const unsigned rank,
+                                     const unsigned INTERPLIB_ARRAY_ARG(indices, static rank))
 {
     ASSERT(dimension > 0, "Dimension must be positive.");
     ASSERT(rank <= dimension, "Rank was larger than dimension.");
     ASSERT(dimension < COVECTOR_BASIS_MAX_DIM, "Maximum dimension count of %u was exceeded!", COVECTOR_BASIS_MAX_DIM);
     covector_basis_t basis = {.dimension = dimension, .sign = sign < 0};
-    va_list args;
-    va_start(args, rank);
     for (unsigned i = 0; i < rank; ++i)
     {
-        const unsigned idx = va_arg(args, unsigned);
+        const unsigned idx = indices[i];
+        ASSERT(i == 0 || idx > indices[i - 1], "Indices were not sorted in ascending order.");
         ASSERT(idx < dimension, "Index %u was out of bounds for dimension %u.", idx, dimension);
         const unsigned bit = (1u << idx);
         ASSERT(basis.basis_bits ^ bit, "Component %u was already specified.", idx);
         basis.basis_bits |= bit;
     }
-    va_end(args);
 
     return basis;
 }
@@ -121,4 +120,37 @@ covector_basis_order_relation_t covector_basis_determine_order(const covector_ba
         return COVECTOR_BASIS_ORDER_BEFORE;
     }
     return COVECTOR_BASIS_ORDER_AFTER;
+}
+
+int covector_basis_is_zero(const covector_basis_t basis)
+{
+    return basis.dimension == 0;
+}
+
+covector_basis_t covector_basis_hodge(const covector_basis_t basis)
+{
+    if (basis.dimension == 0)
+        return basis;
+
+    unsigned hodge_bits = basis.basis_bits ^ ((1u << basis.dimension) - 1);
+    covector_basis_t hodge_basis = {.dimension = basis.dimension, .sign = 0, .basis_bits = hodge_bits};
+    // We introduce the bits one by one and count the number of bits following it to get the flip count
+    unsigned flip_count = 0;
+    while (hodge_bits)
+    {
+        // Get the next lowest bit.
+        const unsigned next_bit = hodge_bits & ~(hodge_bits - 1);
+        // Remove it from the remaining bits.
+        hodge_bits ^= next_bit;
+        const unsigned higher_bits = basis.basis_bits & ~(next_bit - 1);
+        if (!higher_bits)
+            break;
+        // Update flip count based on how many higher bits there are in the original
+        flip_count += popcnt_uint(higher_bits);
+    }
+    // Flip sign if we had an odd number of flips
+    if (flip_count & 1)
+        hodge_basis.sign = !hodge_basis.sign;
+
+    return hodge_basis;
 }

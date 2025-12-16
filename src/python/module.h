@@ -54,6 +54,7 @@ typedef struct
     // Basis
     PyTypeObject *basis_registry_type;
     PyTypeObject *basis_spec_type;
+    PyTypeObject *covector_basis_type;
 
     // Function Spaces
     PyTypeObject *function_space_type;

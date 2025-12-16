@@ -398,9 +398,18 @@ DEFAULT_BASIS_REGISTRY: BasisRegistry = ...
 
 @final
 class CovectorBasis:
-    """Type used to specify covector basis."""
+    """Type used to specify covector basis bundle.
 
-    def __new__(self, n: int, *idx: int): ...
+    Parameters
+    ----------
+    n : int
+        Dimension of the space basis bundle is in.
+
+    *idx : int
+        Indices of basis present in the bundle. Should be sorted and non-repeating.
+    """
+
+    def __new__(self, n: int, /, *idx: int): ...
     @property
     def ndim(self) -> int:
         """Number of dimensions of the space the basis are in."""
@@ -413,7 +422,7 @@ class CovectorBasis:
 
     @property
     def sign(self) -> int:
-        """Return the sign of the basis."""
+        """The sign of the basis."""
         ...
 
     def __xor__(self, other: CovectorBasis, /) -> CovectorBasis:
@@ -436,8 +445,24 @@ class CovectorBasis:
         """Comparison to sort basis."""
         ...
 
+    def __ge__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
     def __lt__(self, other: CovectorBasis) -> bool:
         """Comparison to sort basis."""
+        ...
+
+    def __le__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+    def __bool__(self) -> bool:
+        """Check for non-zero basis."""
+        ...
+
+    def __str__(self) -> str:
+        """Representation of the object."""
         ...
 
 @final
