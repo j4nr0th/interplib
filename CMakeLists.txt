@@ -23,6 +23,8 @@ set(BASIS_SOURCE_FILES
         src/basis/basis_lagrange.c
         src/basis/basis_legendre.c
         src/basis/de_rham_sequence.c
+        src/basis/covector_basis.c
+        src/basis/covector_basis.h
 )
 set(BASIS_HEADER_FILES
         src/basis/basis_set.h

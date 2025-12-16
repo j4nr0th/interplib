@@ -1,0 +1,124 @@
+#include "covector_basis.h"
+
+#include <stdarg.h>
+
+static unsigned popcnt_uint(unsigned x)
+{
+    unsigned count = 0;
+    // We just do popcount
+#ifdef __GNUC__
+    count = __builtin_popcount(x);
+#else
+    // I do not know what the compiler we are on, we just do it the regular way.
+    while (x)
+    {
+        count += 1;
+        x &= ~(x - 1);
+    }
+#endif
+    return count;
+}
+
+int covector_basis_has_component(const covector_basis_t basis, const unsigned dim)
+{
+    ASSERT(dim < basis.dimension, "Dimension was out of bounds.");
+    return (basis.basis_bits & 1 << dim) != 0;
+}
+covector_basis_t covector_basis_wedge(const covector_basis_t b1, const covector_basis_t b2)
+{
+    ASSERT(b1.dimension == b2.dimension, "Basis had different dimensions (%u and %u).", b1.dimension, b2.dimension);
+    if (b1.basis_bits & b2.basis_bits)
+    {
+        // There is some overlap, which means the result is zero
+        return COVECTOR_BASIS_ZERO;
+    }
+
+    unsigned sign = b1.sign ^ b2.sign;
+    // Add bits from b2->basis_bits to resulting_bits, but each time we have a bit set after the destination, we flip
+    // the sign
+    unsigned remaining_bits = b2.basis_bits;
+    while (remaining_bits)
+    {
+        // Extract the next bit
+        const unsigned new_remainder = remaining_bits & (remaining_bits - 1);
+        const unsigned new_bit = remaining_bits ^ new_remainder;
+        remaining_bits = new_remainder;
+
+        const unsigned higher_bits = b1.basis_bits & ~(new_bit - 1);
+        // Flip the sign the same number of times as the number of higher bits, so if the number is odd.
+        // we reverse the sign, otherwise we keep it
+        if (popcnt_uint(higher_bits) & 1)
+        {
+            sign = !sign;
+        }
+    }
+
+    return (covector_basis_t){
+        .dimension = b1.dimension,                   // We copy the dimension
+        .sign = sign,                                // Sign is the product
+        .basis_bits = b1.basis_bits | b2.basis_bits, // Basis are merged
+    };
+}
+
+unsigned covector_basis_rank(const covector_basis_t basis)
+{
+    return popcnt_uint(basis.basis_bits);
+}
+
+covector_basis_t covector_basis_make(const unsigned dimension, const int sign, const unsigned rank, ...)
+{
+    ASSERT(dimension > 0, "Dimension must be positive.");
+    ASSERT(rank <= dimension, "Rank was larger than dimension.");
+    ASSERT(dimension < COVECTOR_BASIS_MAX_DIM, "Maximum dimension count of %u was exceeded!", COVECTOR_BASIS_MAX_DIM);
+    covector_basis_t basis = {.dimension = dimension, .sign = sign < 0};
+    va_list args;
+    va_start(args, rank);
+    for (unsigned i = 0; i < rank; ++i)
+    {
+        const unsigned idx = va_arg(args, unsigned);
+        ASSERT(idx < dimension, "Index %u was out of bounds for dimension %u.", idx, dimension);
+        const unsigned bit = (1u << idx);
+        ASSERT(basis.basis_bits ^ bit, "Component %u was already specified.", idx);
+        basis.basis_bits |= bit;
+    }
+    va_end(args);
+
+    return basis;
+}
+
+covector_basis_t covector_basis_apply_contra_basis(const covector_basis_t basis, const unsigned dim)
+{
+    ASSERT(covector_basis_has_component(basis, dim), "Basis did not have component %u.", dim);
+    // Remove the bit with `dim`, but flip the sign the number of bits set before it!
+    int sign = basis.sign;
+    const unsigned basis_bits = basis.basis_bits ^ (1u << dim);
+    const unsigned lower_bits = basis_bits & (basis_bits - 1);
+    if (popcnt_uint(lower_bits) & 1)
+        sign = !sign;
+    return (covector_basis_t){.dimension = basis.dimension, .sign = sign, .basis_bits = basis_bits};
+}
+
+covector_basis_order_relation_t covector_basis_determine_order(const covector_basis_t basis_1,
+                                                               const covector_basis_t basis_2)
+{
+    if (basis_1.dimension != basis_2.dimension)
+        return COVECTOR_BASIS_NOT_COMPARABLE;
+
+    const unsigned rank_1 = covector_basis_rank(basis_1);
+    if (rank_1 != covector_basis_rank(basis_2))
+        return COVECTOR_BASIS_NOT_COMPARABLE;
+
+    // We can do a quick equality check now.
+    if (basis_1.basis_bits == basis_2.basis_bits)
+        return COVECTOR_BASIS_EQUAL;
+
+    const unsigned first_bit_1 = basis_1.basis_bits & (basis_1.basis_bits - 1);
+    const unsigned first_bit_2 = basis_2.basis_bits & (basis_2.basis_bits - 1);
+
+    // If our rank is below half the dimension, the one that has lower bits is first, otherwise it is reversed.
+    if ((first_bit_1 < first_bit_2) ^ (rank_1 > basis_1.dimension / 2))
+    {
+        return COVECTOR_BASIS_ORDER_BEFORE;
+    }
+    return COVECTOR_BASIS_ORDER_AFTER;
+}

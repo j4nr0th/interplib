@@ -397,6 +397,50 @@ class BasisRegistry:
 DEFAULT_BASIS_REGISTRY: BasisRegistry = ...
 
 @final
+class CovectorBasis:
+    """Type used to specify covector basis."""
+
+    def __new__(self, n: int, *idx: int): ...
+    @property
+    def ndim(self) -> int:
+        """Number of dimensions of the space the basis are in."""
+        ...
+
+    @property
+    def rank(self) -> int:
+        """Number of basis contained."""
+        ...
+
+    @property
+    def sign(self) -> int:
+        """Return the sign of the basis."""
+        ...
+
+    def __xor__(self, other: CovectorBasis, /) -> CovectorBasis:
+        """Wedge product of the two CovectorBasis."""
+        ...
+
+    def __neg__(self) -> CovectorBasis:
+        """Negate the CovectorBasis."""
+        ...
+
+    def __invert__(self) -> CovectorBasis:
+        """Hodge of the CovectorBasis."""
+        ...
+
+    def __eq__(self, other) -> bool:
+        """Compare two CovectorBasis."""
+        ...
+
+    def __gt__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+    def __lt__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+@final
 class BasisSpecs:
     """Type that describes specifications for a basis set.
 
