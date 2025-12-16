@@ -1,5 +1,8 @@
 """Check that covector basis work as expected."""
 
+from itertools import combinations
+
+import pytest
 from interplib._interp import CovectorBasis
 
 
@@ -16,5 +19,15 @@ def test_1d():
     assert b00 ^ b00 == b00
 
 
-if __name__ == "__main__":
-    test_1d()
+@pytest.mark.parametrize("n", range(2, 5))
+def test_nd(n: int):
+    """Testing in n-D is a bit more involved."""
+    b_full = CovectorBasis(n, *range(n))
+    b_empty = CovectorBasis(n)
+    for k in range(1, n):
+        for c in combinations(range(n), k):
+            b1 = CovectorBasis(n, *c)
+            assert b1 ^ ~b1 == b_full
+            assert ~b1 ^ b1 == -b_full
+            assert b1 ^ b_empty == b1
+            assert not (b1 ^ b1)
