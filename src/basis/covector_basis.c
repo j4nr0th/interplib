@@ -111,8 +111,10 @@ covector_basis_order_relation_t covector_basis_determine_order(const covector_ba
     if (basis_1.basis_bits == basis_2.basis_bits)
         return COVECTOR_BASIS_EQUAL;
 
-    const unsigned first_bit_1 = basis_1.basis_bits & (basis_1.basis_bits - 1);
-    const unsigned first_bit_2 = basis_2.basis_bits & (basis_2.basis_bits - 1);
+    const unsigned unique_bits1 = basis_1.basis_bits & ~basis_2.basis_bits;
+    const unsigned unique_bits2 = basis_2.basis_bits & ~basis_1.basis_bits;
+    const unsigned first_bit_1 = unique_bits1 & ~(unique_bits1 - 1);
+    const unsigned first_bit_2 = unique_bits2 & ~(unique_bits2 - 1);
 
     // If our rank is below half the dimension, the one that has lower bits is first, otherwise it is reversed.
     if ((first_bit_1 < first_bit_2) ^ (rank_1 > basis_1.dimension / 2))

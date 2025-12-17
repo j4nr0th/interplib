@@ -24,10 +24,34 @@ def test_nd(n: int):
     """Testing in n-D is a bit more involved."""
     b_full = CovectorBasis(n, *range(n))
     b_empty = CovectorBasis(n)
-    for k in range(1, n):
-        for c in combinations(range(n), k):
-            b1 = CovectorBasis(n, *c)
+    for k1 in range(1, n):
+        for c1 in combinations(range(n), k1):
+            b1 = CovectorBasis(n, *c1)
             assert b1 ^ ~b1 == b_full
             assert ~b1 ^ b1 == -b_full
             assert b1 ^ b_empty == b1
             assert not (b1 ^ b1)
+            for k2 in range(1, n):
+                for c2 in combinations(range(n), k2):
+                    b2 = CovectorBasis(n, *c2)
+
+                    if k1 != k2:
+                        with pytest.raises(ValueError):
+                            _ = b1 == b2
+                    else:
+                        if len(c1) <= n // 2:
+                            v1, v2 = c1, c2
+                        else:
+                            v1 = tuple(i for i in range(n) if i not in c1)
+                            v2 = tuple(i for i in range(n) if i not in c2)
+                        assert (b1 < b2) == (v1 < v2)
+                        assert (b1 <= b2) == (v1 <= v2)
+                        assert (b1 >= b2) == (v1 >= v2)
+                        assert (b1 > b2) == (v1 > v2)
+                        assert (b1 == b2) == (v1 == v2)
+                        assert (b1 != b2) == (v1 != v2)
+
+
+if __name__ == "__main__":
+    test_1d()
+    test_nd(3)

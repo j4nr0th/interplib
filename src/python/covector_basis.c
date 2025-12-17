@@ -165,10 +165,11 @@ static PyObject *covector_basis_richcompare(PyObject *self, PyObject *other, con
     }
     // Get relation in terms of ordering
     const covector_basis_order_relation_t relation = covector_basis_determine_order(this->basis, that->basis);
+    // PySys_FormatStdout("Relation status %u (%S vs %S)\n", relation, self, other);
     switch (relation)
     {
     case COVECTOR_BASIS_NOT_COMPARABLE:
-        PyErr_Format(PyExc_TypeError,
+        PyErr_Format(PyExc_ValueError,
                      "Cannot compare two bases of different dimensions and/or ranks ((%u, %u) != (%u, %u)).",
                      this->basis.dimension, covector_basis_rank(this->basis), that->basis.dimension,
                      covector_basis_rank(that->basis));
@@ -181,18 +182,19 @@ static PyObject *covector_basis_richcompare(PyObject *self, PyObject *other, con
         }
         break;
     case COVECTOR_BASIS_ORDER_AFTER:
-        if (op == Py_GT || op == Py_GE)
+        if (op == Py_GT || op == Py_GE || op == Py_NE)
         {
             Py_RETURN_TRUE;
         }
         break;
     case COVECTOR_BASIS_ORDER_BEFORE:
-        if (op == Py_LT || op == Py_LE)
+        if (op == Py_LT || op == Py_LE || op == Py_NE)
         {
             Py_RETURN_TRUE;
         }
         break;
     }
+
     Py_RETURN_FALSE;
 }
 
