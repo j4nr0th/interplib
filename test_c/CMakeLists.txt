@@ -72,3 +72,7 @@ add_test(NAME qr_decomposition_3 COMMAND test_qr_decomposition_3)
 add_executable(test_covector_basis basis/test_covector_basis.c)
 target_link_libraries(test_covector_basis PRIVATE interp m)
 add_test(NAME covector_basis COMMAND test_covector_basis)
+
+add_executable(test_permutations operations/test_permutations.c)
+target_link_libraries(test_permutations PRIVATE interp m)
+add_test(NAME permutations COMMAND test_permutations)

@@ -61,6 +61,8 @@ set(OPERATIONS_SOURCE_FILES
         src/operations/multidim_iteration.c
         src/operations/reconstruction.c
         src/operations/matrices.c
+        src/operations/permutations.c
+        src/operations/permutations.h
 )
 
 set(OPERATIONS_HEADER_FILES

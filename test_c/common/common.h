@@ -14,10 +14,10 @@
 #include <math.h>
 
 #ifdef __GNUC__
-__attribute__((format(printf, 5, 6)))
+__attribute__((format(printf, 5, 6))) __attribute__((noreturn))
 #endif
-static void
-failed_assertion(const char *file, const int line, const char *function, const char *expr, const char *msg, ...)
+static void failed_assertion(const char *file, const int line, const char *function, const char *expr, const char *msg,
+                             ...)
 {
     char buffer[1024];
     va_list args;
