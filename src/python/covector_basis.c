@@ -158,6 +158,17 @@ static PyObject *covector_basis_richcompare(PyObject *self, PyObject *other, con
     }
     const covector_basis_object *const this = (covector_basis_object *)self;
     const covector_basis_object *const that = (covector_basis_object *)other;
+    if (this->basis.sign != that->basis.sign)
+    {
+        if (op == Py_NE)
+            Py_RETURN_TRUE;
+        if (op == Py_EQ)
+            Py_RETURN_FALSE;
+        PyErr_SetString(PyExc_ValueError,
+                        "Can not compare two basis with different signs for relation other than equal/not equal.");
+        return NULL;
+    }
+
     // If both are zero, it is simple.
     if (covector_basis_is_zero(this->basis) && covector_basis_is_zero(that->basis))
     {
@@ -278,10 +289,126 @@ static PyObject *covector_basis_str(PyObject *self)
             PRINT_TO_BUFFER("+1");
         }
     }
-#undef PRINT_TO_BUFFER
 
     buffer[BUFFER_SIZE - 1] = 0;
     return PyUnicode_FromString(buffer);
+}
+
+static PyObject *covector_basis_repr(PyObject *self)
+{
+    const interplib_module_state_t *state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(self, state->covector_basis_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Cannot convert a basis of type %s to a string.", Py_TYPE(self)->tp_name);
+        return NULL;
+    }
+    enum
+    {
+        CHARS_PER_BASIS = 4,
+        BUFFER_SIZE = CHARS_PER_BASIS * COVECTOR_BASIS_MAX_DIM + 1
+    };
+    char buffer[BUFFER_SIZE];
+    unsigned pos = 0;
+    int status;
+    const covector_basis_object *const this = (covector_basis_object *)self;
+    buffer[0] = 0; // in case we are dealing with zero
+    for (unsigned i = 0; i < this->basis.dimension; ++i)
+    {
+        if (covector_basis_has_component(this->basis, i))
+        {
+            PRINT_TO_BUFFER(", %u", i);
+        }
+    }
+    return PyUnicode_FromFormat("%cCovectorBasis(%u%s)", this->basis.sign ? '+' : '-', this->basis.dimension, buffer);
+}
+
+#undef PRINT_TO_BUFFER
+
+static Py_hash_t covector_basis_hash(PyObject *self)
+{
+    const interplib_module_state_t *state = interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        return -1;
+    }
+    if (!PyObject_TypeCheck(self, state->covector_basis_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Cannot hash an object of type %s.", Py_TYPE(self)->tp_name);
+        return -1;
+    }
+    const covector_basis_object *const this = (covector_basis_object *)self;
+    // Reinterpret the basis value as the hash value
+    const union {
+        covector_basis_t basis;
+        Py_hash_t hash;
+    } hash = {.basis = {
+                  .dimension = this->basis.dimension,
+                  .sign = this->basis.sign,
+                  .basis_bits = ~this->basis.basis_bits, // Flip the basis bits, since this way we are almost always
+                                                         // sure we do not return -1
+              }};
+    return hash.hash;
+}
+
+static int ensure_basis_and_state(PyObject *self, PyTypeObject *defining_class, covector_basis_object **p_this,
+                                  const interplib_module_state_t **p_state)
+{
+    const interplib_module_state_t *const state =
+        defining_class ? PyType_GetModuleState(defining_class) : interplib_get_module_state(Py_TYPE(self));
+    if (!state)
+    {
+        return -1;
+    }
+    if (!PyObject_TypeCheck(self, state->covector_basis_type))
+    {
+        PyErr_Format(PyExc_TypeError, "Expected a %s object, but got a %s.", state->covector_basis_type->tp_name,
+                     Py_TYPE(self)->tp_name);
+        return -1;
+    }
+    *p_state = state;
+    *p_this = (covector_basis_object *)self;
+    return 0;
+}
+
+PyDoc_STRVAR(covector_basis_normalize_docstring,
+             "normalize() -> tuple[int, CovectorBasis]\nNormalize the basis by splitting the sign.\n");
+
+static PyObject *covector_basis_normalize(PyObject *self, PyTypeObject *defining_class,
+                                          PyObject *const *Py_UNUSED(args), const Py_ssize_t nargs,
+                                          const PyObject *kwnames)
+{
+    if (nargs || (kwnames && PyTuple_GET_SIZE(kwnames)))
+    {
+        PyErr_SetString(PyExc_TypeError, "normalize() takes no arguments.");
+        return NULL;
+    }
+
+    const interplib_module_state_t *state;
+    covector_basis_object *this;
+    if (ensure_basis_and_state(self, defining_class, &this, &state) < 0)
+    {
+        return NULL;
+    }
+
+    covector_basis_object *const norm =
+        covector_basis_object_create(state->covector_basis_type, (covector_basis_t){
+                                                                     .dimension = this->basis.dimension,
+                                                                     .sign = 0,
+                                                                     .basis_bits = this->basis.basis_bits,
+                                                                 });
+    if (!norm)
+        return NULL;
+
+    return cpyutl_output_create_check(CPYOUT_TYPE_TUPLE,
+                                      (const cpyutl_output_t[]){
+                                          {.type = CPYOUT_TYPE_PYINT, .value_int = this->basis.sign ? -1 : +1},
+                                          {.type = CPYOUT_TYPE_PYOBJ, .value_obj = (PyObject *)norm},
+                                          {},
+                                      });
 }
 
 PyDoc_STRVAR(covector_basis_docstring,
@@ -333,6 +460,18 @@ PyType_Spec covector_basis_type_spec = {
             {Py_nb_bool, covector_basis_bool},
             {Py_tp_doc, (void *)covector_basis_docstring},
             {Py_tp_str, covector_basis_str},
+            {Py_tp_hash, covector_basis_hash},
+            {Py_tp_repr, covector_basis_repr},
+            {Py_tp_methods,
+             (PyMethodDef[]){
+                 {
+                     .ml_name = "normalize",
+                     .ml_meth = (void *)covector_basis_normalize,
+                     .ml_flags = METH_FASTCALL | METH_METHOD | METH_KEYWORDS,
+                     .ml_doc = covector_basis_normalize_docstring,
+                 },
+                 {},
+             }},
             {},
         },
 };

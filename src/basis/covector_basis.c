@@ -135,7 +135,7 @@ covector_basis_t covector_basis_hodge(const covector_basis_t basis)
         return basis;
 
     unsigned hodge_bits = basis.basis_bits ^ ((1u << basis.dimension) - 1);
-    covector_basis_t hodge_basis = {.dimension = basis.dimension, .sign = 0, .basis_bits = hodge_bits};
+    covector_basis_t hodge_basis = {.dimension = basis.dimension, .sign = basis.sign, .basis_bits = hodge_bits};
     // We introduce the bits one by one and count the number of bits following it to get the flip count
     unsigned flip_count = 0;
     while (hodge_bits)

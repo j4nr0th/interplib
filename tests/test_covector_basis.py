@@ -28,7 +28,8 @@ def test_nd(n: int):
         for c1 in combinations(range(n), k1):
             b1 = CovectorBasis(n, *c1)
             assert b1 ^ ~b1 == b_full
-            assert ~b1 ^ b1 == -b_full
+            assert (~(~b1)).sign == (-1) ** (k1 * (n - k1))
+            assert ~b1 ^ b1 == (-b_full if ((k1 * (n - k1)) % 2) else b_full)
             assert b1 ^ b_empty == b1
             assert not (b1 ^ b1)
             for k2 in range(1, n):

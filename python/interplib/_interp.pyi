@@ -465,6 +465,18 @@ class CovectorBasis:
         """Representation of the object."""
         ...
 
+    def __hash__(self) -> int:
+        """Hash the object."""
+        ...
+
+    def __repr__(self) -> str:
+        """Representation of the object."""
+        ...
+
+    def normalize(self) -> tuple[int, CovectorBasis]:
+        """Normalize the basis by splitting the sign."""
+        ...
+
 @final
 class BasisSpecs:
     """Type that describes specifications for a basis set.
