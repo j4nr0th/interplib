@@ -5,7 +5,7 @@
 #ifndef INTERPLIB_LEGENDRE_H
 #define INTERPLIB_LEGENDRE_H
 
-#include "../common/allocator.h"
+#include "../common/common_defines.h"
 
 INTERPLIB_INTERNAL
 void legendre_eval_bonnet_two(unsigned n, double x, double INTERPLIB_ARRAY_ARG(out, 2));

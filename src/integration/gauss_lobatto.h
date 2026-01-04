@@ -4,7 +4,7 @@
 
 #ifndef GAUSSLOBATTO_H
 #define GAUSSLOBATTO_H
-#include "../common/allocator.h"
+#include "../common/common_defines.h"
 
 INTERPLIB_INTERNAL
 int gauss_lobatto_nodes_weights(unsigned n, double tol, unsigned max_iter, double INTERPLIB_ARRAY_ARG(x, restrict n),

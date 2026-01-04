@@ -40,19 +40,6 @@ target_link_libraries(test_lagrange_derivative_transpose PRIVATE interp m)
 add_test(NAME lagrange_derivative_transpose COMMAND test_lagrange_derivative_transpose)
 
 # OPERATION TESTS
-
-add_executable(test_multidim_iterator_1d operations/test_multidim_iterator_1d.c)
-target_link_libraries(test_multidim_iterator_1d PRIVATE interp m)
-add_test(NAME multidim_iterator_1d COMMAND test_multidim_iterator_1d 120)
-
-add_executable(test_multidim_iterator_2d operations/test_multidim_iterator_2d.c)
-target_link_libraries(test_multidim_iterator_2d PRIVATE interp m)
-add_test(NAME multidim_iterator_2d COMMAND test_multidim_iterator_2d 12 40)
-
-add_executable(test_multidim_iterator_3d operations/test_multidim_iterator_3d.c)
-target_link_libraries(test_multidim_iterator_3d PRIVATE interp m)
-add_test(NAME multidim_iterator_3d COMMAND test_multidim_iterator_3d 13 7 17)
-
 add_executable(test_qr_decomposition operations/test_qr_decomposition.c)
 target_link_libraries(test_qr_decomposition PRIVATE interp m)
 add_test(NAME qr_decomposition COMMAND test_qr_decomposition)
@@ -72,7 +59,3 @@ add_test(NAME qr_decomposition_3 COMMAND test_qr_decomposition_3)
 add_executable(test_covector_basis basis/test_covector_basis.c)
 target_link_libraries(test_covector_basis PRIVATE interp m)
 add_test(NAME covector_basis COMMAND test_covector_basis)
-
-add_executable(test_permutations operations/test_permutations.c)
-target_link_libraries(test_permutations PRIVATE interp m)
-add_test(NAME permutations COMMAND test_permutations)

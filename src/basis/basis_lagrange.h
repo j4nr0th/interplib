@@ -8,7 +8,7 @@
 
 INTERPLIB_INTERNAL
 interp_result_t lagrange_basis_create(basis_set_t **out, basis_spec_t spec, const integration_rule_t *rule,
-                                      const allocator_callbacks *allocator);
+                                      const cutl_allocator_t *allocator);
 
 static inline const double *lagrange_basis_roots(const basis_set_t *this)
 {

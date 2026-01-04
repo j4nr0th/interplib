@@ -8,6 +8,6 @@
 
 INTERPLIB_INTERNAL
 interp_result_t bernstein_basis_create(basis_set_t **out, basis_spec_t spec, const integration_rule_t *rule,
-                                       const allocator_callbacks *allocator);
+                                       const cutl_allocator_t *allocator);
 
 #endif // INTERPLIB_BASIS_BERNSTEIN_H

@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../src/common/allocator.h"
 #include "../../src/common/error.h"
+#include <cutl/allocators.h>
 
 #include <math.h>
 
@@ -67,7 +67,7 @@ static void test_numbers_close(const char *file, const int line, const char *fun
 
 #define TEST_NUMBERS_CLOSE(x, y, atol, rtol) test_numbers_close(__FILE__, __LINE__, __func__, x, y, atol, rtol)
 
-extern const allocator_callbacks TEST_ALLOCATOR;
+extern const cutl_allocator_t TEST_ALLOCATOR;
 
 #include <stdint.h>
 

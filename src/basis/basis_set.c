@@ -40,16 +40,16 @@ typedef struct
 struct basis_set_registry_t
 {
     rw_lock_t lock;
-    allocator_callbacks allocator;
+    cutl_allocator_t allocator;
     int should_cache;
     unsigned n_buckets;
     basis_bucket_btype_t *buckets;
 };
 
 interp_result_t basis_set_registry_create(basis_set_registry_t **out, int should_cache,
-                                          const allocator_callbacks *allocator)
+                                          const cutl_allocator_t *allocator)
 {
-    basis_set_registry_t *const this = allocate(allocator, sizeof *this);
+    basis_set_registry_t *const this = cutl_alloc(allocator, sizeof *this);
     if (!this)
         return INTERP_ERROR_FAILED_ALLOCATION;
     *this = (basis_set_registry_t){
@@ -57,7 +57,7 @@ interp_result_t basis_set_registry_create(basis_set_registry_t **out, int should
     const interp_result_t res = rw_lock_init(&this->lock);
     if (res != INTERP_SUCCESS)
     {
-        deallocate(allocator, this);
+        cutl_dealloc(allocator, this);
         return res;
     }
 
@@ -66,12 +66,12 @@ interp_result_t basis_set_registry_create(basis_set_registry_t **out, int should
 }
 
 static inline interp_result_t basis_set_bucket_btype_init(basis_bucket_btype_t *this, basis_set_type_t type,
-                                                          unsigned starting_size, const allocator_callbacks *allocator)
+                                                          unsigned starting_size, const cutl_allocator_t *allocator)
 {
     this->type = type;
     this->count = 0;
     this->capacity = starting_size;
-    this->buckets = allocate(allocator, starting_size * sizeof *this->buckets);
+    this->buckets = cutl_alloc(allocator, starting_size * sizeof *this->buckets);
     if (!this->buckets)
     {
         this->capacity = 0;
@@ -81,21 +81,21 @@ static inline interp_result_t basis_set_bucket_btype_init(basis_bucket_btype_t *
 }
 
 static inline interp_result_t basis_set_bucket_itype_init(basis_bucket_itype_t *this, integration_rule_type_t type,
-                                                          unsigned starting_size, const allocator_callbacks *allocator)
+                                                          unsigned starting_size, const cutl_allocator_t *allocator)
 {
     this->type = type;
     this->count = 0;
     this->capacity = starting_size;
-    this->basis_sets = allocate(allocator, starting_size * sizeof *this->basis_sets);
+    this->basis_sets = cutl_alloc(allocator, starting_size * sizeof *this->basis_sets);
     if (!this->basis_sets)
     {
         this->capacity = 0;
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
-    this->ref_counts = allocate(allocator, starting_size * sizeof *this->ref_counts);
+    this->ref_counts = cutl_alloc(allocator, starting_size * sizeof *this->ref_counts);
     if (!this->ref_counts)
     {
-        deallocate(allocator, this->basis_sets);
+        cutl_dealloc(allocator, this->basis_sets);
         this->capacity = 0;
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
@@ -103,7 +103,7 @@ static inline interp_result_t basis_set_bucket_itype_init(basis_bucket_itype_t *
 }
 
 static inline interp_result_t basis_set_create(basis_set_t **out, const integration_rule_t *integration_rule,
-                                               const basis_spec_t spec, const allocator_callbacks *allocator)
+                                               const basis_spec_t spec, const cutl_allocator_t *allocator)
 {
     interp_result_t res;
     switch (spec.type)
@@ -135,7 +135,7 @@ static inline interp_result_t basis_set_registry_add_btype_bucket(basis_set_regi
                                                                   const unsigned starting_size)
 {
     basis_bucket_btype_t *new_buckets =
-        reallocate(&this->allocator, this->buckets, (this->n_buckets + 1) * sizeof *new_buckets);
+        cutl_realloc(&this->allocator, this->buckets, (this->n_buckets + 1) * sizeof *new_buckets);
     if (!new_buckets)
     {
         return INTERP_ERROR_FAILED_ALLOCATION;
@@ -160,7 +160,7 @@ static inline interp_result_t basis_set_registry_add_itype_bucket(const basis_se
     {
         const unsigned new_capacity = first_bucket->capacity * 2;
         basis_bucket_itype_t *const new_buckets =
-            reallocate(&this->allocator, first_bucket->buckets, new_capacity * sizeof *new_buckets);
+            cutl_realloc(&this->allocator, first_bucket->buckets, new_capacity * sizeof *new_buckets);
         if (!new_buckets)
             return INTERP_ERROR_FAILED_ALLOCATION;
         first_bucket->buckets = new_buckets;
@@ -184,12 +184,12 @@ static inline interp_result_t basis_set_registry_add_basis_set(const basis_set_r
     {
         const unsigned new_capacity = second_bucket->capacity * 2;
         basis_set_t **const new_basis =
-            reallocate(&this->allocator, second_bucket->basis_sets, new_capacity * sizeof *new_basis);
+            cutl_realloc(&this->allocator, second_bucket->basis_sets, new_capacity * sizeof *new_basis);
         if (!new_basis)
             return INTERP_ERROR_FAILED_ALLOCATION;
         second_bucket->basis_sets = new_basis;
         _Atomic unsigned *const new_ref_counts =
-            reallocate(&this->allocator, second_bucket->ref_counts, new_capacity * sizeof *new_ref_counts);
+            cutl_realloc(&this->allocator, second_bucket->ref_counts, new_capacity * sizeof *new_ref_counts);
         if (!new_ref_counts)
             return INTERP_ERROR_FAILED_ALLOCATION;
         second_bucket->ref_counts = new_ref_counts;
@@ -328,7 +328,7 @@ interp_result_t basis_set_registry_release_basis_set(basis_set_registry_t *this,
             second_bucket->ref_counts[position] -= 1;
             if (second_bucket->ref_counts[position] == 0 && this->should_cache == 0)
             {
-                deallocate(&this->allocator, second_bucket->basis_sets[position]);
+                cutl_dealloc(&this->allocator, second_bucket->basis_sets[position]);
                 memmove(second_bucket->basis_sets + position, second_bucket->basis_sets + position + 1,
                         sizeof(*second_bucket->basis_sets) * (second_bucket->count - position - 1));
                 second_bucket->count -= 1;
@@ -352,15 +352,15 @@ void basis_set_registry_destroy(basis_set_registry_t *this)
             basis_bucket_itype_t *second_bucket = first_bucket->buckets + j;
             for (unsigned k = 0; k < second_bucket->count; ++k)
             {
-                deallocate(&this->allocator, second_bucket->basis_sets[k]);
+                cutl_dealloc(&this->allocator, second_bucket->basis_sets[k]);
             }
-            deallocate(&this->allocator, second_bucket->basis_sets);
-            deallocate(&this->allocator, second_bucket->ref_counts);
+            cutl_dealloc(&this->allocator, second_bucket->basis_sets);
+            cutl_dealloc(&this->allocator, second_bucket->ref_counts);
         }
-        deallocate(&this->allocator, first_bucket->buckets);
+        cutl_dealloc(&this->allocator, first_bucket->buckets);
     }
-    deallocate(&this->allocator, this->buckets);
-    deallocate(&this->allocator, this);
+    cutl_dealloc(&this->allocator, this->buckets);
+    cutl_dealloc(&this->allocator, this);
 }
 
 void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *const this)
@@ -376,7 +376,7 @@ void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *const th
             {
                 if (second_bucket->ref_counts[k] == 0 && this->should_cache == 0)
                 {
-                    deallocate(&this->allocator, second_bucket->basis_sets[k]);
+                    cutl_dealloc(&this->allocator, second_bucket->basis_sets[k]);
                     second_bucket->basis_sets[k] = NULL;
                 }
             }

@@ -7,10 +7,10 @@
 
 INTERPLIB_INTERNAL
 interp_result_t bernstein_basis_create(basis_set_t **out, const basis_spec_t spec, const integration_rule_t *rule,
-                                       const allocator_callbacks *allocator)
+                                       const cutl_allocator_t *allocator)
 {
     basis_set_t *const this =
-        allocate(allocator, sizeof *this + 2 * sizeof(*this->_data) * (spec.order + 1) * rule->n_nodes);
+        cutl_alloc(allocator, sizeof *this + 2 * sizeof(*this->_data) * (spec.order + 1) * rule->n_nodes);
     if (!this)
         return INTERP_ERROR_FAILED_ALLOCATION;
 

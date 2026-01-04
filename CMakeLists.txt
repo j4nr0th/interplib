@@ -34,12 +34,10 @@ set(BASIS_HEADER_FILES
         src/basis/de_rham_sequence.h
 )
 set(COMMON_SOURCE_FILES
-        src/common/allocator.c
         src/common/error.c
         src/common/rw_lock.c
 )
 set(COMMON_HEADER_FILES
-        src/common/allocator.h
         src/common/common_defines.h
         src/common/error.h
         src/common/rw_lock.h
@@ -58,16 +56,10 @@ set(INTEGRATION_HEADER_FILES
 )
 
 set(OPERATIONS_SOURCE_FILES
-        src/operations/multidim_iteration.c
-        src/operations/reconstruction.c
         src/operations/matrices.c
-        src/operations/permutations.c
-        src/operations/permutations.h
 )
 
 set(OPERATIONS_HEADER_FILES
-        src/operations/multidim_iteration.h
-        src/operations/reconstruction.h
         src/operations/matrices.h
 )
 
@@ -100,9 +92,11 @@ add_library(interp STATIC
         ${POLYNOMIALS_SOURCE_FILES}
 )
 
+add_subdirectory(cutl)
+
 set_property(TARGET interp PROPERTY C_STANDARD 17)
 target_compile_definitions(interp PRIVATE INTERPLIB_ASSERTS)
-target_link_libraries(interp PUBLIC m OpenMP::OpenMP_C)
+target_link_libraries(interp PUBLIC m OpenMP::OpenMP_C cutl)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(interp PRIVATE -Wall -Wextra -Werror -fanalyzer -Werror)
 endif ()
@@ -135,7 +129,7 @@ Python_add_library(_interp MODULE
 
 add_subdirectory(cpyutl)
 
-target_link_libraries(_interp PRIVATE interp cpyutl)
+target_link_libraries(_interp PRIVATE interp cpyutl cutl)
 set_property(TARGET _interp PROPERTY C_STANDARD 17)
 install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
 target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS CPYUTL_ENABLE_ASSERTS)

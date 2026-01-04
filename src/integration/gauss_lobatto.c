@@ -1,7 +1,3 @@
-//
-// Created by jan on 27.1.2025.
-//
-
 /**
  * Implementation based on Jupyter in:
  *

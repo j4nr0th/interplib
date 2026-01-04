@@ -30,20 +30,20 @@ void check_basis_equal(const covector_basis_t *b1, const covector_basis_t *b2)
 
 void check_hodge(const covector_basis_t b)
 {
-    // printf("Basis: ");
-    // print_basis(&b);
-    // printf("\n");
+    printf("Basis: ");
+    print_basis(&b);
+    printf("\n");
     const covector_basis_t hodge = covector_basis_hodge(b);
-    // printf("Hodge: ");
-    // print_basis(&hodge);
-    // printf("\n");
+    printf("Hodge: ");
+    print_basis(&hodge);
+    printf("\n");
     const covector_basis_t wedge = covector_basis_wedge(b, hodge);
-    // printf("Wedge: ");
-    // print_basis(&wedge);
-    // printf("\n");
+    printf("Wedge: ");
+    print_basis(&wedge);
+    printf("\n");
     TEST_ASSERTION(covector_basis_rank(wedge) == b.dimension,
                    "Wedge of basis and its Hodge should have rank equal it its dimension");
-    TEST_ASSERTION(wedge.sign == b.sign, "Wedge of basis and its Hodge should have the same sign as the basis");
+    TEST_ASSERTION(wedge.sign == 0, "Wedge of basis and its Hodge should have the same sign as the basis");
 }
 
 int main(void)

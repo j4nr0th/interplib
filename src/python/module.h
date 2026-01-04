@@ -5,7 +5,8 @@
 #ifndef INTERPLIB_MODULE_H
 #define INTERPLIB_MODULE_H
 
-#include "../common/allocator.h"
+#include "../common/common_defines.h"
+#include <cutl/allocators.h>
 
 //  Python ssize define
 #ifndef PY_SSIZE_T_CLEAN
@@ -33,13 +34,13 @@
 #include <cpyutl.h>
 
 INTERPLIB_INTERNAL
-extern allocator_callbacks SYSTEM_ALLOCATOR;
+extern cutl_allocator_t SYSTEM_ALLOCATOR;
 
 INTERPLIB_INTERNAL
-extern allocator_callbacks PYTHON_ALLOCATOR;
+extern cutl_allocator_t PYTHON_ALLOCATOR;
 
 INTERPLIB_INTERNAL
-extern allocator_callbacks OBJECT_ALLOCATOR;
+extern cutl_allocator_t OBJECT_ALLOCATOR;
 
 #include "../basis/basis_set.h"
 #include "../integration/integration_rules.h"

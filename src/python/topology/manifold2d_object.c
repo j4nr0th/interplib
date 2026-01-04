@@ -342,7 +342,7 @@ static PyObject *maifold2d_from_irregular(PyObject *type, PyObject *args, PyObje
     this->manifold.surf_lines = NULL;
     this->manifold.surf_counts = NULL;
 
-    this->manifold.lines = allocate(&SYSTEM_ALLOCATOR, sizeof *this->manifold.lines * n_lines);
+    this->manifold.lines = cutl_alloc(&SYSTEM_ALLOCATOR, sizeof *this->manifold.lines * n_lines);
     if (!this->manifold.lines)
     {
         Py_DECREF(this);
@@ -381,7 +381,7 @@ static PyObject *maifold2d_from_irregular(PyObject *type, PyObject *args, PyObje
     this->manifold.n_surfaces = PySequence_Fast_GET_SIZE(seq);
 
     this->manifold.surf_counts =
-        allocate(&SYSTEM_ALLOCATOR, sizeof *this->manifold.surf_counts * (this->manifold.n_surfaces + 1));
+        cutl_alloc(&SYSTEM_ALLOCATOR, sizeof *this->manifold.surf_counts * (this->manifold.n_surfaces + 1));
     if (!this->manifold.surf_counts)
     {
         Py_DECREF(this);
@@ -407,7 +407,7 @@ static PyObject *maifold2d_from_irregular(PyObject *type, PyObject *args, PyObje
         this->manifold.surf_counts[i + 1] = n_surf_lines;
     }
 
-    this->manifold.surf_lines = allocate(&SYSTEM_ALLOCATOR, sizeof(*this->manifold.surf_lines) * n_surf_lines);
+    this->manifold.surf_lines = cutl_alloc(&SYSTEM_ALLOCATOR, sizeof(*this->manifold.surf_lines) * n_surf_lines);
     if (!this->manifold.surf_lines)
     {
         Py_DECREF(seq);
@@ -544,7 +544,7 @@ static PyObject *maifold2d_from_regular(PyObject *type, PyObject *args, PyObject
     this->manifold.surf_lines = NULL;
     this->manifold.surf_counts = NULL;
 
-    this->manifold.lines = allocate(&SYSTEM_ALLOCATOR, sizeof *this->manifold.lines * n_lines);
+    this->manifold.lines = cutl_alloc(&SYSTEM_ALLOCATOR, sizeof *this->manifold.lines * n_lines);
     if (!this->manifold.lines)
     {
         Py_DECREF(this);
@@ -585,14 +585,14 @@ static PyObject *maifold2d_from_regular(PyObject *type, PyObject *args, PyObject
     const unsigned n_per_surf = PyArray_DIM(surfaces, 1);
 
     this->manifold.surf_counts =
-        allocate(&SYSTEM_ALLOCATOR, sizeof *this->manifold.surf_counts * (this->manifold.n_surfaces + 1));
+        cutl_alloc(&SYSTEM_ALLOCATOR, sizeof *this->manifold.surf_counts * (this->manifold.n_surfaces + 1));
     if (!this->manifold.surf_counts)
     {
         Py_DECREF(this);
         return NULL;
     }
     this->manifold.surf_lines =
-        allocate(&SYSTEM_ALLOCATOR, sizeof(*this->manifold.surf_lines) * this->manifold.n_surfaces * n_per_surf);
+        cutl_alloc(&SYSTEM_ALLOCATOR, sizeof(*this->manifold.surf_lines) * this->manifold.n_surfaces * n_per_surf);
     if (!this->manifold.surf_lines)
     {
         Py_DECREF(surfaces);

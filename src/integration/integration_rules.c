@@ -13,7 +13,7 @@
 #include <threads.h>
 
 interp_result_t integration_rule_for_accuracy(integration_rule_t **out, const integration_rule_type_t type,
-                                              const unsigned accuracy, const allocator_callbacks *allocator)
+                                              const unsigned accuracy, const cutl_allocator_t *allocator)
 {
     unsigned required_order;
     switch (type)
@@ -38,9 +38,9 @@ interp_result_t integration_rule_for_accuracy(integration_rule_t **out, const in
     return integration_rule_for_order(out, type, required_order, allocator);
 }
 interp_result_t integration_rule_for_order(integration_rule_t **out, const integration_rule_type_t type,
-                                           const unsigned order, const allocator_callbacks *allocator)
+                                           const unsigned order, const cutl_allocator_t *allocator)
 {
-    integration_rule_t *const this = allocate(allocator, sizeof *this + 2 * (order + 1) * sizeof *this->_data);
+    integration_rule_t *const this = cutl_alloc(allocator, sizeof *this + 2 * (order + 1) * sizeof *this->_data);
     if (!this)
         return INTERP_ERROR_FAILED_ALLOCATION;
     this->n_nodes = order + 1;
@@ -84,19 +84,19 @@ typedef struct
 static inline interp_result_t integration_rule_type_bucket_init(integration_rule_type_bucket_t *this,
                                                                 const integration_rule_type_t type,
                                                                 const unsigned starting_size,
-                                                                const allocator_callbacks *allocator)
+                                                                const cutl_allocator_t *allocator)
 {
     this->type = type;
     this->count = 0;
     this->capacity = starting_size;
-    this->rules = allocate(allocator, starting_size * sizeof *this->rules);
+    this->rules = cutl_alloc(allocator, starting_size * sizeof *this->rules);
     if (!this->rules)
         return INTERP_ERROR_FAILED_ALLOCATION;
 
-    this->ref_counts = allocate(allocator, starting_size * sizeof *this->ref_counts);
+    this->ref_counts = cutl_alloc(allocator, starting_size * sizeof *this->ref_counts);
     if (!this->ref_counts)
     {
-        deallocate(allocator, this->rules);
+        cutl_dealloc(allocator, this->rules);
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
     memset(this->ref_counts, 0, starting_size * sizeof *this->ref_counts);
@@ -105,31 +105,31 @@ static inline interp_result_t integration_rule_type_bucket_init(integration_rule
 }
 
 static inline void integration_rule_type_bucket_destroy(integration_rule_type_bucket_t *this,
-                                                        const allocator_callbacks *allocator)
+                                                        const cutl_allocator_t *allocator)
 {
     for (unsigned i = 0; i < this->count; ++i)
     {
-        deallocate(allocator, this->rules[i]);
+        cutl_dealloc(allocator, this->rules[i]);
     }
-    deallocate(allocator, this->rules);
-    deallocate(allocator, this->ref_counts);
+    cutl_dealloc(allocator, this->rules);
+    cutl_dealloc(allocator, this->ref_counts);
     *this = (integration_rule_type_bucket_t){};
 }
 
 static inline interp_result_t integration_rule_type_bucket_add_rule(integration_rule_type_bucket_t *this,
                                                                     integration_rule_t *rule,
-                                                                    const allocator_callbacks *allocator)
+                                                                    const cutl_allocator_t *allocator)
 {
     ASSERT(rule->spec.type == this->type, "Rule type does not match bucket type.");
     if (this->count == this->capacity)
     {
         const unsigned new_capacity = this->capacity * 2;
-        integration_rule_t **new_rules = reallocate(allocator, this->rules, new_capacity * sizeof *new_rules);
+        integration_rule_t **new_rules = cutl_realloc(allocator, this->rules, new_capacity * sizeof *new_rules);
         if (!new_rules)
             return INTERP_ERROR_FAILED_ALLOCATION;
         this->rules = new_rules;
 
-        unsigned *new_ref_counts = reallocate(allocator, this->ref_counts, new_capacity * sizeof *new_ref_counts);
+        unsigned *new_ref_counts = cutl_realloc(allocator, this->ref_counts, new_capacity * sizeof *new_ref_counts);
         if (!new_ref_counts)
             return INTERP_ERROR_FAILED_ALLOCATION;
         this->ref_counts = new_ref_counts;
@@ -146,7 +146,7 @@ static inline interp_result_t integration_rule_type_bucket_add_rule(integration_
 struct integration_rule_registry_t
 {
     rw_lock_t lock;                          // Lock for the registry
-    allocator_callbacks allocator;           // Allocator to use
+    cutl_allocator_t allocator;              // Allocator to use
     int should_cache;                        // Whether to cache rules
     unsigned n_buckets;                      // Number of buckets
     integration_rule_type_bucket_t *buckets; // Bucket array
@@ -154,9 +154,9 @@ struct integration_rule_registry_t
 
 INTERPLIB_INTERNAL
 interp_result_t integration_rule_registry_create(integration_rule_registry_t **out, const int should_cache,
-                                                 const allocator_callbacks *allocator)
+                                                 const cutl_allocator_t *allocator)
 {
-    integration_rule_registry_t *const this = allocate(allocator, sizeof *this);
+    integration_rule_registry_t *const this = cutl_alloc(allocator, sizeof *this);
     if (!this)
         return INTERP_ERROR_FAILED_ALLOCATION;
     *this = (integration_rule_registry_t){
@@ -164,7 +164,7 @@ interp_result_t integration_rule_registry_create(integration_rule_registry_t **o
     const interp_result_t res = rw_lock_init(&this->lock);
     if (res != INTERP_SUCCESS)
     {
-        deallocate(allocator, this);
+        cutl_dealloc(allocator, this);
         return res;
     }
     *out = this;
@@ -179,8 +179,8 @@ void integration_rule_registry_destroy(integration_rule_registry_t *this)
         integration_rule_type_bucket_destroy(&this->buckets[i], &this->allocator);
     }
     rw_lock_destroy(&this->lock);
-    deallocate(&this->allocator, this->buckets);
-    deallocate(&this->allocator, this);
+    cutl_dealloc(&this->allocator, this->buckets);
+    cutl_dealloc(&this->allocator, this);
 }
 
 INTERPLIB_INTERNAL
@@ -203,7 +203,7 @@ interp_result_t integration_rule_registry_get_rule(integration_rule_registry_t *
         rw_lock_acquire_write(&this->lock);
 
         integration_rule_type_bucket_t *const new_buckets =
-            reallocate(&this->allocator, this->buckets, (this->n_buckets + 1) * sizeof *new_buckets);
+            cutl_realloc(&this->allocator, this->buckets, (this->n_buckets + 1) * sizeof *new_buckets);
         if (!new_buckets)
             return INTERP_ERROR_FAILED_ALLOCATION;
         this->buckets = new_buckets;
@@ -283,7 +283,7 @@ interp_result_t integration_rule_registry_release_rule(integration_rule_registry
                 bucket->ref_counts[j] -= 1;
                 if (bucket->ref_counts[j] == 0 && this->should_cache == 0)
                 {
-                    deallocate(&this->allocator, bucket->rules[j]);
+                    cutl_dealloc(&this->allocator, bucket->rules[j]);
                     memmove(bucket->rules + j, bucket->rules + j + 1, (bucket->count - j - 1) * sizeof *bucket->rules);
                     bucket->count -= 1;
                 }
@@ -308,7 +308,7 @@ void integration_rule_registry_release_unused_rules(integration_rule_registry_t 
         {
             if (bucket->ref_counts[j] == 0)
             {
-                deallocate(&this->allocator, bucket->rules[j]);
+                cutl_dealloc(&this->allocator, bucket->rules[j]);
             }
         }
         unsigned pos, valid;
@@ -333,7 +333,7 @@ void integration_rule_registry_release_all_rules(integration_rule_registry_t *th
         integration_rule_type_bucket_t *const bucket = this->buckets + i;
         for (unsigned j = 0; j < bucket->count; ++j)
         {
-            deallocate(&this->allocator, bucket->rules[j]);
+            cutl_dealloc(&this->allocator, bucket->rules[j]);
         }
         bucket->count = 0;
     }

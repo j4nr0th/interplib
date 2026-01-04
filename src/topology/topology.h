@@ -5,8 +5,9 @@
 #ifndef INTERPLIB_TOPOLOGY_H
 #define INTERPLIB_TOPOLOGY_H
 
-#include "../common/allocator.h"
+#include "../common/common_defines.h"
 #include "../common/error.h"
+#include <cutl/allocators.h>
 
 typedef unsigned index_t;
 _Static_assert(sizeof(index_t) == 4, "This must be for the geo_id_t to make sense");
@@ -63,16 +64,16 @@ typedef struct
 INTERPLIB_INTERNAL
 interp_result_t manifold1d_new(manifold1d_t *manifold, unsigned n_points, unsigned n_lines,
                                const line_t INTERPLIB_ARRAY_ARG(lines, static n_lines),
-                               const allocator_callbacks *allocator);
+                               const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
-interp_result_t manifold1d_new_line(manifold1d_t *manifold, unsigned n_points, const allocator_callbacks *allocator);
+interp_result_t manifold1d_new_line(manifold1d_t *manifold, unsigned n_points, const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
-void manifold1d_free(manifold1d_t *manifold, const allocator_callbacks *allocator);
+void manifold1d_free(manifold1d_t *manifold, const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
-interp_result_t manifold1d_dual(const manifold1d_t *manifold, manifold1d_t *dual, const allocator_callbacks *allocator);
+interp_result_t manifold1d_dual(const manifold1d_t *manifold, manifold1d_t *dual, const cutl_allocator_t *allocator);
 
 /*
  *
@@ -98,19 +99,19 @@ typedef struct
 //                                        unsigned n_surfaces, unsigned points_per_surface,
 //                                        const unsigned INTERPLIB_ARRAY_ARG(surface_points,
 //                                                                           static n_surfaces *points_per_surface),
-//                                        const allocator_callbacks *allocator);
+//                                        const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
 interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsigned n_lines,
                                const line_t INTERPLIB_ARRAY_ARG(lines, static n_lines), unsigned n_surfaces,
                                const surface_t INTERPLIB_ARRAY_ARG(surfaces, static n_surfaces),
-                               const allocator_callbacks *allocator);
+                               const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
-void manifold2d_free(manifold2d_t *manifold, const allocator_callbacks *allocator);
+void manifold2d_free(manifold2d_t *manifold, const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
-interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual, const allocator_callbacks *allocator);
+interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual, const cutl_allocator_t *allocator);
 
 typedef union {
     manifold_dimension_t manifold_type;

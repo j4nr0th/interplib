@@ -1,8 +1,8 @@
 #ifndef INTERPLIB_FUNCTION_SPACE_OBJECTS_H
 #define INTERPLIB_FUNCTION_SPACE_OBJECTS_H
 
-#include "../operations/multidim_iteration.h"
 #include "module.h"
+#include <cutl/iterators/multidim_iteration.h>
 
 typedef struct
 {

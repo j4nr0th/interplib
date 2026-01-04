@@ -1,7 +1,7 @@
 #include "function_space_objects.h"
-#include "../operations/multidim_iteration.h"
 #include "basis_objects.h"
 #include "integration_objects.h"
+#include <cutl/iterators/multidim_iteration.h>
 
 function_space_object *function_space_object_create(PyTypeObject *type, const unsigned n_basis,
                                                     const basis_spec_t INTERPLIB_ARRAY_ARG(specs, static n_basis))

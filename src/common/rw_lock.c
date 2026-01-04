@@ -1,20 +1,5 @@
-//
-// Created by jan on 2025-09-12.
-//
-
 #include "rw_lock.h"
-
-/*
-typedef struct
-{
-    mtx_t lock;
-    cnd_t cond_read;
-    unsigned readers;
-    unsigned writers;
-    unsigned new_readers;
-    unsigned new_writers;
-} rw_lock_t;
- */
+#include <threads.h>
 
 INTERPLIB_INTERNAL
 interp_result_t rw_lock_init(rw_lock_t *this)

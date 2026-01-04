@@ -44,7 +44,7 @@ typedef struct element_collection_t element_collection_t;
 
 INTERPLIB_INTERNAL
 interp_result_t element_collection_init(element_collection_t *this, unsigned element_count, const manifold_t *manifold,
-                                        const allocator_callbacks *allocator);
+                                        const cutl_allocator_t *allocator);
 
 typedef enum
 {
