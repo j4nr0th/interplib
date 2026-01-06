@@ -1,11 +1,8 @@
-//
-// Created by jan on 2025-09-07.
-//
 
 #ifndef INTERPLIB_INTEGRATION_RULES_H
 #define INTERPLIB_INTEGRATION_RULES_H
-#include "../common/allocator.h"
 #include "../common/error.h"
+#include <cutl/allocators.h>
 
 typedef enum
 {
@@ -53,11 +50,11 @@ static inline const double *integration_rule_weights_const(const integration_rul
 
 INTERPLIB_INTERNAL
 interp_result_t integration_rule_for_accuracy(integration_rule_t **out, integration_rule_type_t type, unsigned accuracy,
-                                              const allocator_callbacks *allocator);
+                                              const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
 interp_result_t integration_rule_for_order(integration_rule_t **out, integration_rule_type_t type, unsigned order,
-                                           const allocator_callbacks *allocator);
+                                           const cutl_allocator_t *allocator);
 
 typedef struct integration_rule_registry_t integration_rule_registry_t;
 
@@ -72,7 +69,7 @@ typedef struct integration_rule_registry_t integration_rule_registry_t;
  *                 On success, it points to the newly allocated and initialized registry object.
  * @param[in] should_cache If non-zero, then integration rules are cached and not freed when unused until explicitly
  *                         cleared.
- * @param[in] allocator Pointer to an `allocator_callbacks` structure for custom
+ * @param[in] allocator Pointer to an `cutl_allocator_t` structure for custom
  *                      memory allocation, reallocation, and deallocation operations.
  *
  * @return `INTERP_SUCCESS` on successful initialization.
@@ -83,7 +80,7 @@ typedef struct integration_rule_registry_t integration_rule_registry_t;
  */
 INTERPLIB_INTERNAL
 interp_result_t integration_rule_registry_create(integration_rule_registry_t **out, int should_cache,
-                                                 const allocator_callbacks *allocator);
+                                                 const cutl_allocator_t *allocator);
 
 /**
  * @brief Destroys an integration rule registry.

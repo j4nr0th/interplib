@@ -37,7 +37,7 @@ int main()
             TEST_NUMBERS_CLOSE(computed, analytical, 1e-12, 1e-10);
         }
 
-        deallocate(&TEST_ALLOCATOR, rule);
+        cutl_dealloc(&TEST_ALLOCATOR, rule);
     }
 
     return 0;

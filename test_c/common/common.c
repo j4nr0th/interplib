@@ -26,10 +26,10 @@ static void wrap_free(void *state, void *ptr)
     free(ptr);
 }
 
-const allocator_callbacks TEST_ALLOCATOR = {
-    .alloc = wrap_malloc,
-    .free = wrap_free,
-    .realloc = wrap_realloc,
+const cutl_allocator_t TEST_ALLOCATOR = {
+    .allocate = wrap_malloc,
+    .deallocate = wrap_free,
+    .reallocate = wrap_realloc,
     .state = (void *)TEST_ALLOCATOR_MAGIC_NUMBER,
 };
 

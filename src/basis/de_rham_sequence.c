@@ -14,7 +14,7 @@ typedef struct
 
 typedef struct element_collection_t
 {
-    allocator_callbacks allocator;
+    cutl_allocator_t allocator;
     const manifold_t *manifold;
     unsigned element_count;
     element_order_t *element_orders;
@@ -22,14 +22,14 @@ typedef struct element_collection_t
 } element_collection_t;
 
 interp_result_t element_collection_init(element_collection_t *this, const unsigned element_count,
-                                        const manifold_t *manifold, const allocator_callbacks *allocator)
+                                        const manifold_t *manifold, const cutl_allocator_t *allocator)
 {
     this->manifold = manifold;
     this->allocator = *allocator;
     this->element_count = element_count;
 
     this->element_orders =
-        allocate(allocator, element_count * sizeof *this->element_orders * manifold_dimension_count(this->manifold));
+        cutl_alloc(allocator, element_count * sizeof *this->element_orders * manifold_dimension_count(this->manifold));
     if (!this->element_orders)
         return INTERP_ERROR_FAILED_ALLOCATION;
 
@@ -51,10 +51,10 @@ interp_result_t element_collection_init(element_collection_t *this, const unsign
 
 void element_collection_destroy(element_collection_t *this)
 {
-    deallocate(&this->allocator, this->element_orders);
+    cutl_dealloc(&this->allocator, this->element_orders);
     for (unsigned i = 0; i < FORM_ORDER_COUNT - 1; ++i)
     {
-        deallocate(&this->allocator, this->form_offsets[i]);
+        cutl_dealloc(&this->allocator, this->form_offsets[i]);
     }
     *this = (element_collection_t){};
 }
@@ -68,8 +68,8 @@ interp_result_t element_collection_form_offsets(element_collection_t *this, cons
         return INTERP_SUCCESS;
     }
 
-    form_offsets_t *offsets =
-        allocate(&this->allocator, sizeof *offsets + sizeof *offsets->offsets * (this->element_count + 1));
+    form_offsets_t *const offsets =
+        cutl_alloc(&this->allocator, sizeof *offsets + sizeof *offsets->offsets * (this->element_count + 1));
     if (!offsets)
         return INTERP_ERROR_FAILED_ALLOCATION;
     offsets->order = form_order;
@@ -98,7 +98,7 @@ interp_result_t differential_form_new(differential_form_t **out, const form_orde
         return res;
 
     differential_form_t *const this =
-        allocate(&collection->allocator, sizeof *this + sizeof *this->values * offsets->offsets[element_count]);
+        cutl_alloc(&collection->allocator, sizeof *this + sizeof *this->values * offsets->offsets[element_count]);
     if (!this)
         return INTERP_ERROR_FAILED_ALLOCATION;
 
@@ -127,10 +127,10 @@ interp_result_t differential_form_new(differential_form_t **out, const form_orde
 INTERPLIB_INTERNAL
 void differential_form_destroy(differential_form_t *this)
 {
-    const allocator_callbacks *allocator = &this->collection->allocator;
+    const cutl_allocator_t *allocator = &this->collection->allocator;
     this->collection = NULL;
     this->form_order = 0;
-    deallocate(allocator, this);
+    cutl_dealloc(allocator, this);
 }
 
 INTERPLIB_INTERNAL

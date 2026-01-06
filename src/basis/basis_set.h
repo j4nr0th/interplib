@@ -6,7 +6,7 @@
 #define INTERPLIB_BASIS_H
 #include "../common/error.h"
 #include "../integration/integration_rules.h"
-#include "../operations/multidim_iteration.h"
+#include <cutl/iterators/multidim_iteration.h>
 
 typedef enum
 {
@@ -58,7 +58,7 @@ typedef struct basis_set_registry_t basis_set_registry_t;
 
 INTERPLIB_INTERNAL
 interp_result_t basis_set_registry_create(basis_set_registry_t **out, int should_cache,
-                                          const allocator_callbacks *allocator);
+                                          const cutl_allocator_t *allocator);
 
 INTERPLIB_INTERNAL
 interp_result_t basis_set_registry_get_basis_set(basis_set_registry_t *this, const basis_set_t **p_basis,

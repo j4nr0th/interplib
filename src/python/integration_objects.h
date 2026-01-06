@@ -1,8 +1,8 @@
 #ifndef INTERPLIB_INTEGRATION_RULE_OBJECT_H
 #define INTERPLIB_INTEGRATION_RULE_OBJECT_H
 #include "../integration/integration_rules.h"
-#include "../operations/multidim_iteration.h"
 #include "module.h"
+#include <cutl/iterators/multidim_iteration.h>
 
 typedef struct
 {

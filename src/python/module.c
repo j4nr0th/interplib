@@ -19,6 +19,7 @@
 #include "mass_matrices.h"
 
 // Topology
+#include "covector_basis.h"
 #include "cpyutl.h"
 #include "degrees_of_freedom.h"
 #include "function_space_objects.h"
@@ -63,10 +64,10 @@ static void free_system(void *state, void *ptr)
 }
 
 INTERPLIB_INTERNAL
-allocator_callbacks SYSTEM_ALLOCATOR = {
-    .alloc = allocate_system,
-    .free = free_system,
-    .realloc = reallocate_system,
+cutl_allocator_t SYSTEM_ALLOCATOR = {
+    .allocate = allocate_system,
+    .deallocate = free_system,
+    .reallocate = reallocate_system,
     .state = (void *)SYSTEM_MAGIC,
 };
 
@@ -89,10 +90,10 @@ static void free_python(void *state, void *ptr)
 }
 
 INTERPLIB_INTERNAL
-allocator_callbacks PYTHON_ALLOCATOR = {
-    .alloc = allocate_python,
-    .free = free_python,
-    .realloc = reallocate_python,
+cutl_allocator_t PYTHON_ALLOCATOR = {
+    .allocate = allocate_python,
+    .deallocate = free_python,
+    .reallocate = reallocate_python,
     .state = (void *)PYTHON_MAGIC,
 };
 
@@ -799,6 +800,8 @@ static int interplib_add_types(PyObject *mod)
             NULL ||
         (module_state->basis_registry_type =
              cpyutl_add_type_from_spec_to_module(mod, &basis_registry_type_specs, NULL)) == NULL ||
+        (module_state->covector_basis_type =
+             cpyutl_add_type_from_spec_to_module(mod, &covector_basis_type_spec, NULL)) == NULL ||
         (module_state->function_space_type =
              cpyutl_add_type_from_spec_to_module(mod, &function_space_type_spec, NULL)) == NULL ||
         (module_state->integration_space_type =

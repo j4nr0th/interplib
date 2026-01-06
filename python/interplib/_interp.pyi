@@ -397,6 +397,87 @@ class BasisRegistry:
 DEFAULT_BASIS_REGISTRY: BasisRegistry = ...
 
 @final
+class CovectorBasis:
+    """Type used to specify covector basis bundle.
+
+    Parameters
+    ----------
+    n : int
+        Dimension of the space basis bundle is in.
+
+    *idx : int
+        Indices of basis present in the bundle. Should be sorted and non-repeating.
+    """
+
+    def __new__(self, n: int, /, *idx: int): ...
+    @property
+    def ndim(self) -> int:
+        """Number of dimensions of the space the basis are in."""
+        ...
+
+    @property
+    def rank(self) -> int:
+        """Number of basis contained."""
+        ...
+
+    @property
+    def sign(self) -> int:
+        """The sign of the basis."""
+        ...
+
+    def __xor__(self, other: CovectorBasis, /) -> CovectorBasis:
+        """Wedge product of the two CovectorBasis."""
+        ...
+
+    def __neg__(self) -> CovectorBasis:
+        """Negate the CovectorBasis."""
+        ...
+
+    def __invert__(self) -> CovectorBasis:
+        """Hodge of the CovectorBasis."""
+        ...
+
+    def __eq__(self, other) -> bool:
+        """Compare two CovectorBasis."""
+        ...
+
+    def __gt__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+    def __ge__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+    def __lt__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+    def __le__(self, other: CovectorBasis) -> bool:
+        """Comparison to sort basis."""
+        ...
+
+    def __bool__(self) -> bool:
+        """Check for non-zero basis."""
+        ...
+
+    def __str__(self) -> str:
+        """Representation of the object."""
+        ...
+
+    def __hash__(self) -> int:
+        """Hash the object."""
+        ...
+
+    def __repr__(self) -> str:
+        """Representation of the object."""
+        ...
+
+    def normalize(self) -> tuple[int, CovectorBasis]:
+        """Normalize the basis by splitting the sign."""
+        ...
+
+@final
 class BasisSpecs:
     """Type that describes specifications for a basis set.
 

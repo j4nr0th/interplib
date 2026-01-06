@@ -8,12 +8,12 @@
 INTERPLIB_INTERNAL
 interp_result_t manifold1d_new(manifold1d_t *manifold, const unsigned n_points, const unsigned n_lines,
                                const line_t INTERPLIB_ARRAY_ARG(lines, static n_lines),
-                               const allocator_callbacks *allocator)
+                               const cutl_allocator_t *allocator)
 {
     manifold->manifold_type = MANIFOLD_1D;
     manifold->n_points = n_points;
     manifold->n_lines = n_lines;
-    manifold->lines = allocate(allocator, n_lines * sizeof *manifold->lines);
+    manifold->lines = cutl_alloc(allocator, n_lines * sizeof *manifold->lines);
     if (!manifold->lines)
         return INTERP_ERROR_FAILED_ALLOCATION;
 
@@ -31,33 +31,36 @@ interp_result_t manifold1d_new(manifold1d_t *manifold, const unsigned n_points, 
 }
 
 INTERPLIB_INTERNAL
-interp_result_t manifold1d_new_line(manifold1d_t *manifold, unsigned n_points, const allocator_callbacks *allocator)
+interp_result_t manifold1d_new_line(manifold1d_t *manifold, unsigned n_points, const cutl_allocator_t *allocator)
 {
     manifold->manifold_type = MANIFOLD_1D;
     manifold->n_points = n_points;
     manifold->n_lines = n_points - 1;
-    manifold->lines = allocate(allocator, manifold->n_lines * sizeof *manifold->lines);
+    manifold->lines = cutl_alloc(allocator, manifold->n_lines * sizeof *manifold->lines);
     if (!manifold->lines)
         return INTERP_ERROR_FAILED_ALLOCATION;
     for (unsigned i = 0; i < manifold->n_lines; ++i)
-        manifold->lines[i] = (line_t){(geo_id_t){.index = i, .reverse = 0}, (geo_id_t){.index = i + 1, .reverse = 0}};
+        manifold->lines[i] = (line_t){
+            (geo_id_t){.index = i, .reverse = 0},
+            (geo_id_t){.index = i + 1, .reverse = 0},
+        };
     return INTERP_SUCCESS;
 }
 
 INTERPLIB_INTERNAL
-void manifold1d_free(manifold1d_t *manifold, const allocator_callbacks *allocator)
+void manifold1d_free(manifold1d_t *manifold, const cutl_allocator_t *allocator)
 {
-    deallocate(allocator, manifold->lines);
+    cutl_dealloc(allocator, manifold->lines);
     *manifold = (manifold1d_t){};
 }
 
 INTERPLIB_INTERNAL
-interp_result_t manifold1d_dual(const manifold1d_t *manifold, manifold1d_t *dual, const allocator_callbacks *allocator)
+interp_result_t manifold1d_dual(const manifold1d_t *manifold, manifold1d_t *dual, const cutl_allocator_t *allocator)
 {
     dual->manifold_type = MANIFOLD_1D;
     dual->n_points = manifold->n_lines;
     dual->n_lines = manifold->n_points;
-    dual->lines = allocate(allocator, dual->n_lines * sizeof *dual->lines);
+    dual->lines = cutl_alloc(allocator, dual->n_lines * sizeof *dual->lines);
     if (!dual->lines)
         return INTERP_ERROR_FAILED_ALLOCATION;
     for (unsigned i_point = 0; i_point < manifold->n_points; ++i_point)
@@ -71,7 +74,7 @@ interp_result_t manifold1d_dual(const manifold1d_t *manifold, manifold1d_t *dual
             {
                 if (dual_line.begin.index != GEO_ID_INVALID)
                 {
-                    deallocate(allocator, dual->lines);
+                    cutl_dealloc(allocator, dual->lines);
                     return INTERP_ERROR_OBJECT_CONNECTED_TWICE;
                 }
                 dual_line.begin.index = manifold->lines[i_line].begin.index;
@@ -81,7 +84,7 @@ interp_result_t manifold1d_dual(const manifold1d_t *manifold, manifold1d_t *dual
             {
                 if (dual_line.end.index != GEO_ID_INVALID)
                 {
-                    deallocate(allocator, dual->lines);
+                    cutl_dealloc(allocator, dual->lines);
                     return INTERP_ERROR_OBJECT_CONNECTED_TWICE;
                 }
                 dual_line.end.index = manifold->lines[i_line].end.index;
@@ -98,7 +101,7 @@ INTERPLIB_INTERNAL
 interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsigned n_lines,
                                const line_t INTERPLIB_ARRAY_ARG(lines, static n_lines), unsigned n_surfaces,
                                const surface_t INTERPLIB_ARRAY_ARG(surfaces, static n_surfaces),
-                               const allocator_callbacks *allocator)
+                               const cutl_allocator_t *allocator)
 {
     manifold->n_points = n_points;
     manifold->n_lines = n_lines;
@@ -108,7 +111,7 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
     manifold->surf_lines = NULL;
     manifold->surf_counts = NULL;
 
-    manifold->lines = allocate(allocator, sizeof *manifold->lines * n_lines);
+    manifold->lines = cutl_alloc(allocator, sizeof *manifold->lines * n_lines);
     if (!manifold->lines)
     {
         return INTERP_ERROR_FAILED_ALLOCATION;
@@ -121,7 +124,7 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
 
         if (begin.index >= n_points || end.index >= n_points)
         {
-            deallocate(allocator, manifold->lines);
+            cutl_dealloc(allocator, manifold->lines);
             return INTERP_ERROR_GEOID_OUT_OF_RANGE;
         }
         manifold->lines[i_ln] = (line_t){
@@ -132,10 +135,10 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
 
     manifold->n_surfaces = n_surfaces;
 
-    manifold->surf_counts = allocate(allocator, sizeof *manifold->surf_counts * (manifold->n_surfaces + 1));
+    manifold->surf_counts = cutl_alloc(allocator, sizeof *manifold->surf_counts * (manifold->n_surfaces + 1));
     if (!manifold->surf_counts)
     {
-        deallocate(allocator, manifold->lines);
+        cutl_dealloc(allocator, manifold->lines);
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
 
@@ -153,11 +156,11 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
         // same_size = same_size && (surface->n_lines == first_size);
     }
 
-    manifold->surf_lines = allocate(allocator, sizeof(*manifold->surf_lines) * n_surf_lines);
+    manifold->surf_lines = cutl_alloc(allocator, sizeof(*manifold->surf_lines) * n_surf_lines);
     if (!manifold->surf_lines)
     {
-        deallocate(allocator, manifold->surf_counts);
-        deallocate(allocator, manifold->lines);
+        cutl_dealloc(allocator, manifold->surf_counts);
+        cutl_dealloc(allocator, manifold->lines);
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
 
@@ -172,16 +175,16 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
             const geo_id_t id = surface->values[j];
             if (id.index != GEO_ID_INVALID)
             {
-                deallocate(allocator, surf_lines);
-                deallocate(allocator, manifold->surf_counts);
-                deallocate(allocator, manifold->lines);
+                cutl_dealloc(allocator, surf_lines);
+                cutl_dealloc(allocator, manifold->surf_counts);
+                cutl_dealloc(allocator, manifold->lines);
                 return INTERP_ERROR_GEOID_NOT_VALID;
             }
             if (id.index >= manifold->n_lines)
             {
-                deallocate(allocator, surf_lines);
-                deallocate(allocator, manifold->surf_counts);
-                deallocate(allocator, manifold->lines);
+                cutl_dealloc(allocator, surf_lines);
+                cutl_dealloc(allocator, manifold->surf_counts);
+                cutl_dealloc(allocator, manifold->lines);
                 return INTERP_ERROR_GEOID_OUT_OF_RANGE;
             }
             surf_lines[j] = id;
@@ -217,9 +220,9 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
 
             if (begin.index != end.index)
             {
-                deallocate(allocator, surf_lines);
-                deallocate(allocator, manifold->surf_counts);
-                deallocate(allocator, manifold->lines);
+                cutl_dealloc(allocator, surf_lines);
+                cutl_dealloc(allocator, manifold->surf_counts);
+                cutl_dealloc(allocator, manifold->lines);
                 return INTERP_ERROR_SURFACE_NOT_CLOSED;
             }
             end = new_end;
@@ -236,19 +239,19 @@ interp_result_t manifold2d_new(manifold2d_t *manifold, unsigned n_points, unsign
 }
 
 INTERPLIB_INTERNAL
-void manifold2d_free(manifold2d_t *manifold, const allocator_callbacks *allocator)
+void manifold2d_free(manifold2d_t *manifold, const cutl_allocator_t *allocator)
 {
-    deallocate(allocator, manifold->lines);
-    deallocate(allocator, manifold->surf_counts);
-    deallocate(allocator, manifold->surf_lines);
+    cutl_dealloc(allocator, manifold->lines);
+    cutl_dealloc(allocator, manifold->surf_counts);
+    cutl_dealloc(allocator, manifold->surf_lines);
     *manifold = (manifold2d_t){};
 }
 
 INTERPLIB_INTERNAL
-interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual, const allocator_callbacks *allocator)
+interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual, const cutl_allocator_t *allocator)
 {
     const unsigned n_lines = manifold->n_lines;
-    line_t *const dual_lines = allocate(allocator, sizeof *dual_lines * n_lines);
+    line_t *const dual_lines = cutl_alloc(allocator, sizeof *dual_lines * n_lines);
     if (!dual_lines)
         return INTERP_ERROR_FAILED_ALLOCATION;
 
@@ -277,7 +280,7 @@ interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual
                 {
                     if (line.begin.index != GEO_ID_INVALID)
                     {
-                        deallocate(allocator, dual_lines);
+                        cutl_dealloc(allocator, dual_lines);
                         return INTERP_ERROR_OBJECT_CONNECTED_TWICE;
                     }
                     line.begin.index = i_surf;
@@ -286,7 +289,7 @@ interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual
                 {
                     if (line.end.index != GEO_ID_INVALID)
                     {
-                        deallocate(allocator, dual_lines);
+                        cutl_dealloc(allocator, dual_lines);
                         return INTERP_ERROR_OBJECT_CONNECTED_TWICE;
                     }
                     line.end.index = i_surf;
@@ -299,10 +302,10 @@ interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual
 
     const unsigned n_surf = manifold->n_points;
     dual->n_surfaces = n_surf;
-    size_t *const surf_counts = allocate(allocator, sizeof *surf_counts * (n_surf + 1));
+    size_t *const surf_counts = cutl_alloc(allocator, sizeof *surf_counts * (n_surf + 1));
     if (!surf_counts)
     {
-        deallocate(allocator, dual_lines);
+        cutl_dealloc(allocator, dual_lines);
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
     dual->surf_counts = surf_counts;
@@ -320,11 +323,11 @@ interp_result_t manifold2d_dual(const manifold2d_t *manifold, manifold2d_t *dual
         surf_counts[pt_idx + 1] = acc_cnt;
     }
 
-    geo_id_t *dual_surf = allocate(allocator, sizeof *dual_surf * surf_counts[n_surf]);
+    geo_id_t *dual_surf = cutl_alloc(allocator, sizeof *dual_surf * surf_counts[n_surf]);
     if (!dual_surf)
     {
-        deallocate(allocator, surf_counts);
-        deallocate(allocator, dual_lines);
+        cutl_dealloc(allocator, surf_counts);
+        cutl_dealloc(allocator, dual_lines);
         return INTERP_ERROR_FAILED_ALLOCATION;
     }
     dual->surf_lines = dual_surf;
