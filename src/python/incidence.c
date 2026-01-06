@@ -3,6 +3,129 @@
 #include "../polynomials/lagrange.h"
 #include "basis_objects.h"
 
+void bernstein_apply_incidence_operator(
+    const unsigned n, const size_t pre_stride, const size_t post_stride, const unsigned cols,
+    const double INTERPLIB_ARRAY_ARG(values_in, restrict const static pre_stride *(n + 1) * post_stride * cols),
+    double INTERPLIB_ARRAY_ARG(values_out, restrict const pre_stride * n * post_stride * cols))
+{
+    const size_t col_stride_in = cols * post_stride * pre_stride * (n + 1);
+    const size_t col_stride_out = cols * post_stride * pre_stride * n;
+#pragma omp simd
+    for (unsigned i_col = 0; i_col < cols; ++i_col)
+    {
+        double *const vout = values_out + i_col * col_stride_out;
+        const double *const vin = values_in + i_col * col_stride_in;
+
+        for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
+        {
+            for (size_t i_post = 0; i_post < post_stride; ++i_post)
+            {
+                double *const ptr_out = vout + i_pre * n * post_stride + i_post;
+                const double *const ptr_in = vin + i_pre * (n + 1) * post_stride + i_post;
+
+                const npy_double coeff = (double)n / 2.0;
+                ptr_out[0] -= coeff * ptr_in[0];
+                for (unsigned col = 1; col < n; ++col)
+                {
+                    const npy_double x = coeff * ptr_in[col * post_stride];
+                    ptr_out[col * post_stride] -= x;
+                    ptr_out[(col - 1) * post_stride] += x;
+                }
+                ptr_out[(n - 1) * post_stride] += coeff * ptr_in[n * post_stride];
+            }
+        }
+    }
+}
+
+void legendre_apply_incidence_operator(
+    const unsigned n, const size_t pre_stride, const size_t post_stride, const unsigned cols,
+    const double INTERPLIB_ARRAY_ARG(values_in, restrict const static pre_stride *(n + 1) * post_stride * cols),
+    double INTERPLIB_ARRAY_ARG(values_out, restrict const pre_stride * n * post_stride * cols))
+{
+    const size_t col_stride_in = cols * post_stride * pre_stride * (n + 1);
+    const size_t col_stride_out = cols * post_stride * pre_stride * n;
+#pragma omp simd
+    for (unsigned i_col = 0; i_col < cols; ++i_col)
+    {
+        double *const vout = values_out + i_col * col_stride_out;
+        const double *const vin = values_in + i_col * col_stride_in;
+
+        for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
+        {
+            for (size_t i_post = 0; i_post < post_stride; ++i_post)
+            {
+                double *const ptr_out = vout + i_pre * n * post_stride + i_post;
+                const double *const ptr_in = vin + i_pre * (n + 1) * post_stride + i_post;
+
+                for (unsigned col = n; col > 0; --col)
+                {
+                    unsigned coeff = 2 * col - 1;
+                    for (unsigned c_row = 0; 2 * c_row < col; ++c_row)
+                    {
+                        const unsigned r = (col - 1 - 2 * c_row);
+                        ptr_out[r * post_stride] += coeff * ptr_in[col * post_stride];
+                        coeff -= 4;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void lagrange_apply_incidence_matrix(
+    const basis_set_type_t type, const unsigned n, const size_t pre_stride, const size_t post_stride,
+    const unsigned cols,
+    const double INTERPLIB_ARRAY_ARG(values_in, restrict const static pre_stride *(n + 1) * post_stride * cols),
+    double INTERPLIB_ARRAY_ARG(values_out, restrict const pre_stride * n * post_stride * cols),
+    double INTERPLIB_ARRAY_ARG(work, restrict const n + (n + 1) + n * (n + 1)))
+{
+    // Divide up the work array
+    double *restrict const out_nodes = work + 0;
+    double *restrict const in_nodes = work + n;
+    double *restrict const trans_matrix = work + n + (n + 1);
+
+    // Compute nodes for the output set
+    interp_result_t res = generate_lagrange_roots(n - 1, type, out_nodes);
+    CPYUTL_ASSERT(res == INTERP_SUCCESS, "Somehow an invalid enum?");
+    if (res != INTERP_SUCCESS)
+        return;
+
+    res = generate_lagrange_roots(n, type, in_nodes);
+    CPYUTL_ASSERT(res == INTERP_SUCCESS, "Somehow an invalid enum?");
+    if (res != INTERP_SUCCESS)
+        return;
+
+    lagrange_polynomial_first_derivative_2(n, out_nodes, n + 1, in_nodes, trans_matrix);
+    const size_t col_stride_in = cols * post_stride * pre_stride * (n + 1);
+    const size_t col_stride_out = cols * post_stride * pre_stride * n;
+#pragma omp simd
+    for (unsigned i_col = 0; i_col < cols; ++i_col)
+    {
+        double *const vout = values_out + i_col * col_stride_out;
+        const double *const vin = values_in + i_col * col_stride_in;
+
+        for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
+        {
+            for (size_t i_post = 0; i_post < post_stride; ++i_post)
+            {
+                double *const ptr_out = vout + i_pre * n * post_stride + i_post;
+                const double *const ptr_in = vin + i_pre * (n + 1) * post_stride + i_post;
+
+                // Apply the transformation matrix
+                for (unsigned row = 0; row < n; ++row)
+                {
+                    double v = 0;
+                    for (unsigned col = 0; col < n + 1; ++col)
+                    {
+                        v += trans_matrix[row * (n + 1) + col] * ptr_in[col * post_stride];
+                    }
+                    ptr_out[row * post_stride] = v;
+                }
+            }
+        }
+    }
+}
+
 static PyObject *incidence_matrix(PyObject *mod, PyObject *const *args, const Py_ssize_t nargs, const PyObject *kwnames)
 {
     const interplib_module_state_t *const state = PyModule_GetState(mod);
