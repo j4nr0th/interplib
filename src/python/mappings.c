@@ -22,35 +22,22 @@ static PyObject *coordinate_map_new(PyTypeObject *type, PyObject *args, PyObject
             state->integration_registry_type, &integration_registry, state->basis_registry_type, &basis_registry))
         return NULL;
 
-    // Call the reconstruct function on the DoFs
-    PyArrayObject *const res_array = (PyArrayObject *)dof_reconstruct_at_integration_points(
-        (PyObject *)dofs, state->degrees_of_freedom_type,
-        (PyObject *const[]){(PyObject *)integration_space, (PyObject *)integration_registry,
-                            (PyObject *)basis_registry},
-        3, NULL);
-
-    if (!res_array)
-    {
-        raise_exception_from_current(PyExc_RuntimeError, "Failed to reconstruct the DoFs.");
+    // Create the reconstruction state
+    reconstruction_state_t recon_state;
+    if (dof_reconstruction_state_init(dofs, integration_space, integration_registry, basis_registry, &recon_state) < 0)
         return NULL;
-    }
-
     const unsigned ndim = Py_SIZE(integration_space);
-
-    const Py_ssize_t n_vals = PyArray_SIZE(res_array);
+    const Py_ssize_t n_vals = (Py_ssize_t)multidim_iterator_total_size(recon_state.iter_int);
     coordinate_map_object *const self = (coordinate_map_object *)type->tp_alloc(type, n_vals * (ndim + 1));
     if (!self)
     {
-        Py_DECREF(res_array);
         return NULL;
     }
-
+    // Copy integration specs first
     self->ndim = ndim;
     self->int_specs = PyMem_Malloc(ndim * sizeof(*self->int_specs));
-
     if (!self->int_specs)
     {
-        Py_DECREF(res_array);
         Py_DECREF(self);
         return NULL;
     }
@@ -59,32 +46,32 @@ static PyObject *coordinate_map_new(PyTypeObject *type, PyObject *args, PyObject
         self->int_specs[idim] = integration_space->specs[idim];
     }
 
-    memcpy(self->values, PyArray_DATA(res_array), n_vals * sizeof(*self->values));
-    Py_DECREF(res_array);
+    // Call the reconstruct function on the DoFs
+    const unsigned ndofs = Py_SIZE(dofs);
+    const double *const restrict pdofs = dofs->values;
+    compute_integration_point_values(ndim, recon_state.iter_int, recon_state.iter_basis, recon_state.basis_sets, n_vals,
+                                     self->values + 0 * n_vals, ndofs, pdofs);
 
-    // Compute the gradients
+    int *const derivative_array = PyMem_Malloc(sizeof(int) * ndim);
+    if (!derivative_array)
+    {
+        Py_DECREF(self);
+        return NULL;
+    }
     for (unsigned i = 0; i < ndim; ++i)
     {
-        PyObject *const index = PyLong_FromLong(i);
-        if (!index)
-        {
-            Py_DECREF(self);
-            return NULL;
-        }
-        PyArrayObject *const res = (PyArrayObject *)dof_reconstruct_derivative_at_integration_points(
-            (PyObject *)dofs, state->degrees_of_freedom_type,
-            (PyObject *const[]){(PyObject *)integration_space, index, (PyObject *)integration_registry,
-                                (PyObject *)basis_registry},
-            3, NULL);
-        Py_DECREF(index);
-        if (!res)
-        {
-            Py_DECREF(self);
-            return NULL;
-        }
-        memcpy(self->values + n_vals * (i + 1), PyArray_DATA(res), n_vals * sizeof(double));
-        Py_DECREF(res);
+        derivative_array[i] = 0;
     }
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        derivative_array[i] = 1; // Set the current dimension to use derivative
+        // Compute with the specified derivatives
+        compute_integration_point_values_derivatives(ndim, recon_state.iter_int, recon_state.iter_basis,
+                                                     recon_state.basis_sets, derivative_array, n_vals,
+                                                     self->values + (i + 1) * n_vals, ndofs, pdofs);
+        derivative_array[i] = 0; // Reset the current dimension
+    }
+    PyMem_Free(derivative_array);
 
     return (PyObject *)self;
 }
@@ -301,6 +288,60 @@ static void space_map_object_dealloc(PyObject *self)
     Py_DECREF(type);
 }
 
+static void calculate_determinants_and_inverse_maps(
+    const unsigned n_dim, const unsigned n_maps, const coordinate_map_object *maps[static n_maps],
+    const size_t total_points, double determinant[restrict const total_points], const size_t jacobian_size,
+    double inverse_maps[restrict const total_points * jacobian_size], double jacobian[restrict const jacobian_size],
+    double q_mat[restrict const n_maps * n_maps])
+{
+    // Now we iterate over all the points
+    for (size_t i_pt = 0; i_pt < total_points; ++i_pt)
+    {
+        // Fill in the Jacobian
+        const unsigned rows = n_maps;
+        const unsigned cols = n_dim;
+        for (unsigned idim = 0; idim < rows; ++idim)
+        {
+            for (unsigned jdim = 0; jdim < cols; ++jdim)
+            {
+                jacobian[idim * cols + jdim] = coordinate_map_gradient(maps[idim], jdim)[i_pt];
+            }
+        }
+
+        const matrix_t jacobian_mat = (matrix_t){.rows = rows, .cols = cols, .values = jacobian};
+        const matrix_t q_matrix = (matrix_t){.rows = rows, .cols = rows, .values = q_mat};
+
+        // Decompose Jacobian into QR decomposition
+        interp_result_t res = matrix_qr_decompose(&jacobian_mat, &q_matrix);
+        (void)res;
+        CPYUTL_ASSERT(res == INTERP_SUCCESS, "QR decomposition failed.");
+        // Compute the determinant from the diagonal of the matrix
+        double det = 1;
+        for (unsigned i = 0; i < cols; ++i)
+        {
+            det *= jacobian[i * cols + i];
+        }
+        determinant[i_pt] = det;
+
+        double *const p_inv_map = inverse_maps + i_pt * jacobian_size;
+        const matrix_t out_mat = (matrix_t){.rows = cols, .cols = rows, .values = p_inv_map};
+        // Copy the top part of q into out
+        for (unsigned irow = 0; irow < cols; ++irow)
+        {
+            for (unsigned icol = 0; icol < rows; ++icol)
+            {
+                p_inv_map[irow * rows + icol] = q_mat[irow * rows + icol];
+            }
+        }
+
+        // Use decomposition to compute "inverse". This is done simply by applying inverse of the
+        // upper triangular (rows x rows) part of the jacobian to the matrix q_mat.
+        res = matrix_back_substitute(&jacobian_mat, &out_mat);
+        CPYUTL_ASSERT(res == INTERP_SUCCESS, "Back substitution failed.");
+        (void)res;
+    }
+}
+
 static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
 {
     const interplib_module_state_t *const state = interplib_get_module_state(subtype);
@@ -406,19 +447,16 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         Py_INCREF(map);
     }
 
-    // Create the iterator to loop over all integration points
-    multidim_iterator_t *const it = integration_specs_iterator(this->ndim, this->int_specs);
-    multidim_iterator_set_to_start(it);
+    const size_t total_points = integration_specs_total_points(this->ndim, this->int_specs);
+    const size_t jacobian_size = (size_t)this->ndim * n_maps;
 
-    const size_t total_points = multidim_iterator_total_size(it);
-    // Allocate the output array
+    // Allocate the output arrays
     double *const determinant = PyMem_Malloc(sizeof(*determinant) * total_points);
     if (!determinant)
     {
         Py_DECREF(this);
         return NULL;
     }
-    const size_t jacobian_size = this->ndim * n_maps;
     double *const inverse_maps = PyMem_Malloc(sizeof(*inverse_maps) * total_points * jacobian_size);
     if (!inverse_maps)
     {
@@ -444,109 +482,12 @@ static PyObject *space_map_new(PyTypeObject *subtype, PyObject *args, PyObject *
         return NULL;
     }
 
-    // Now we iterate over all the points
-    while (!multidim_iterator_is_at_end(it))
-    {
-        // Get the index of the point
-        const size_t i_pt = multidim_iterator_get_flat_index(it);
-
-        // Fill in the Jacobian
-        const unsigned rows = n_maps;
-        const unsigned cols = this->ndim;
-        for (unsigned idim = 0; idim < rows; ++idim)
-        {
-            for (unsigned jdim = 0; jdim < cols; ++jdim)
-            {
-                jacobian[idim * cols + jdim] = coordinate_map_gradient(this->maps[idim], jdim)[i_pt];
-            }
-        }
-
-        // printf("Jacobian at point %zu:\n", i_pt);
-        // for (unsigned i = 0; i < rows; ++i)
-        // {
-        //     for (unsigned j = 0; j < cols; ++j)
-        //     {
-        //         printf("%5.3g ", jacobian[i * cols + j]);
-        //     }
-        //     printf("\n");
-        // }
-        // printf("\n");
-
-        const matrix_t jacobian_mat = (matrix_t){.rows = rows, .cols = cols, .values = jacobian};
-        const matrix_t q_matrix = (matrix_t){.rows = rows, .cols = rows, .values = q_mat};
-
-        // Decompose Jacobian into QR decomposition
-        interp_result_t res = matrix_qr_decompose(&jacobian_mat, &q_matrix);
-        (void)res;
-        CPYUTL_ASSERT(res == INTERP_SUCCESS, "QR decomposition failed.");
-        // Compute the determinant from the diagonal of the matrix
-        double det = 1;
-        for (unsigned i = 0; i < cols; ++i)
-        {
-            det *= jacobian[i * cols + i];
-        }
-        determinant[i_pt] = det;
-
-        double *const p_inv_map = inverse_maps + i_pt * jacobian_size;
-        const matrix_t out_mat = (matrix_t){.rows = cols, .cols = rows, .values = p_inv_map};
-        // Copy the top part of q into out
-        for (unsigned irow = 0; irow < cols; ++irow)
-        {
-            for (unsigned icol = 0; icol < rows; ++icol)
-            {
-                p_inv_map[irow * rows + icol] = q_mat[irow * rows + icol];
-            }
-        }
-
-        // printf("Decomposition of the Jacobian was:\n");
-        // printf("\tDeterminant: %g\n", determinant[i_pt]);
-        // printf("\tQ matrix:\n");
-        // for (unsigned i = 0; i < rows; ++i)
-        // {
-        //     printf("\t");
-        //     for (unsigned j = 0; j < rows; ++j)
-        //     {
-        //         printf("%5.3g ", q_mat[i * rows + j]);
-        //     }
-        //     printf("\n");
-        // }
-        // printf("\tR matrix:\n");
-        // for (unsigned irow = 0; irow < rows; ++irow)
-        // {
-        //     printf("\t");
-        //     for (unsigned icol = 0; icol < cols; ++icol)
-        //     {
-        //         printf("%5.3g ", jacobian[irow * cols + icol]);
-        //     }
-        //     printf("\n");
-        // }
-
-        // Use decomposition to compute "inverse". This is done simply by applying inverse of the
-        // upper triangular (rows x rows) part of the jacobian to the matrix q_mat.
-        res = matrix_back_substitute(&jacobian_mat, &out_mat);
-        CPYUTL_ASSERT(res == INTERP_SUCCESS, "Back substitution failed.");
-        (void)res;
-
-        // printf("Computed inverse was:\n");
-        // for (unsigned irow = 0; irow < cols; ++irow)
-        // {
-        //     for (unsigned icol = 0; icol < rows; ++icol)
-        //     {
-        //         printf("%5.3g ", p_inv_map[irow * rows + icol]);
-        //     }
-        //     printf("\n");
-        // }
-        // printf("-------------------------------\n");
-
-        multidim_iterator_advance(it, this->ndim - 1, 1);
-    }
+    calculate_determinants_and_inverse_maps(this->ndim, n_maps, (const coordinate_map_object **)this->maps,
+                                            total_points, determinant, jacobian_size, inverse_maps, jacobian, q_mat);
 
     // Free work arrays
     PyMem_RawFree(q_mat);
     PyMem_RawFree(jacobian);
-
-    // Free the iterator
-    PyMem_Free(it);
 
     // Store the output
     this->determinant = determinant;
@@ -789,6 +730,21 @@ PyType_Spec space_map_type_spec = {
 size_t space_map_inverse_size_per_integration_point(const space_map_object *map)
 {
     return map->ndim * Py_SIZE(map);
+}
+
+double space_map_forward_derivative(const space_map_object *map, const size_t integration_point_index,
+                                    const unsigned idx_dim, const unsigned idx_coord)
+{
+    const coordinate_map_object *const map_dim = map->maps[idx_coord];
+    return coordinate_map_gradient(map_dim, idx_dim)[integration_point_index];
+}
+
+double space_map_backward_derivative(const space_map_object *map, const size_t integration_point_index,
+                                     const unsigned idx_dim, const unsigned idx_coord)
+{
+    const size_t n_coords = Py_SIZE(map);
+    const size_t jacobian_size = (size_t)map->ndim * n_coords;
+    return map->inverse_maps[integration_point_index * jacobian_size + idx_dim * n_coords + idx_coord];
 }
 
 const double *space_map_inverse_at_integration_point(const space_map_object *map, const size_t flat_index)

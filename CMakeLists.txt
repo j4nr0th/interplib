@@ -7,6 +7,7 @@ endif ()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C)
 find_package(Python COMPONENTS Interpreter Development.Module Development.SABIModule REQUIRED)
+message("Using Python executable ${Python_EXECUTABLE}")
 
 find_package(OpenMP)
 
@@ -16,6 +17,8 @@ execute_process(
         OUTPUT_VARIABLE NumPy_INCLUDE_DIRS
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+
+message("Numpy's include directories were ${NumPy_INCLUDE_DIRS}")
 
 set(BASIS_SOURCE_FILES
         src/basis/basis_set.c
@@ -83,6 +86,11 @@ set(TOPOLOGY_HEADER_FILES
         src/topology/topology.h
 )
 
+
+set(RECONSTRUCTION_SOURCE_FILES
+        src/reconstruction/reconstruction.c
+)
+
 add_library(interp STATIC
         ${BASIS_SOURCE_FILES}
         ${COMMON_SOURCE_FILES}
@@ -90,6 +98,7 @@ add_library(interp STATIC
         ${OPERATIONS_SOURCE_FILES}
         ${TOPOLOGY_SOURCE_FILES}
         ${POLYNOMIALS_SOURCE_FILES}
+        ${RECONSTRUCTION_SOURCE_FILES}
 )
 
 add_subdirectory(cutl)
@@ -131,6 +140,7 @@ add_subdirectory(cpyutl)
 
 target_link_libraries(_interp PRIVATE interp cpyutl cutl)
 set_property(TARGET _interp PROPERTY C_STANDARD 17)
+set_property(TARGET _interp PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 install(TARGETS _interp DESTINATION ${SKBUILD_PROJECT_NAME})
 target_compile_definitions(_interp PRIVATE INTERPLIB_ASSERTS CPYUTL_ENABLE_ASSERTS)
 
@@ -140,7 +150,7 @@ endif ()
 target_include_directories(_interp PRIVATE ${NumPy_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} cpyutl/src)
 
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(_interp PRIVATE -Wall -Wextra -Werror -flto=auto)
+    target_compile_options(_interp PRIVATE -Wall -Wextra -Werror)
 endif ()
 
 

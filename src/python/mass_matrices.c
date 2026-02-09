@@ -1,5 +1,6 @@
 #include "mass_matrices.h"
 #include "basis_objects.h"
+#include "covector_basis.h"
 #include "function_space_objects.h"
 #include "integration_objects.h"
 #include "mappings.h"
@@ -604,6 +605,106 @@ PyDoc_STRVAR(compute_gradient_mass_matrix_docstring,
              "array\n"
              "    Mass matrix as a 2D array, which maps the primal degrees of freedom of the input\n"
              "    function space to dual degrees of freedom of the output function space.\n");
+
+/* static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const *args, const Py_ssize_t nargs,
+//                                                const PyObject *kwnames)
+{
+    const interplib_module_state_t *state = PyModule_GetState(module);
+    if (!state)
+        return NULL;
+
+    const covector_basis_object *basis_in, *basis_out;
+    const function_space_object *fn_space_in, *fn_space_out;
+    const space_map_object *space_map;
+    const integration_registry_object *integration_registry =
+        (const integration_registry_object *)state->registry_integration;
+    const basis_registry_object *basis_registry = (const basis_registry_object *)state->registry_basis;
+
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &basis_in,
+                    .type_check = state->covector_basis_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &basis_out,
+                    .type_check = state->covector_basis_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &fn_space_in,
+                    .type_check = state->function_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &fn_space_out,
+                    .type_check = state->function_space_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &space_map,
+                    .type_check = state->space_mapping_type,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &integration_registry,
+                    .type_check = state->integration_registry_type,
+                    .optional = 1,
+                    .kwname = "integration_registry",
+                    .kw_only = 1,
+                },
+                {
+                    .type = CPYARG_TYPE_PYTHON,
+                    .p_val = &basis_registry,
+                    .type_check = state->basis_registry_type,
+                    .optional = 1,
+                    .kwname = "basis_registry",
+                    .kw_only = 1,
+                },
+                {},
+            },
+            args, nargs, kwnames) < 0)
+        return NULL;
+
+    const unsigned n = basis_in->basis.dimension;
+    if (n != basis_out->basis.dimension)
+    {
+        PyErr_Format(PyExc_ValueError, "Basis dimensions must match, but got %u and %u.", n,
+                     basis_out->basis.dimension);
+        return NULL;
+    }
+    if (Py_SIZE(fn_space_in) != Py_SIZE(fn_space_out) || Py_SIZE(fn_space_in) != n)
+    {
+        PyErr_Format(PyExc_ValueError,
+                     "Function spaces must have the same dimension as basis, but got %u and %u instead of %u.",
+                     Py_SIZE(fn_space_in), Py_SIZE(fn_space_out), n);
+        return NULL;
+    }
+    if (Py_SIZE(space_map) != n)
+    {
+        PyErr_Format(PyExc_ValueError,
+                     "Coordinate map must have the same dimension as basis, but got %u instead of %u.",
+                     Py_SIZE(space_map), n);
+        return NULL;
+    }
+
+    const unsigned k = covector_basis_rank(basis_in->basis);
+    if (k != covector_basis_rank(basis_out->basis))
+    {
+        PyErr_Format(PyExc_ValueError, "Basis ranks must match, but got %u and %u.", k,
+                     covector_basis_rank(basis_out->basis));
+        return NULL;
+    }
+
+    const covector_basis_t b_in = basis_in->basis;
+    const covector_basis_t b_out = basis_out->basis;
+
+    // TODO
+    Py_RETURN_NONE;
+}
+*/
 
 PyMethodDef mass_matrices_methods[] = {
     {

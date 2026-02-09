@@ -53,4 +53,30 @@ const double *space_map_inverse_at_integration_point(const space_map_object *map
 INTERPLIB_INTERNAL
 size_t space_map_inverse_size_per_integration_point(const space_map_object *map);
 
+/**
+ * Get the forward Jacobian derivative, meaning the derivative of the coordinate with respect to the input dimension.
+ *
+ * @param map Space map to use.
+ * @param integration_point_index Flat index of the integration point at which to get the derivative.
+ * @param idx_dim Index of the input dimension.
+ * @param idx_coord Index of the coordinate.
+ * @return Value of the specified forward derivative at the integration point.
+ */
+INTERPLIB_INTERNAL
+double space_map_forward_derivative(const space_map_object *map, size_t integration_point_index, unsigned idx_dim,
+                                    unsigned idx_coord);
+
+/**
+ * Get the backward Jacobian derivative, meaning the derivative of the input dimension with respect to the coordinate.
+ *
+ * @param map Space map to use.
+ * @param integration_point_index Flat index of the integration point at which to get the derivative.
+ * @param idx_dim Index of the input dimension.
+ * @param idx_coord Index of the coordinate.
+ * @return Value of the specified backward derivative at the integration point.
+ */
+INTERPLIB_INTERNAL
+double space_map_backward_derivative(const space_map_object *map, size_t integration_point_index, unsigned idx_dim,
+                                     unsigned idx_coord);
+
 #endif // INTERPLIB_MAPPINGS_H

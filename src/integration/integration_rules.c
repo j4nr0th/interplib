@@ -378,6 +378,16 @@ unsigned integration_rule_spec_get_accuracy(const integration_spec_t spec)
     }
 }
 
+size_t integration_specs_total_points(const unsigned ndim, const integration_spec_t specs[static const ndim])
+{
+    size_t total = 1;
+    for (unsigned i = 0; i < ndim; ++i)
+    {
+        total *= specs[i].order + 1;
+    }
+    return total;
+}
+
 const char *integration_rule_type_to_str(const integration_rule_type_t type)
 {
     switch (type)

@@ -230,90 +230,10 @@ PyDoc_STRVAR(dof_reconstruct_at_integration_points_docstring,
              "array\n"
              "    Array of reconstructed function values at the integration points.\n");
 
-static void compute_integration_point_values(const unsigned ndim, multidim_iterator_t *const iter_int,
-                                             multidim_iterator_t *const iter_basis,
-                                             const basis_set_t *basis_sets[static ndim], npy_double *const ptr,
-                                             const double *dof_values)
-{
-    multidim_iterator_set_to_start(iter_int);
-    while (!multidim_iterator_is_at_end(iter_int))
-    {
-        // Compute the point value
-        double val = 0;
-        multidim_iterator_set_to_start(iter_basis);
-        while (!multidim_iterator_is_at_end(iter_basis))
-        {
-            // For each basis compute value at the integration point
-            double basis_val = 1;
-            for (unsigned idim = 0; idim < ndim; ++idim)
-            {
-                basis_val *= basis_set_basis_values(
-                    basis_sets[idim],
-                    multidim_iterator_get_offset(iter_basis, idim))[multidim_iterator_get_offset(iter_int, idim)];
-            }
-            // Scale the basis value by the degree of freedom
-            val += basis_val * dof_values[multidim_iterator_get_flat_index(iter_basis)];
-            multidim_iterator_advance(iter_basis, ndim - 1, 1);
-        }
-
-        // Write output and advance the integration iterator
-        ptr[multidim_iterator_get_flat_index(iter_int)] = val;
-        multidim_iterator_advance(iter_int, ndim - 1, 1);
-    }
-}
-
-static void compute_integration_point_values_derivatives(const unsigned ndim, multidim_iterator_t *const iter_int,
-                                                         multidim_iterator_t *const iter_basis,
-                                                         const basis_set_t *basis_sets[static ndim],
-                                                         const int derivatives[static ndim], npy_double *const ptr,
-                                                         const double *dof_values)
-{
-    multidim_iterator_set_to_start(iter_int);
-    while (!multidim_iterator_is_at_end(iter_int))
-    {
-        // Compute the point value
-        double val = 0;
-        multidim_iterator_set_to_start(iter_basis);
-        while (!multidim_iterator_is_at_end(iter_basis))
-        {
-            // For each basis compute value at the integration point
-            double basis_val = 1;
-            for (unsigned idim = 0; idim < ndim; ++idim)
-            {
-                const size_t idx_basis_dim = multidim_iterator_get_offset(iter_basis, idim);
-                const double *basis_values;
-                if (derivatives[idim] == 0)
-                {
-                    basis_values = basis_set_basis_values(basis_sets[idim], idx_basis_dim);
-                }
-                else
-                {
-                    basis_values = basis_set_basis_derivatives(basis_sets[idim], idx_basis_dim);
-                }
-                basis_val *= basis_values[multidim_iterator_get_offset(iter_int, idim)];
-            }
-            // Scale the basis value by the degree of freedom
-            val += basis_val * dof_values[multidim_iterator_get_flat_index(iter_basis)];
-            multidim_iterator_advance(iter_basis, ndim - 1, 1);
-        }
-
-        // Write output and advance the integration iterator
-        ptr[multidim_iterator_get_flat_index(iter_int)] = val;
-        multidim_iterator_advance(iter_int, ndim - 1, 1);
-    }
-}
-
-typedef struct
-{
-    multidim_iterator_t *iter_int;
-    multidim_iterator_t *iter_basis;
-    const basis_set_t **basis_sets;
-} reconstruction_state_t;
-
-static int reconstruction_state_init(const dof_object *this, const integration_space_object *integration_space,
-                                     const integration_registry_object *python_integration_registry,
-                                     const basis_registry_object *python_basis_registry,
-                                     reconstruction_state_t *recon_state)
+int dof_reconstruction_state_init(const dof_object *this, const integration_space_object *integration_space,
+                                  const integration_registry_object *python_integration_registry,
+                                  const basis_registry_object *python_basis_registry,
+                                  reconstruction_state_t *recon_state)
 {
     multidim_iterator_t *const iter_int = integration_space_iterator(integration_space);
     if (!iter_int)
@@ -357,9 +277,8 @@ static int reconstruction_state_init(const dof_object *this, const integration_s
     return 0;
 }
 
-static void reconstruction_state_release(reconstruction_state_t *const recon_state,
-                                         basis_set_registry_t *basis_registry, const unsigned ndim,
-                                         const basis_set_t *basis_sets[static ndim])
+void dof_reconstruction_state_release(reconstruction_state_t *const recon_state, basis_set_registry_t *basis_registry,
+                                      const unsigned ndim, const basis_set_t *basis_sets[static ndim])
 {
     python_basis_sets_release(ndim, basis_sets, basis_registry);
     PyMem_Free(recon_state->iter_basis);
@@ -489,8 +408,8 @@ PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObject *de
         return NULL;
 
     reconstruction_state_t recon_state;
-    if (reconstruction_state_init(this, integration_space, python_integration_registry, python_basis_registry,
-                                  &recon_state) < 0)
+    if (dof_reconstruction_state_init(this, integration_space, python_integration_registry, python_basis_registry,
+                                      &recon_state) < 0)
     {
         Py_DECREF(out_array);
         return NULL;
@@ -502,11 +421,11 @@ PyObject *dof_reconstruct_at_integration_points(PyObject *self, PyTypeObject *de
                   "Basis iterator should have the same number of elements as there are DoFs (%zu vs %u)",
                   multidim_iterator_total_size(recon_state.iter_basis), n_dof);
 
-    compute_integration_point_values(ndim, recon_state.iter_int, recon_state.iter_basis, recon_state.basis_sets, ptr,
-                                     this->values);
+    compute_integration_point_values(ndim, recon_state.iter_int, recon_state.iter_basis, recon_state.basis_sets,
+                                     PyArray_SIZE(out_array), ptr, n_dof, this->values);
 
     // Free the iterator memory and release the basis sets
-    reconstruction_state_release(&recon_state, python_basis_registry->registry, ndim, recon_state.basis_sets);
+    dof_reconstruction_state_release(&recon_state, python_basis_registry->registry, ndim, recon_state.basis_sets);
     return (PyObject *)out_array;
 }
 
@@ -699,8 +618,8 @@ PyObject *dof_reconstruct_derivative_at_integration_points(PyObject *self, PyTyp
     }
 
     reconstruction_state_t recon_state;
-    if (reconstruction_state_init(this, integration_space, python_integration_registry, python_basis_registry,
-                                  &recon_state) < 0)
+    if (dof_reconstruction_state_init(this, integration_space, python_integration_registry, python_basis_registry,
+                                      &recon_state) < 0)
     {
         PyMem_Free(derivative_indices);
         Py_DECREF(out_array);
@@ -714,11 +633,12 @@ PyObject *dof_reconstruct_derivative_at_integration_points(PyObject *self, PyTyp
                   multidim_iterator_total_size(recon_state.iter_basis), n_dof);
 
     compute_integration_point_values_derivatives(ndim, recon_state.iter_int, recon_state.iter_basis,
-                                                 recon_state.basis_sets, derivative_indices, ptr, this->values);
+                                                 recon_state.basis_sets, derivative_indices, PyArray_SIZE(out_array),
+                                                 ptr, n_dof, this->values);
 
     // Free the iterator memory and release the basis sets
     PyMem_Free(derivative_indices);
-    reconstruction_state_release(&recon_state, python_basis_registry->registry, ndim, recon_state.basis_sets);
+    dof_reconstruction_state_release(&recon_state, python_basis_registry->registry, ndim, recon_state.basis_sets);
     return (PyObject *)out_array;
 }
 

@@ -196,4 +196,7 @@ unsigned integration_rule_get_rules(integration_rule_registry_t *this, unsigned 
 INTERPLIB_INTERNAL
 unsigned integration_rule_spec_get_accuracy(integration_spec_t spec);
 
+INTERPLIB_INTERNAL
+size_t integration_specs_total_points(unsigned ndim, const integration_spec_t specs[static ndim]);
+
 #endif // INTERPLIB_INTEGRATION_RULES_H
