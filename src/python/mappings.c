@@ -2,6 +2,8 @@
 
 #include "../operations/matrices.h"
 #include "basis_objects.h"
+#include "cutl/iterators/combination_iterator.h"
+#include "cutl/iterators/permutation_iterator.h"
 #include "degrees_of_freedom.h"
 #include "integration_objects.h"
 
@@ -751,3 +753,158 @@ const double *space_map_inverse_at_integration_point(const space_map_object *map
 {
     return map->inverse_maps + flat_index * space_map_inverse_size_per_integration_point(map);
 }
+
+PyObject *compute_basis_transform(PyObject *mod, PyObject *const *args, const Py_ssize_t nargs, PyObject *kwds)
+{
+    interplib_module_state_t *const state = PyModule_GetState(mod);
+    if (!state)
+        return NULL;
+
+    const space_map_object *map;
+    Py_ssize_t order;
+
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {.type = CPYARG_TYPE_PYTHON, .type_check = state->space_mapping_type, .p_val = &map, .kwname = "smap"},
+                {.type = CPYARG_TYPE_SSIZE, .p_val = &order, .kwname = "order"},
+                {},
+            },
+            args, nargs, kwds) < 0)
+        return NULL;
+
+    const unsigned n_maps = Py_SIZE(map);
+    const unsigned n_dims = map->ndim;
+    if (order <= 0 || order > n_dims || order > n_maps)
+    {
+        PyErr_Format(PyExc_ValueError, "Expected order in range (0, %u], but got %zd.",
+                     n_dims < n_maps ? n_dims : n_maps, order);
+        return NULL;
+    }
+
+    permutation_iterator_t *const iter_out_perm = PyMem_Malloc(permutation_iterator_required_memory(order, order));
+    if (!iter_out_perm)
+        return NULL;
+    combination_iterator_t *const iter_out_comb = PyMem_Malloc(combination_iterator_required_memory(order));
+    if (!iter_out_comb)
+    {
+        PyMem_Free(iter_out_perm);
+        return NULL;
+    }
+    combination_iterator_t *const iter_in_comb = PyMem_Malloc(combination_iterator_required_memory(order));
+    if (!iter_in_comb)
+    {
+        PyMem_Free(iter_out_comb);
+        PyMem_Free(iter_out_perm);
+        return NULL;
+    }
+    multidim_iterator_t *const iter_int_pts = integration_specs_iterator(n_dims, map->int_specs);
+    if (!iter_int_pts)
+    {
+        PyMem_Free(iter_out_comb);
+        PyMem_Free(iter_in_comb);
+        PyMem_Free(iter_out_perm);
+        return NULL;
+    }
+    combination_iterator_init(iter_in_comb, n_dims, order);
+    combination_iterator_init(iter_out_comb, n_maps, order);
+    permutation_iterator_init(iter_out_perm, order, order);
+
+    const size_t total_points = multidim_iterator_total_size(iter_int_pts);
+    const npy_intp out_dims[3] = {
+        combination_iterator_total_count(iter_in_comb),
+        combination_iterator_total_count(iter_out_comb),
+        (npy_intp)total_points,
+    };
+    PyArrayObject *const res = (PyArrayObject *)PyArray_SimpleNew(3, out_dims, NPY_DOUBLE);
+    if (!res)
+    {
+        PyMem_Free(iter_int_pts);
+        PyMem_Free(iter_out_comb);
+        PyMem_Free(iter_in_comb);
+        PyMem_Free(iter_out_perm);
+        return NULL;
+    }
+    npy_double *const ptr_out = PyArray_DATA(res);
+
+    // Iterate over bases in the inputs space
+    size_t idx_in = 0;
+    while (!combination_iterator_is_done(iter_in_comb))
+    {
+        // Indices of current input dimensions
+        const uint8_t *const current_in = combination_iterator_current(iter_in_comb);
+        // Iterate over bases in the output space.
+        size_t idx_out = 0;
+        combination_iterator_init(iter_out_comb, n_maps, order);
+        while (!combination_iterator_is_done(iter_out_comb))
+        {
+            // Indices of current output dimensions.
+            const uint8_t *const current_out = combination_iterator_current(iter_out_comb);
+
+            // Loop over integration points
+            for (size_t idx_pt = 0; idx_pt < total_points; ++idx_pt)
+            {
+                // Total transformation coefficient, which we will accumulate for each possible basis.
+                double val = 0.0;
+
+                // Loop over all permutations of the current basis indices.
+                permutation_iterator_init(iter_out_perm, order, order);
+                while (!permutation_iterator_is_done(iter_out_perm))
+                {
+                    // Indices for the current permutation
+                    const uint8_t *const current_perm = permutation_iterator_current(iter_out_perm);
+                    double basis_contribution = 1.0;
+
+                    // Loop over the derivative terms and compute their product
+                    for (unsigned idim = 0; idim < order; ++idim)
+                    {
+                        const unsigned idx_coord = current_out[current_perm[idim]];
+                        const unsigned idx_dim = current_in[idim];
+                        // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                        const double contribution = space_map_backward_derivative(map, idx_pt, idx_dim, idx_coord);
+                        basis_contribution *= contribution;
+                        // printf("Adding contribution of dxi_%u/dx_%u=%g to element(%zu, %zu, %zu)\n", idx_dim,
+                        // idx_coord,
+                        //        contribution, idx_in, idx_out, idx_pt);
+                    }
+
+                    // Check if we flip the sign (meaning subtract) for this contribution.
+                    if (permutation_iterator_current_sign(iter_out_perm))
+                    {
+                        val -= basis_contribution;
+                    }
+                    else
+                    {
+                        val += basis_contribution;
+                    }
+
+                    permutation_iterator_next(iter_out_perm);
+                }
+
+                ptr_out[idx_in * out_dims[1] * out_dims[2] + idx_out * out_dims[2] + idx_pt] = val;
+            }
+
+            idx_out += 1;
+            combination_iterator_next(iter_out_comb);
+        }
+
+        idx_in += 1;
+        combination_iterator_next(iter_in_comb);
+    }
+
+    PyMem_Free(iter_int_pts);
+    PyMem_Free(iter_out_comb);
+    PyMem_Free(iter_in_comb);
+    PyMem_Free(iter_out_perm);
+
+    return (PyObject *)res;
+}
+
+PyMethodDef transformation_functions[] = {
+    {
+        .ml_name = "compute_basis_transform",
+        .ml_meth = (void *)compute_basis_transform,
+        .ml_flags = METH_FASTCALL | METH_KEYWORDS,
+        .ml_doc = "TODO", // TODO
+    },
+    {}, // sentinel
+};

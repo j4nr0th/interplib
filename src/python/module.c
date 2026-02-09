@@ -835,7 +835,8 @@ static int interplib_add_functions(PyObject *mod)
         return -1;
     }
 
-    if (PyModule_AddFunctions(mod, mass_matrices_methods) < 0 || PyModule_AddFunctions(mod, incidence_methods) < 0)
+    if (PyModule_AddFunctions(mod, mass_matrices_methods) < 0 || PyModule_AddFunctions(mod, incidence_methods) < 0 ||
+        PyModule_AddFunctions(mod, transformation_functions) < 0)
         return -1;
 
     return 0;

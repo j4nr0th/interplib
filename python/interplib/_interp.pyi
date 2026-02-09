@@ -914,6 +914,28 @@ class SpaceMap:
         """
         ...
 
+def compute_basis_transform(smap: SpaceMap, order: int) -> npt.NDArray[np.double]:
+    """Compute the matrix with transformation factors for k-form basis.
+
+    Basis transform matrix returned by this function specifies how at integration point a
+    basis from the reference domain contributes to the basis in the target domain.
+
+    Parameters
+    ----------
+    smap : SpaceMap
+        Mapping of the space in which this is to be computed.
+
+    order : int
+        Order of the k-form for which this is to be done.
+
+    Returns
+    -------
+    array
+        Array with three axis. The first indexes over the input basis, the second
+        over output basis, and the last one over integration points.
+    """
+    ...
+
 def incidence_matrix(specs: BasisSpecs) -> npt.NDArray[np.double]:
     """Return the incidence matrix to transfer derivative degrees of freedom.
 

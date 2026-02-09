@@ -79,4 +79,7 @@ INTERPLIB_INTERNAL
 double space_map_backward_derivative(const space_map_object *map, size_t integration_point_index, unsigned idx_dim,
                                      unsigned idx_coord);
 
+INTERPLIB_INTERNAL
+extern PyMethodDef transformation_functions[];
+
 #endif // INTERPLIB_MAPPINGS_H
