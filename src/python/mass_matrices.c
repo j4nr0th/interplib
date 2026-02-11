@@ -979,8 +979,8 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                             {
                                 const double v_left = trans_mat[idx_left * trans_dims[1] * trans_dims[2] +
                                                                 m * trans_dims[2] + integration_pt_flat_idx];
-                                const double v_right =
-                                    trans_mat[idx_right * trans_dims[1] + m * trans_dims[2] + integration_pt_flat_idx];
+                                const double v_right = trans_mat[idx_right * trans_dims[1] * trans_dims[2] +
+                                                                 m * trans_dims[2] + integration_pt_flat_idx];
                                 dp += v_left * v_right;
                             }
                             // Multiply the factor by the weight
