@@ -881,7 +881,7 @@ PyArrayObject *compute_basis_transform_impl(const space_map_object *map, const P
     PyMem_Free(iter_in_comb);
     PyMem_Free(iter_out_perm);
 
-    return (PyObject *)res;
+    return res;
 }
 
 static PyObject *compute_basis_transform(PyObject *mod, PyObject *const *args, const Py_ssize_t nargs, PyObject *kwds)

@@ -936,7 +936,7 @@ def compute_basis_transform(smap: SpaceMap, order: int) -> npt.NDArray[np.double
     """
     ...
 
-def compute_kfrom_mass_matrix(
+def compute_kform_mass_matrix(
     smap: SpaceMap,
     order: int,
     left_bases: FunctionSpace,

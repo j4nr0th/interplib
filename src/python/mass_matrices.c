@@ -651,35 +651,41 @@ def compute_kfrom_mass_matrix(
     basis_registry: BasisRegistry,
     int_registry: IntegrationRegistry,
 ) -> npt.NDArray[np.double]:
-    """Compute the k-form mass matrix.
-
-    Parameters
-    ----------
-    smap : SpaceMap
-        Mapping of the space in which this is to be computed.
-
-    order : int
-        Order of the k-form for which this is to be done.
-
-    left_bases : FunctionSpace
-        Function space of 0-forms used as test forms.
-
-    right_bases : FunctionSpace
-        Function space of 0-forms used as trial forms.
-
-    basis_registry : BasisRegistry
-        Registry to get the basis from.
-
-    int_registry : IntegrationRegistry
-        Registry to get the integration rules from.
-
-    Returns
-    -------
-    array
-        Mass matrix for inner product of two k-forms.
+    """
     """
     ...
  */
+
+PyDoc_STRVAR(
+    compute_mass_matrix_component_docstring,
+    "compute_kform_mass_matrix(smap: SpaceMap, order: int, left_bases: FunctionSpace, right_bases: FunctionSpace, *, "
+    "int_registry: IntegrationRegistry, basis_registry: BasisRegistry) -> numpy.typing.NDArray[numpy.double]\n"
+    "Compute the k-form mass matrix.\n"
+    "\n"
+    "Parameters\n"
+    "----------\n"
+    "smap : SpaceMap\n"
+    "    Mapping of the space in which this is to be computed.\n"
+    "\n"
+    "order : int\n"
+    "    Order of the k-form for which this is to be done.\n"
+    "\n"
+    "left_bases : FunctionSpace\n"
+    "    Function space of 0-forms used as test forms.\n"
+    "\n"
+    "right_bases : FunctionSpace\n"
+    "    Function space of 0-forms used as trial forms.\n"
+    "\n"
+    "basis_registry : BasisRegistry\n"
+    "    Registry to get the basis from.\n"
+    "\n"
+    "int_registry : IntegrationRegistry\n"
+    "    Registry to get the integration rules from.\n"
+    "\n"
+    "Returns\n"
+    "-------\n"
+    "array\n"
+    "    Mass matrix for inner product of two k-forms.\n");
 
 static unsigned basis_get_num_dofs(const unsigned ndim, const basis_spec_t basis[static ndim], const unsigned order,
                                    const uint8_t derived[static order])
@@ -913,7 +919,7 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
     combination_iterator_init(iter_component_right, n, order);
     combination_iterator_init(iter_component_left, n, order);
 
-    size_t row_offset = 0, col_offset = 0;
+    size_t row_offset = 0;
     size_t idx_left = 0;
     // Loop over left k-form components
     for (const uint8_t *p_derivatives_left = combination_iterator_current(iter_component_left);
@@ -923,6 +929,7 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
         basis_set_iterator(n, fn_left->specs, order, p_derivatives_left, iter_basis_left);
 
         size_t idx_right = 0;
+        size_t col_offset = 0;
         // Loop over right k-form components
         for (const uint8_t *p_derivatives_right = combination_iterator_current(iter_component_right);
              !combination_iterator_is_done(iter_component_right); combination_iterator_next(iter_component_right))
@@ -931,11 +938,13 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
             basis_set_iterator(n, fn_right->specs, order, p_derivatives_right, iter_basis_right);
 
             // Loop over basis functions of the left k-form component
-            for (multidim_iterator_set_to_start(iter_basis_left); !multidim_iterator_is_at_end(iter_basis_left);
+            for (multidim_iterator_set_to_start(iter_basis_left), idx_left = 0;
+                 !multidim_iterator_is_at_end(iter_basis_left);
                  multidim_iterator_advance(iter_basis_left, n - 1, 1), ++idx_left)
             {
                 // Loop over basis functions of the right k-form component
-                for (multidim_iterator_set_to_start(iter_basis_right); !multidim_iterator_is_at_end(iter_basis_right);
+                for (multidim_iterator_set_to_start(iter_basis_right), idx_right = 0;
+                     !multidim_iterator_is_at_end(iter_basis_right);
                      multidim_iterator_advance(iter_basis_right, n - 1, 1), ++idx_right)
                 {
                     double integral_value = 0;
@@ -983,7 +992,7 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
 
                         integral_value += int_weight * basis_value_left * basis_value_right;
                     }
-                    ptr_mat_out[idx_left * col_cnt + idx_right] = integral_value;
+                    ptr_mat_out[(row_offset + idx_left) * col_cnt + (col_offset + idx_right)] = integral_value;
                 }
             }
 
@@ -991,12 +1000,12 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
             basis_set_iterator(n, fn_right->specs, order, p_derivatives_right, iter_basis_right);
 
             const unsigned dofs_right = basis_get_num_dofs(n, fn_right->specs, order, p_derivatives_right);
+            ASSERT(dofs_right == idx_right, "I miscounted dof counts");
             col_offset += dofs_right;
-            ASSERT(col_offset == idx_right, "I miscounted dof counts");
         }
         const unsigned dofs_left = basis_get_num_dofs(n, fn_left->specs, order, p_derivatives_left);
+        ASSERT(dofs_left == idx_left, "I miscounted dof counts");
         row_offset += dofs_left;
-        ASSERT(row_offset == idx_left, "I miscounted dof counts");
     }
 
     // Release integration rules and basis
@@ -1023,6 +1032,12 @@ PyMethodDef mass_matrices_methods[] = {
         .ml_meth = (void *)compute_gradient_mass_matrix,
         .ml_flags = METH_FASTCALL | METH_KEYWORDS,
         .ml_doc = compute_gradient_mass_matrix_docstring,
+    },
+    {
+        .ml_name = "compute_kform_mass_matrix",
+        .ml_meth = (void *)compute_mass_matrix_component,
+        .ml_flags = METH_FASTCALL | METH_KEYWORDS,
+        .ml_doc = compute_mass_matrix_component_docstring,
     },
     {},
 };
