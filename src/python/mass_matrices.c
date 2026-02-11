@@ -956,16 +956,19 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                         const size_t integration_pt_flat_idx = multidim_iterator_get_flat_index(iter_int_pts);
                         if (order == 0)
                         {
+                            ASSERT(transform_array == NULL, "Transform array should be NULL for order 0.");
                             // For 0-form it's just the determinant
                             int_weight *= space_map->determinant[integration_pt_flat_idx];
                         }
                         else if (order == n)
                         {
+                            ASSERT(transform_array == NULL, "Transform array should be NULL for order n.");
                             // For n-form it is the inverse of determinant
                             int_weight /= space_map->determinant[integration_pt_flat_idx];
                         }
                         else
                         {
+                            ASSERT(transform_array != NULL, "Transform array should not be NULL for order > 0.");
                             // For all others we must compute them from transformation matrix, after determinant
                             int_weight *= space_map->determinant[integration_pt_flat_idx];
                             const npy_double *restrict const trans_mat = PyArray_DATA(transform_array);
@@ -977,7 +980,7 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                                 const double v_left = trans_mat[idx_left * trans_dims[1] * trans_dims[2] +
                                                                 m * trans_dims[2] + integration_pt_flat_idx];
                                 const double v_right =
-                                    trans_mat[idx_right * trans_dims[1] * trans_dims[2] + integration_pt_flat_idx];
+                                    trans_mat[idx_right * trans_dims[1] + m * trans_dims[2] + integration_pt_flat_idx];
                                 dp += v_left * v_right;
                             }
                             // Multiply the factor by the weight
