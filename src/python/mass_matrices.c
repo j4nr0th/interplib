@@ -52,6 +52,7 @@ static double evaluate_basis_derivative_at_integration_point(const unsigned n_sp
 static double evaluate_kform_basis_at_integration_point(const unsigned n_space_dim, const multidim_iterator_t *iter_int,
                                                         const multidim_iterator_t *iter_basis,
                                                         const basis_set_t *basis_sets[static n_space_dim],
+                                                        const basis_set_t *basis_sets_lower[static n_space_dim],
                                                         const unsigned order, const uint8_t derivatives[static order])
 {
     double basis_out = 1;
@@ -64,7 +65,7 @@ static double evaluate_kform_basis_at_integration_point(const unsigned n_space_d
 
         if (iderivative < order && derivatives[iderivative] == idim)
         {
-            out_basis_val = basis_set_basis_derivatives(basis_sets[idim], b_idx_out)[integration_point_idx];
+            out_basis_val = basis_set_basis_values(basis_sets_lower[idim], b_idx_out)[integration_point_idx];
             ++iderivative;
         }
         else
@@ -707,11 +708,13 @@ static unsigned basis_get_num_dofs(const unsigned ndim, const basis_spec_t basis
     }
     return dofs;
 }
+
 static void basis_set_iterator(const unsigned ndim, const basis_spec_t basis[static ndim], const unsigned order,
                                const uint8_t derived[static order], multidim_iterator_t *iter)
 {
-    ASSERT(multidim_iterator_get_ndims(iter) == ndim, "Iterator was set for %u dimensions, but %u were needed.",
-           (unsigned)multidim_iterator_get_ndims(iter), ndim);
+    // Can't put the check here, since the iterator is not initialized on the first run.
+    // ASSERT(multidim_iterator_get_ndims(iter) == ndim, "Iterator was set for %u dimensions, but %u were needed.",
+    //        (unsigned)multidim_iterator_get_ndims(iter), ndim);
     for (unsigned idim = 0, iderived = 0; idim < ndim; ++idim)
     {
         unsigned n;
@@ -804,17 +807,22 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
         return NULL;
     }
 
-    if (order == 0 || order == n)
+    // Function spaces must have order at least 1 in each dimension
+    for (unsigned i = 0; i < n; ++i)
     {
-        PyErr_Format(PyExc_NotImplementedError, "Order %zd not yet supported for mass matrix computation.", order);
-        return NULL;
+        if (fn_left->specs[i].order < 1 || fn_right->specs[i].order < 1)
+        {
+            PyErr_Format(PyExc_ValueError, "Function spaces must have order at least 1 in each dimension.");
+            return NULL;
+        }
     }
 
     // Compute needed space
     combination_iterator_t *iter_component_right, *iter_component_left;
     multidim_iterator_t *iter_basis_right, *iter_basis_left, *iter_int_pts;
     const integration_rule_t **integration_rules;
-    const basis_set_t **basis_sets_left, **basis_sets_right;
+    const basis_set_t **basis_sets_left, **basis_sets_right, **basis_sets_left_lower, **basis_sets_right_lower;
+    basis_spec_t *lower_basis_buffer;
     void *const mem_1 = cutl_alloc_group(
         &PYTHON_ALLOCATOR, (const cutl_alloc_info_t[]){
                                {combination_iterator_required_memory(order), (void **)&iter_component_right},
@@ -824,7 +832,10 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                                {multidim_iterator_needed_memory(n), (void **)&iter_int_pts},
                                {sizeof(integration_rule_t *) * n, (void **)&integration_rules},
                                {sizeof(basis_set_t *) * n, (void **)&basis_sets_left},
+                               {sizeof(basis_set_t *) * n, (void **)&basis_sets_left_lower},
                                {sizeof(basis_set_t *) * n, (void **)&basis_sets_right},
+                               {sizeof(basis_set_t *) * n, (void **)&basis_sets_right_lower},
+                               {sizeof(basis_spec_t) * n, (void **)&lower_basis_buffer},
                                {},
                            });
     if (!mem_1)
@@ -843,6 +854,7 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
     {
         col_cnt += basis_get_num_dofs(n, fn_right->specs, order, p_in);
     }
+
     combination_iterator_init(iter_component_left, n, order);
     for (const uint8_t *p_out = combination_iterator_current(iter_component_left);
          !combination_iterator_is_done(iter_component_left); combination_iterator_next(iter_component_left))
@@ -911,17 +923,59 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
         return NULL;
     }
 
+    // Prepare lower basis specs for left
+    for (unsigned i = 0; i < n; ++i)
+    {
+        lower_basis_buffer[i] = (basis_spec_t){.type = fn_left->specs[i].type, .order = fn_left->specs[i].order - 1};
+    }
+    // Get left lower basis sets
+    res = basis_set_registry_get_basis_sets(basis_registry->registry, n, basis_sets_left_lower, integration_rules,
+                                            lower_basis_buffer);
+    if (res != INTERP_SUCCESS)
+    {
+        for (unsigned i = 0; i < n; ++i)
+        {
+            integration_rule_registry_release_rule(integration_registry->registry, integration_rules[i]);
+            basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_left[i]);
+            basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_right[i]);
+        }
+        Py_DECREF(array_out);
+        Py_XDECREF(transform_array);
+        cutl_dealloc(&PYTHON_ALLOCATOR, mem_1);
+        return NULL;
+    }
+
+    // Prepare lower basis specs for right
+    for (unsigned i = 0; i < n; ++i)
+    {
+        lower_basis_buffer[i] = (basis_spec_t){.type = fn_right->specs[i].type, .order = fn_right->specs[i].order - 1};
+    }
+    // Get right lower basis sets
+    res = basis_set_registry_get_basis_sets(basis_registry->registry, n, basis_sets_right_lower, integration_rules,
+                                            lower_basis_buffer);
+    if (res != INTERP_SUCCESS)
+    {
+        for (unsigned i = 0; i < n; ++i)
+        {
+            integration_rule_registry_release_rule(integration_registry->registry, integration_rules[i]);
+            basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_left[i]);
+            basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_right[i]);
+            basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_left_lower[i]);
+        }
+        Py_DECREF(array_out);
+        Py_XDECREF(transform_array);
+        cutl_dealloc(&PYTHON_ALLOCATOR, mem_1);
+        return NULL;
+    }
+
     npy_double *restrict const ptr_mat_out = PyArray_DATA(array_out);
 
     // Now compute numerical integrals
-
-    // Prepare basis iterators
-    combination_iterator_init(iter_component_right, n, order);
-    combination_iterator_init(iter_component_left, n, order);
-
     size_t row_offset = 0;
     size_t idx_left = 0;
+
     // Loop over left k-form components
+    combination_iterator_init(iter_component_left, n, order);
     for (const uint8_t *p_derivatives_left = combination_iterator_current(iter_component_left);
          !combination_iterator_is_done(iter_component_left); combination_iterator_next(iter_component_left))
     {
@@ -931,9 +985,11 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
         size_t idx_right = 0;
         size_t col_offset = 0;
         // Loop over right k-form components
+        combination_iterator_init(iter_component_right, n, order);
         for (const uint8_t *p_derivatives_right = combination_iterator_current(iter_component_right);
              !combination_iterator_is_done(iter_component_right); combination_iterator_next(iter_component_right))
         {
+
             // Set the iterator for basis functions of the right k-form component
             basis_set_iterator(n, fn_right->specs, order, p_derivatives_right, iter_basis_right);
 
@@ -947,9 +1003,10 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                      !multidim_iterator_is_at_end(iter_basis_right);
                      multidim_iterator_advance(iter_basis_right, n - 1, 1), ++idx_right)
                 {
+
                     double integral_value = 0;
                     // Loop over all integration points
-                    for (multidim_iterator_set_to_start(iter_int_pts); multidim_iterator_is_at_end(iter_int_pts);
+                    for (multidim_iterator_set_to_start(iter_int_pts); !multidim_iterator_is_at_end(iter_int_pts);
                          multidim_iterator_advance(iter_int_pts, n - 1, 1))
                     {
                         double int_weight = calculate_integration_weight(n, iter_int_pts, integration_rules);
@@ -987,25 +1044,28 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                             int_weight *= dp;
                         }
 
-                        const double basis_value_left = evaluate_kform_basis_at_integration_point(
-                            n, iter_int_pts, iter_basis_left, basis_sets_left, order, p_derivatives_left);
+                        const double basis_value_left =
+                            evaluate_kform_basis_at_integration_point(n, iter_int_pts, iter_basis_left, basis_sets_left,
+                                                                      basis_sets_left_lower, order, p_derivatives_left);
 
                         const double basis_value_right = evaluate_kform_basis_at_integration_point(
-                            n, iter_int_pts, iter_basis_right, basis_sets_right, order, p_derivatives_right);
-
+                            n, iter_int_pts, iter_basis_right, basis_sets_right, basis_sets_right_lower, order,
+                            p_derivatives_right);
+                        // printf("At integration point contributions are: weight (%g), left (%g), right (%g)\n",
+                        //        int_weight, basis_value_left, basis_value_right);
                         integral_value += int_weight * basis_value_left * basis_value_right;
                     }
+                    // printf("Value of entry (%zu, %zu) is %g\n", row_offset + idx_left, col_offset + idx_right,
+                    //        integral_value);
                     ptr_mat_out[(row_offset + idx_left) * col_cnt + (col_offset + idx_right)] = integral_value;
                 }
             }
-
-            // Reset the output basis iterator for the right k-form component
-            basis_set_iterator(n, fn_right->specs, order, p_derivatives_right, iter_basis_right);
 
             const unsigned dofs_right = basis_get_num_dofs(n, fn_right->specs, order, p_derivatives_right);
             ASSERT(dofs_right == idx_right, "I miscounted dof counts");
             col_offset += dofs_right;
         }
+
         const unsigned dofs_left = basis_get_num_dofs(n, fn_left->specs, order, p_derivatives_left);
         ASSERT(dofs_left == idx_left, "I miscounted dof counts");
         row_offset += dofs_left;
@@ -1017,9 +1077,12 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
         integration_rule_registry_release_rule(integration_registry->registry, integration_rules[j]);
         basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_left[j]);
         basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_right[j]);
+        basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_left_lower[j]);
+        basis_set_registry_release_basis_set(basis_registry->registry, basis_sets_right_lower[j]);
     }
     cutl_dealloc(&PYTHON_ALLOCATOR, mem_1);
     Py_XDECREF(transform_array);
+
     return (PyObject *)array_out;
 }
 
