@@ -135,7 +135,7 @@ def test_2d_to_2d(pts_h: int, pts_v: int, order_i1: int, order_i2) -> None:
         (5, 5, 5, 4),
     ),
 )
-def test_2d_to_3d(pts_h: int, pts_v: int, order_i1: int, order_i2) -> None:
+def test_2d_to_3d(pts_h: int, pts_v: int, order_i1: int, order_i2: int) -> None:
     """Check that 2D to 3D mapping is correct."""
     assert pts_h > 1 and pts_v > 2 and order_i1 > 0 and order_i2 > 0
     rng = np.random.default_rng(pts_h**2 + 2 * pts_v**3 + order_i1 + 2 * order_i2 + 1)

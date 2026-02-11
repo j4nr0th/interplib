@@ -973,21 +973,25 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
     // Now compute numerical integrals
     size_t row_offset = 0;
     size_t idx_left = 0;
+    size_t basis_idx_left = 0;
 
     // Loop over left k-form components
     combination_iterator_init(iter_component_left, n, order);
     for (const uint8_t *p_derivatives_left = combination_iterator_current(iter_component_left);
-         !combination_iterator_is_done(iter_component_left); combination_iterator_next(iter_component_left))
+         !combination_iterator_is_done(iter_component_left);
+         combination_iterator_next(iter_component_left), ++basis_idx_left)
     {
         // Set the iterator for basis functions of the left k-form component
         basis_set_iterator(n, fn_left->specs, order, p_derivatives_left, iter_basis_left);
 
         size_t idx_right = 0;
         size_t col_offset = 0;
+        size_t basis_idx_right = 0;
         // Loop over right k-form components
         combination_iterator_init(iter_component_right, n, order);
         for (const uint8_t *p_derivatives_right = combination_iterator_current(iter_component_right);
-             !combination_iterator_is_done(iter_component_right); combination_iterator_next(iter_component_right))
+             !combination_iterator_is_done(iter_component_right);
+             combination_iterator_next(iter_component_right), ++basis_idx_right)
         {
 
             // Set the iterator for basis functions of the right k-form component
@@ -1032,11 +1036,13 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                             const npy_intp *restrict const trans_dims = PyArray_DIMS(transform_array);
                             // Contraction of 2-nd dimension for the current components and integration point
                             double dp = 0;
+                            ASSERT(basis_idx_left < (size_t)trans_dims[0] && basis_idx_right < (size_t)trans_dims[0],
+                                   "Input basis indices are not correct for the transformation array shape");
                             for (unsigned m = 0; m < trans_dims[1]; ++m)
                             {
-                                const double v_left = trans_mat[idx_left * trans_dims[1] * trans_dims[2] +
+                                const double v_left = trans_mat[basis_idx_left * trans_dims[1] * trans_dims[2] +
                                                                 m * trans_dims[2] + integration_pt_flat_idx];
-                                const double v_right = trans_mat[idx_right * trans_dims[1] * trans_dims[2] +
+                                const double v_right = trans_mat[basis_idx_right * trans_dims[1] * trans_dims[2] +
                                                                  m * trans_dims[2] + integration_pt_flat_idx];
                                 dp += v_left * v_right;
                             }
@@ -1051,8 +1057,8 @@ static PyObject *compute_mass_matrix_component(PyObject *module, PyObject *const
                         const double basis_value_right = evaluate_kform_basis_at_integration_point(
                             n, iter_int_pts, iter_basis_right, basis_sets_right, basis_sets_right_lower, order,
                             p_derivatives_right);
-                        // printf("At integration point contributions are: weight (%g), left (%g), right (%g)\n",
-                        //        int_weight, basis_value_left, basis_value_right);
+                        // printf("At integration point %zu contributions are: weight (%g), left (%g), right (%g)\n",
+                        //        integration_pt_flat_idx, int_weight, basis_value_left, basis_value_right);
                         integral_value += int_weight * basis_value_left * basis_value_right;
                     }
                     // printf("Value of entry (%zu, %zu) is %g\n", row_offset + idx_left, col_offset + idx_right,
