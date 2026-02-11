@@ -82,4 +82,7 @@ double space_map_backward_derivative(const space_map_object *map, size_t integra
 INTERPLIB_INTERNAL
 extern PyMethodDef transformation_functions[];
 
+INTERPLIB_INTERNAL
+PyArrayObject *compute_basis_transform_impl(const space_map_object *map, const Py_ssize_t order);
+
 #endif // INTERPLIB_MAPPINGS_H

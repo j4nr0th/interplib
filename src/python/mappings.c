@@ -754,24 +754,8 @@ const double *space_map_inverse_at_integration_point(const space_map_object *map
     return map->inverse_maps + flat_index * space_map_inverse_size_per_integration_point(map);
 }
 
-PyObject *compute_basis_transform(PyObject *mod, PyObject *const *args, const Py_ssize_t nargs, PyObject *kwds)
+PyArrayObject *compute_basis_transform_impl(const space_map_object *map, const Py_ssize_t order)
 {
-    interplib_module_state_t *const state = PyModule_GetState(mod);
-    if (!state)
-        return NULL;
-
-    const space_map_object *map;
-    Py_ssize_t order;
-
-    if (parse_arguments_check(
-            (cpyutl_argument_t[]){
-                {.type = CPYARG_TYPE_PYTHON, .type_check = state->space_mapping_type, .p_val = &map, .kwname = "smap"},
-                {.type = CPYARG_TYPE_SSIZE, .p_val = &order, .kwname = "order"},
-                {},
-            },
-            args, nargs, kwds) < 0)
-        return NULL;
-
     const unsigned n_maps = Py_SIZE(map);
     const unsigned n_dims = map->ndim;
     if (order <= 0 || order > n_dims || order > n_maps)
@@ -828,6 +812,7 @@ PyObject *compute_basis_transform(PyObject *mod, PyObject *const *args, const Py
 
     // Iterate over bases in the inputs space
     size_t idx_in = 0;
+    combination_iterator_init(iter_in_comb, n_dims, order);
     while (!combination_iterator_is_done(iter_in_comb))
     {
         // Indices of current input dimensions
@@ -897,6 +882,27 @@ PyObject *compute_basis_transform(PyObject *mod, PyObject *const *args, const Py
     PyMem_Free(iter_out_perm);
 
     return (PyObject *)res;
+}
+
+static PyObject *compute_basis_transform(PyObject *mod, PyObject *const *args, const Py_ssize_t nargs, PyObject *kwds)
+{
+    interplib_module_state_t *const state = PyModule_GetState(mod);
+    if (!state)
+        return NULL;
+
+    const space_map_object *map;
+    Py_ssize_t order;
+
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {.type = CPYARG_TYPE_PYTHON, .type_check = state->space_mapping_type, .p_val = &map, .kwname = "smap"},
+                {.type = CPYARG_TYPE_SSIZE, .p_val = &order, .kwname = "order"},
+                {},
+            },
+            args, nargs, kwds) < 0)
+        return NULL;
+
+    return (PyObject *)compute_basis_transform_impl(map, order);
 }
 
 PyMethodDef transformation_functions[] = {

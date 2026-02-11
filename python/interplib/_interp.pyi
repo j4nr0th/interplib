@@ -936,6 +936,44 @@ def compute_basis_transform(smap: SpaceMap, order: int) -> npt.NDArray[np.double
     """
     ...
 
+def compute_kfrom_mass_matrix(
+    smap: SpaceMap,
+    order: int,
+    left_bases: FunctionSpace,
+    right_bases: FunctionSpace,
+    *,
+    int_registry: IntegrationRegistry,
+    basis_registry: BasisRegistry,
+) -> npt.NDArray[np.double]:
+    """Compute the k-form mass matrix.
+
+    Parameters
+    ----------
+    smap : SpaceMap
+        Mapping of the space in which this is to be computed.
+
+    order : int
+        Order of the k-form for which this is to be done.
+
+    left_bases : FunctionSpace
+        Function space of 0-forms used as test forms.
+
+    right_bases : FunctionSpace
+        Function space of 0-forms used as trial forms.
+
+    int_registry : IntegrationRegistry
+        Registry to get the integration rules from.
+
+    basis_registry : BasisRegistry
+        Registry to get the basis from.
+
+    Returns
+    -------
+    array
+        Mass matrix for inner product of two k-forms.
+    """
+    ...
+
 def incidence_matrix(specs: BasisSpecs) -> npt.NDArray[np.double]:
     """Return the incidence matrix to transfer derivative degrees of freedom.
 
