@@ -14,7 +14,7 @@ from fdg import (
     IntegrationSpecs,
     SpaceMap,
 )
-from fdg.visualization import lagrange_quadrilateral_grid
+from fdg.visualization import lagrange_hexahedral_grid, lagrange_quadrilateral_grid
 
 
 def test_lagrange_quadrilateral_grid_interpolates_nonlinear_data() -> None:
@@ -47,3 +47,43 @@ def test_lagrange_quadrilateral_grid_interpolates_nonlinear_data() -> None:
     sampled = query.sample(grid)
     expected = (query_x**2 + 2.0 * query_y**2 + 3.0 * query_x * query_y).ravel()
     np.testing.assert_allclose(sampled["field"], expected, atol=1.0e-12)
+
+
+def test_lagrange_hexahedral_grid_accepts_anisotropic_orders(tmp_path) -> None:
+    """Anisotropic orders survive high-order VTK serialization."""
+    integration = IntegrationSpace(
+        IntegrationSpecs(3), IntegrationSpecs(3), IntegrationSpecs(3)
+    )
+    basis = FunctionSpace(
+        BasisSpecs(BasisType.LAGRANGE_UNIFORM, 1),
+        BasisSpecs(BasisType.LAGRANGE_UNIFORM, 1),
+        BasisSpecs(BasisType.LAGRANGE_UNIFORM, 1),
+    )
+    coordinates = np.meshgrid(
+        np.asarray((0.0, 1.0)),
+        np.asarray((0.0, 1.0)),
+        np.asarray((0.0, 1.0)),
+        indexing="ij",
+    )
+    space_map = SpaceMap(
+        *(
+            CoordinateMap(DegreesOfFreedom(basis, coordinate.ravel()), integration)
+            for coordinate in coordinates
+        )
+    )
+    orders = (1, 2, 3)
+    shape = tuple(order + 1 for order in orders)
+    field = np.arange(np.prod(shape), dtype=float).reshape(shape)
+
+    grid = lagrange_hexahedral_grid([space_map], orders, {"field": [field]})
+    assert grid.n_cells == 1
+    assert grid.n_points == np.prod(shape)
+    assert grid.celltypes[0] == pv.CellType.LAGRANGE_HEXAHEDRON
+    np.testing.assert_array_equal(grid.point_data["field"], field.ravel())
+    output = tmp_path / "anisotropic.vtu"
+    grid.save(output)
+    loaded = pv.read(output)
+    degrees = loaded.GetCellData().GetHigherOrderDegrees()
+    assert degrees is not None
+    assert degrees.GetTuple(0) == (1.0, 2.0, 3.0)
+    assert [loaded.GetCell(0).GetOrder(axis) for axis in range(3)] == [1, 2, 3]

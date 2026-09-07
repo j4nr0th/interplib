@@ -222,34 +222,47 @@ def lagrange_quadrilateral_grid(
 
 def lagrange_hexahedral_grid(
     space_maps: Sequence[SpaceMap],
-    order: int,
+    order: int | Sequence[int],
     point_data: Mapping[str, Sequence[npt.ArrayLike]] | None = None,
 ) -> pv.UnstructuredGrid:
-    """Build VTK Lagrange cells from sampled element maps.
+    """Build VTK Lagrange hexahedra from sampled element maps.
 
     Parameters
     ----------
     space_maps : sequence of SpaceMap
-        Element maps used to generate the cell points.
-    order : int
-        Lagrange sampling order along every reference axis.
+        Element maps used to generate the cell points. Each map must have
+        three reference and three physical dimensions.
+    order : int or sequence of int
+        Lagrange sampling order. A scalar applies to all three reference axes;
+        a sequence supplies ``(order_x, order_y, order_z)`` independently.
+        Orders must be non-negative.
     point_data : mapping of str to sequence of array_like, optional
-        Per-element arrays sampled on the same tensor grids as the cells. Each
-        array must have shape ``(order + 1, order + 1, order + 1)``.
+        Per-element arrays sampled on the same tensor grids as the cells. For
+        orders ``(o0, o1, o2)``, each array must have shape
+        ``(o0 + 1, o1 + 1, o2 + 1)``.
 
     Returns
     -------
     pyvista.UnstructuredGrid
         High-order Lagrange-hexahedron cells with optional point data.
 
+    Raises
+    ------
+    ValueError
+        If an order is negative, a point-data sequence has the wrong length,
+        a map has the wrong physical dimension, or an array has the wrong
+        tensor-grid shape.
+
     Notes
     -----
-    Each element owns its points. Keeping elements separate avoids assuming that
-    independently sampled curved maps have bitwise-identical shared points.
-    Tensor-product points and point data use C order throughout.
+    Each element owns its points. Keeping elements separate avoids assuming
+    that independently sampled curved maps have bitwise-identical shared
+    points. Tensor-product points and point data use C order before VTK
+    vertices-edges-faces-body reordering. The cell-data attribute
+    ``HigherOrderDegrees`` is populated so direction-dependent orders survive
+    VTK serialization.
     """
-    if order < 0:
-        raise ValueError("The Lagrange order must be non-negative.")
+    orders = _sample_orders(order, 3)
     if point_data is None:
         point_data = {}
     if any(len(values) != len(space_maps) for values in point_data.values()):
@@ -261,13 +274,11 @@ def lagrange_hexahedral_grid(
         name: [] for name in point_data
     }
     point_offset = 0
-    point_count = (order + 1) ** 3
-    vtk_indices = _vtk_3d_indices(order, order, order).astype(np.intp, copy=False)
+    point_count = int(np.prod(np.asarray(orders, dtype=np.intp) + 1))
+    vtk_indices = _vtk_3d_indices(*orders).astype(np.intp, copy=False)
 
     for element, space_map in enumerate(space_maps):
-        sampled_map = SampledSpaceMap.on_uniform_grid(
-            space_map, orders=(order, order, order)
-        )
+        sampled_map = SampledSpaceMap.on_uniform_grid(space_map, orders=orders)
         positions = np.asarray(sampled_map.positions)
         if positions.shape[-1] != 3:
             raise ValueError("Lagrange hexahedra require three physical coordinates.")
@@ -296,4 +307,9 @@ def lagrange_hexahedral_grid(
     )
     for name, values in sampled_data.items():
         grid.point_data[name] = np.concatenate(values)
+    degrees = np.tile(np.asarray(orders, dtype=np.int32), (len(cells), 1))
+    grid.cell_data["HigherOrderDegrees"] = degrees
+    grid.GetCellData().SetHigherOrderDegrees(
+        grid.GetCellData().GetArray("HigherOrderDegrees")
+    )
     return grid
