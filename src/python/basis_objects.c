@@ -612,6 +612,40 @@ void python_basis_sets_release(const unsigned n_basis, const basis_set_t *sets[s
     }
     PyMem_Free(sets);
 }
+const basis_endpoint_set_t **python_basis_endpoints_get(const unsigned n_basis,
+                                                        const basis_spec_t specs[const static n_basis],
+                                                        basis_set_registry_t *registry)
+{
+    const basis_endpoint_set_t **const array = PyMem_Malloc(n_basis * sizeof(*array));
+    if (!array)
+        return NULL;
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        const fdg_result_t res = basis_set_registry_get_basis_endpoints(registry, array + ibasis, specs[ibasis]);
+        if (res != FDG_SUCCESS)
+        {
+            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve endpoint basis values: %s (%s).", fdg_error_str(res),
+                         fdg_error_msg(res));
+            for (unsigned i = 0; i < ibasis; ++i)
+                basis_set_registry_release_basis_endpoints(registry, array[i]);
+            PyMem_Free(array);
+            return NULL;
+        }
+    }
+    return array;
+}
+
+void python_basis_endpoints_release(const unsigned n_basis, const basis_endpoint_set_t *sets[static n_basis],
+                                    basis_set_registry_t *registry)
+{
+    for (unsigned ibasis = 0; ibasis < n_basis; ++ibasis)
+    {
+        basis_set_registry_release_basis_endpoints(registry, sets[ibasis]);
+        sets[ibasis] = NULL;
+    }
+    PyMem_Free(sets);
+}
+
 multidim_iterator_t *python_basis_iterator(const unsigned n_basis, const basis_spec_t specs[const static n_basis])
 {
     multidim_iterator_t *const iter = PyMem_Malloc(multidim_iterator_needed_memory(n_basis));

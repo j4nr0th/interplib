@@ -86,10 +86,15 @@ The derivative degrees of freedom are the values of the derivative at the
 nodes of the degree-:math:`o - 1` Lagrange set, obtained from the nodal
 values by differentiating the cardinal functions.
 
-The values (and first derivatives) of a basis set are tabulated at the
-nodes of an integration rule and cached by the :class:`BasisRegistry`;
+The values (and first derivatives) of a basis set are tabulated at the nodes of an integration rule and cached by the :class:`BasisRegistry`;
 evaluating a basis on demand is also possible through
 :meth:`BasisSpecs.values` and :meth:`BasisSpecs.derivatives`.
+
+The same registry also caches the two endpoint value vectors of every
+one-dimensional basis specification independently of integration rules.  These
+vectors are used by boundary projections at :math:`-1` and :math:`+1`, so
+repeated boundary extraction does not rebuild the basis or require a
+Gauss-Lobatto integration rule.
 
 Basis Specifications
 --------------------

@@ -399,8 +399,9 @@ static PyObject *function_space_values_at_integration_nodes(PyObject *self, PyTy
                       multidim_iterator_total_size(iterator_basis) * multidim_iterator_total_size(iterator_nodes),
                   "Incorrect output size.");
 
-    const basis_set_t **const basis_sets = PyMem_Malloc(ndim * sizeof(*basis_sets));
-    if (!basis_sets)
+    const integration_rule_t **const integration_rules =
+        python_integration_rules_get(ndim, integration_space->specs, integration_registry->registry);
+    if (!integration_rules)
     {
         PyMem_Free(iterator_basis);
         PyMem_Free(iterator_nodes);
@@ -408,35 +409,15 @@ static PyObject *function_space_values_at_integration_nodes(PyObject *self, PyTy
         return NULL;
     }
 
-    for (unsigned idim = 0; idim < ndim; ++idim)
+    const basis_set_t **const basis_sets =
+        python_basis_sets_get(ndim, this->specs, integration_rules, basis_registry->registry);
+    python_integration_rules_release(ndim, integration_rules, integration_registry->registry);
+    if (!basis_sets)
     {
-        const integration_rule_t *int_rule;
-        fdg_result_t res = integration_rule_registry_get_rule(integration_registry->registry,
-                                                              integration_space->specs[idim], &int_rule);
-        if (res == FDG_SUCCESS)
-        {
-            const basis_set_t *basis;
-            res = basis_set_registry_get_basis_set(basis_registry->registry, &basis, int_rule, this->specs[idim]);
-            // Release the rule
-            (void)integration_rule_registry_release_rule(integration_registry->registry, int_rule);
-            basis_sets[idim] = basis;
-        }
-
-        if (res != FDG_SUCCESS)
-        {
-            // Release the basis acquired so far
-            for (unsigned jdim = 0; jdim < idim; ++jdim)
-            {
-                (void)basis_set_registry_release_basis_set(basis_registry->registry, basis_sets[jdim]);
-            }
-            PyMem_Free(basis_sets);
-            PyMem_Free(iterator_basis);
-            PyMem_Free(iterator_nodes);
-            Py_DECREF(out);
-            PyErr_Format(PyExc_ValueError, "Failed to get basis for dimension %u, reason: %s (%s)", idim,
-                         fdg_error_str(res), fdg_error_msg(res));
-            return NULL;
-        }
+        PyMem_Free(iterator_basis);
+        PyMem_Free(iterator_nodes);
+        Py_DECREF(out);
+        return NULL;
     }
 
     size_t basis_stride = 1, node_stride = 1;

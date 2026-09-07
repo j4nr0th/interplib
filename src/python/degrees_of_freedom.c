@@ -810,51 +810,53 @@ PyObject *dof_at_boundary(PyObject *self, PyTypeObject *defining_class, PyObject
         return NULL;
     }
 
-    // Find the basis set I will have to evaluate
     const basis_spec_t *const basis = this->basis_specs + idim;
-
-    // Compute basis values at the given point
-    double *basis_values, *roots;
-    basis_spec_t *out_specs;
-    void *const mem = cutl_alloc_group(
-        &PYTHON_ALLOCATOR, (const cutl_alloc_info_t[]){
-                               {.size = sizeof(*basis_values) * (basis->order + 1), .p_ptr = (void **)&basis_values},
-                               {.size = sizeof(*roots) * (basis->order + 1), .p_ptr = (void **)&roots},
-                               {.size = sizeof(*out_specs) * (this->n_dims - 1), .p_ptr = (void **)&out_specs},
-                               {},
-                           });
-    if (!mem)
-        return NULL;
-
-    switch (basis->type)
+    basis_set_registry_t *const basis_registry = ((basis_registry_object *)state->registry_basis)->registry;
+    const basis_endpoint_set_t *endpoint_set = NULL;
+    const int use_endpoint = value == -1.0 || value == +1.0;
+    if (use_endpoint)
     {
-    case BASIS_BERNSTEIN:
-        bernstein_interpolation_vector((value + 1.0) / 2.0, basis->order, basis_values);
-        break;
-
-    case BASIS_LEGENDRE:
-        legendre_eval_bonnet_all(basis->order, value, basis_values);
-        break;
-
-    case BASIS_LAGRANGE_UNIFORM:
-    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
-    case BASIS_LAGRANGE_GAUSS:
-    case BASIS_LAGRANGE_GAUSS_LOBATTO:
-        // Set the roots
+        const fdg_result_t res = basis_set_registry_get_basis_endpoints(basis_registry, &endpoint_set, *basis);
+        if (res != FDG_SUCCESS)
         {
-            const fdg_result_t res = generate_lagrange_roots(basis->order, basis->type, roots);
-            ASSERT(res == FDG_SUCCESS, "Could not generate roots for Lagrange basis.");
-            (void)res;
+            PyErr_Format(PyExc_RuntimeError, "Failed to retrieve endpoint basis values: %s (%s).", fdg_error_str(res),
+                         fdg_error_msg(res));
+            return NULL;
         }
-        lagrange_polynomial_values_2(1, &value, basis->order + 1, roots, basis_values);
-        break;
-
-    default:
-        ASSERT(0, "Invalid basis type enum value %u", (unsigned)basis->type);
-        break;
     }
 
-    // Compute pre- and post-strides while filling in the output basis spaces
+    double *basis_values;
+    basis_spec_t *out_specs;
+    void *mem = NULL;
+    if (use_endpoint)
+    {
+        const unsigned out_dim = this->n_dims - 1;
+        out_specs = PyMem_Malloc((out_dim ? out_dim : 1) * sizeof(*out_specs));
+        if (!out_specs)
+        {
+            (void)basis_set_registry_release_basis_endpoints(basis_registry, endpoint_set);
+            return NULL;
+        }
+        basis_values = (double *)basis_endpoint_values(endpoint_set, value > 0.0);
+    }
+    else
+    {
+        double *roots;
+        mem =
+            cutl_alloc_group(&PYTHON_ALLOCATOR,
+                             (const cutl_alloc_info_t[]){
+                                 {.size = sizeof(*basis_values) * (basis->order + 1), .p_ptr = (void **)&basis_values},
+                                 {.size = sizeof(*roots) * (basis->order + 1), .p_ptr = (void **)&roots},
+                                 {.size = sizeof(*out_specs) * (this->n_dims - 1), .p_ptr = (void **)&out_specs},
+                                 {},
+                             });
+        if (!mem)
+            return NULL;
+
+        basis_compute_at_point_prepare(basis->type, basis->order, roots);
+        basis_compute_at_point_values(basis->type, basis->order, 1, &value, basis_values, roots);
+    }
+
     size_t pre_stride = 1, post_stride = 1;
     for (unsigned i = 0; i < idim; ++i)
     {
@@ -869,35 +871,44 @@ PyObject *dof_at_boundary(PyObject *self, PyTypeObject *defining_class, PyObject
         out_specs[i - 1] = this->basis_specs[i];
     }
 
-    // Create the output DoF object
     dof_object *const new_dofs = dof_object_create(state->degrees_of_freedom_type, this->n_dims - 1, out_specs);
     if (!new_dofs)
     {
-        cutl_dealloc(&PYTHON_ALLOCATOR, mem);
+        if (use_endpoint)
+        {
+            PyMem_Free(out_specs);
+            (void)basis_set_registry_release_basis_endpoints(basis_registry, endpoint_set);
+        }
+        else
+        {
+            cutl_dealloc(&PYTHON_ALLOCATOR, mem);
+        }
         return NULL;
     }
 
     double *restrict const out_dofs = new_dofs->values;
     const double *restrict const in_dofs = this->values;
     const unsigned n_dofs = basis->order + 1;
-
-    // Loop over all DoFs that need to be dealt with
     for (size_t i_pre = 0; i_pre < pre_stride; ++i_pre)
     {
         for (size_t i_post = 0; i_post < post_stride; ++i_post)
         {
             double v = 0.0;
             for (unsigned i = 0; i < n_dofs; ++i)
-            {
                 v += in_dofs[i_pre * n_dofs * post_stride + i * post_stride + i_post] * basis_values[i];
-            }
             out_dofs[i_pre * post_stride + i_post] = v;
         }
     }
 
-    // Release the memory
-    cutl_dealloc(&PYTHON_ALLOCATOR, basis_values);
-    // Done
+    if (use_endpoint)
+    {
+        PyMem_Free(out_specs);
+        (void)basis_set_registry_release_basis_endpoints(basis_registry, endpoint_set);
+    }
+    else
+    {
+        cutl_dealloc(&PYTHON_ALLOCATOR, mem);
+    }
     return (PyObject *)new_dofs;
 }
 

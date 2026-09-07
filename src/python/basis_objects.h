@@ -35,6 +35,14 @@ const basis_set_t **python_basis_sets_get(unsigned n_basis, const basis_spec_t s
 FDG_INTERNAL
 void python_basis_sets_release(unsigned n_basis, const basis_set_t *sets[static n_basis],
                                basis_set_registry_t *registry);
+FDG_INTERNAL
+const basis_endpoint_set_t **python_basis_endpoints_get(unsigned n_basis,
+                                                        const basis_spec_t specs[const static n_basis],
+                                                        basis_set_registry_t *registry);
+
+FDG_INTERNAL
+void python_basis_endpoints_release(unsigned n_basis, const basis_endpoint_set_t *sets[static n_basis],
+                                    basis_set_registry_t *registry);
 
 FDG_INTERNAL
 multidim_iterator_t *python_basis_iterator(unsigned n_basis, const basis_spec_t specs[const static n_basis]);

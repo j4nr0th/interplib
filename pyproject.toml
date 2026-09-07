@@ -38,6 +38,7 @@ dev = [
     "pre-commit",
     "codespell",
     "tomli",
+    "ruff>=0.16.6",
 ]
 docs = [
     "sphinx",

@@ -57,6 +57,32 @@ typedef struct
     integration_spec_t integration_spec; // Specifications for the Integration rule
     double _data[];                      // Values of the basis_sets and their derivatives at integration nodes
 } basis_set_t;
+/**
+ * @brief Cached values of a 1D basis at the interval endpoints.
+ *
+ * The data is laid out as the values at `-1` followed by the values at
+ * `+1`, with `order + 1` entries for each endpoint.
+ */
+typedef struct
+{
+    basis_spec_t spec;
+    double _data[];
+} basis_endpoint_set_t;
+
+/**
+ * @brief Get basis values at one interval endpoint.
+ *
+ * @param this Cached endpoint values.
+ * @param end Zero for `-1`, one for `+1`.
+ * @return Pointer to `order + 1` basis values.
+ */
+static inline const double *basis_endpoint_values(const basis_endpoint_set_t *this, const unsigned end)
+{
+    ASSERT(end <= 1, "Endpoint index was out of bounds.");
+    return this->_data + end * (this->spec.order + 1);
+}
+
+typedef struct basis_set_registry_t basis_set_registry_t;
 
 /**
  * @brief Get a pointer to all basis values at all integration nodes.
@@ -111,8 +137,6 @@ static inline const double *basis_set_basis_derivatives(const basis_set_t *this,
     ASSERT(index <= this->spec.order, "Index was out of bounds.");
     return this->_data + (this->spec.order + 1 + index) * (this->integration_spec.order + 1);
 }
-
-typedef struct basis_set_registry_t basis_set_registry_t;
 
 /**
  * @brief Create a new basis set registry.
@@ -180,6 +204,31 @@ fdg_result_t basis_set_registry_get_basis_sets(basis_set_registry_t *this, unsig
                                                const basis_set_t *FDG_ARRAY_ARG(p_basis, cnt),
                                                const integration_rule_t *FDG_ARRAY_ARG(integration_rule, static cnt),
                                                const basis_spec_t FDG_ARRAY_ARG(specs, static cnt));
+/**
+ * @brief Get cached basis values at the interval endpoints.
+ *
+ * Endpoint values are keyed only by the basis specification and therefore do
+ * not depend on an integration rule.
+ *
+ * @param this Registry to get the endpoint values from.
+ * @param p_endpoints Receives the endpoint values on success.
+ * @param spec Specification of the basis.
+ * @return FDG_SUCCESS on success, or an error code on failure.
+ */
+FDG_INTERNAL
+fdg_result_t basis_set_registry_get_basis_endpoints(basis_set_registry_t *this,
+                                                    const basis_endpoint_set_t **p_endpoints, basis_spec_t spec);
+
+/**
+ * @brief Release a previously retrieved endpoint basis set.
+ *
+ * @param this Registry the endpoint values were retrieved from.
+ * @param endpoints Endpoint values to release.
+ * @return FDG_SUCCESS if the endpoint values were found and released.
+ */
+FDG_INTERNAL
+fdg_result_t basis_set_registry_release_basis_endpoints(basis_set_registry_t *this,
+                                                        const basis_endpoint_set_t *endpoints);
 
 /**
  * @brief Release a previously retrieved basis set.

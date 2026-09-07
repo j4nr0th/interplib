@@ -12,11 +12,13 @@ object is created by specifying the :class:`FunctionSpace` and optionally values
 corresponding DoFs.
 
 This type can be used to reconstruct the values of the function or its gradients,
-thought they are never cached. The only exceptions are the partially cached methods
+though they are never cached. The only exceptions are the partially cached methods
 :meth:`DegreesOfFreedom.reconstruct_at_integration_points` and
 :meth:`DegreesOfFreedom.reconstruct_derivative_at_integration_points`, which make use
-of :class:`BasisRegistry` and :class:`IntegrationRegistry` to cache values of basis
-functions at integration points.
+of :class:`BasisRegistry` and :class:`IntegrationRegistry` to cache values of
+basis functions at integration points. Boundary projections at the reference
+endpoints additionally use the basis registry's integration-independent endpoint
+cache.
 
 Reconstruction
 --------------
@@ -52,9 +54,10 @@ Derivatives and projections
 
 - :meth:`DegreesOfFreedom.plane_projection` evaluates the basis functions
   of dimension :math:`k` at the coordinate :math:`x`, i.e. it restricts the
-  function to the plane :math:`\xi_k = x` and returns the DoFs of the
-  restriction on that plane. This is the operation behind
-  :meth:`SpaceMap.boundary`.
+  function to the plane :math:`\xi_k = x` and returns the DoFs of the restriction
+  on that plane. At :math:`x = -1` or :math:`x = +1`, the endpoint basis values
+  are retrieved from the integration-independent :class:`BasisRegistry` cache.
+  This is the operation behind :meth:`SpaceMap.boundary`.
 
 - :meth:`DegreesOfFreedom.reverse_orientation` maps the reference
   coordinate :math:`\xi_k \in [-1, +1]` to :math:`-\xi_k`, i.e. it reverses

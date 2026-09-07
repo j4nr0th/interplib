@@ -417,31 +417,37 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
                                   const basis_spec_t *basis_specs, const int8_t *orientation,
                                   const integration_spec_t *canonical_specs,
                                   const integration_rule_t *const *source_rules,
-                                  integration_registry_object *const integration_registry,
                                   basis_registry_object *const basis_registry, const bool element_table,
                                   const size_t point_count, trace_basis_table_t *const out)
 {
     *out = (trace_basis_table_t){};
     const unsigned ndim = element_table ? element_dim : face_dim;
     const unsigned component_count = combination_total_count((uint8_t)ndim, (uint8_t)order);
+    const unsigned free_count = face_dim;
     const size_t point_stride_count = face_dim > 0 ? face_dim : 1;
+    const unsigned axis_count = ndim > 0 ? ndim : 1;
     size_t *point_strides;
     const integration_rule_t **canonical_rules;
-    const integration_rule_t **axis_rules;
     const basis_set_t **basis_sets = NULL;
     const basis_set_t **basis_sets_lower = NULL;
+    const basis_endpoint_set_t **endpoint_sets = NULL;
+    const basis_endpoint_set_t **endpoint_sets_lower = NULL;
+    basis_spec_t *free_specs;
+    basis_spec_t *free_specs_lower;
     basis_spec_t *lower_specs;
+    unsigned *source_axes;
     uint8_t *component_axes;
-    const integration_rule_t *endpoint_rule = NULL;
-    const unsigned axis_count = ndim > 0 ? ndim : 1;
     void *const memory = cutl_alloc_group(
         &PYTHON_ALLOCATOR,
-        (const cutl_alloc_info_t[]){{sizeof(*point_strides) * point_stride_count, (void **)&point_strides},
-                                    {sizeof(*canonical_rules) * face_dim, (void **)&canonical_rules},
-                                    {sizeof(*axis_rules) * axis_count, (void **)&axis_rules},
-                                    {sizeof(*lower_specs) * ndim, (void **)&lower_specs},
-                                    {sizeof(*component_axes) * (order > 0 ? order : 1), (void **)&component_axes},
-                                    {}});
+        (const cutl_alloc_info_t[]){
+            {sizeof(*point_strides) * point_stride_count, (void **)&point_strides},
+            {sizeof(*canonical_rules) * face_dim, (void **)&canonical_rules},
+            {sizeof(*free_specs) * (free_count > 0 ? free_count : 1), (void **)&free_specs},
+            {sizeof(*free_specs_lower) * (free_count > 0 ? free_count : 1), (void **)&free_specs_lower},
+            {sizeof(*lower_specs) * axis_count, (void **)&lower_specs},
+            {sizeof(*source_axes) * axis_count, (void **)&source_axes},
+            {sizeof(*component_axes) * (order > 0 ? order : 1), (void **)&component_axes},
+            {}});
     if (!memory)
         return -1;
 
@@ -456,45 +462,66 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
         PyErr_SetString(PyExc_ValueError, "Trace basis point count does not match its quadrature.");
         goto fail;
     }
+
+    for (unsigned axis = 0; axis < ndim; ++axis)
+    {
+        source_axes[axis] = face_dim;
+        if (!element_table)
+        {
+            source_axes[axis] = axis;
+            free_specs[axis] = basis_specs[axis];
+        }
+    }
     if (face_dim > 0)
     {
         const unsigned fixed_count = element_dim - face_dim;
         for (unsigned face_axis = 0; face_axis < face_dim; ++face_axis)
         {
             const int8_t mapping = orientation[fixed_count + face_axis];
-            const unsigned source_axis = (unsigned)(mapping < 0 ? -mapping : mapping) - 1;
-            const unsigned source_face_axis = get_source_face_axis(element_dim, face_dim, orientation, source_axis);
-            canonical_rules[face_axis] = source_rules[source_face_axis];
+            const unsigned element_axis = (unsigned)(mapping < 0 ? -mapping : mapping) - 1;
+            const unsigned source_axis = get_source_face_axis(element_dim, face_dim, orientation, element_axis);
+            canonical_rules[face_axis] = source_rules[source_axis];
+            free_specs[face_axis] = basis_specs[element_axis];
+            source_axes[element_axis] = face_axis;
+        }
+    }
+    if (order > 0)
+    {
+        for (unsigned axis = 0; axis < ndim; ++axis)
+        {
+            lower_specs[axis] = basis_specs[axis];
+            lower_specs[axis].order -= 1;
+        }
+        for (unsigned axis = 0; axis < free_count; ++axis)
+        {
+            free_specs_lower[axis] = free_specs[axis];
+            free_specs_lower[axis].order -= 1;
         }
     }
 
-    if (element_table && element_dim > face_dim)
+    if (ndim > 0 && element_table)
     {
-        const integration_spec_t endpoint_spec = {
-            .type = INTEGRATION_RULE_TYPE_GAUSS_LOBATTO,
-            .order = 1,
-        };
-        if (integration_rule_registry_get_rule(integration_registry->registry, endpoint_spec, &endpoint_rule) !=
-            FDG_SUCCESS)
+        endpoint_sets = python_basis_endpoints_get(ndim, basis_specs, basis_registry->registry);
+        if (!endpoint_sets)
             goto fail;
-    }
-    for (unsigned axis = 0; axis < ndim; ++axis)
-    {
-        if (!element_table)
+        if (order > 0)
         {
-            axis_rules[axis] = canonical_rules[axis];
-            continue;
+            endpoint_sets_lower = python_basis_endpoints_get(ndim, lower_specs, basis_registry->registry);
+            if (!endpoint_sets_lower)
+                goto fail;
         }
-        axis_rules[axis] = endpoint_rule;
-        const unsigned fixed_count = element_dim - face_dim;
-        for (unsigned face_axis = 0; face_axis < face_dim; ++face_axis)
+    }
+    if (free_count > 0)
+    {
+        basis_sets = python_basis_sets_get(free_count, free_specs, canonical_rules, basis_registry->registry);
+        if (!basis_sets)
+            goto fail;
+        if (order > 0)
         {
-            const int8_t mapping = orientation[fixed_count + face_axis];
-            if ((unsigned)(mapping < 0 ? -mapping : mapping) - 1 == axis)
-            {
-                axis_rules[axis] = canonical_rules[face_axis];
-                break;
-            }
+            basis_sets_lower =
+                python_basis_sets_get(free_count, free_specs_lower, canonical_rules, basis_registry->registry);
+            if (!basis_sets_lower)
+                goto fail;
         }
     }
 
@@ -536,24 +563,6 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
         out->component_offsets[component + 1] = out->component_offsets[component] + dof_count;
     }
 
-    if (ndim > 0)
-    {
-        basis_sets = python_basis_sets_get(ndim, basis_specs, axis_rules, basis_registry->registry);
-        if (!basis_sets)
-            goto fail;
-        if (order > 0)
-        {
-            for (unsigned axis = 0; axis < ndim; ++axis)
-            {
-                lower_specs[axis] = basis_specs[axis];
-                lower_specs[axis].order -= 1;
-            }
-            basis_sets_lower = python_basis_sets_get(ndim, lower_specs, axis_rules, basis_registry->registry);
-            if (!basis_sets_lower)
-                goto fail;
-        }
-    }
-
     for (unsigned component = 0; component < component_count; ++component)
     {
         const size_t dof_count = out->component_offsets[component + 1] - out->component_offsets[component];
@@ -570,18 +579,25 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
                 const bool active = order > 0 && component_axis < order && component_axes[component_axis] == axis;
                 if (active)
                     component_axis += 1;
-                const basis_set_t *const basis = active ? basis_sets_lower[axis] : basis_sets[axis];
-                const size_t basis_dim = (size_t)basis->spec.order + 1;
                 const size_t integration_index = trace_basis_point_index(
                     element_dim, face_dim, orientation, axis, point, canonical_specs, point_strides, element_table);
+                const unsigned source_axis = source_axes[axis];
+                const basis_endpoint_set_t *const endpoint =
+                    element_table ? (active ? endpoint_sets_lower[axis] : endpoint_sets[axis]) : NULL;
+                const basis_set_t *const basis =
+                    element_table ? NULL : (active ? basis_sets_lower[source_axis] : basis_sets[source_axis]);
+                const size_t basis_dim = endpoint ? endpoint->spec.order + 1 : (size_t)basis->spec.order + 1;
+                const double *const endpoint_values =
+                    endpoint ? basis_endpoint_values(endpoint, (unsigned)integration_index) : NULL;
                 for (size_t previous = current_count; previous > 0; --previous)
                 {
                     const double previous_value = point_values[previous - 1];
                     for (size_t basis_index = basis_dim; basis_index > 0; --basis_index)
                     {
-                        point_values[(previous - 1) * basis_dim + basis_index - 1] =
-                            previous_value *
-                            basis_set_basis_values(basis, (unsigned)(basis_index - 1))[integration_index];
+                        const double basis_value =
+                            endpoint ? endpoint_values[basis_index - 1]
+                                     : basis_set_basis_values(basis, (unsigned)(basis_index - 1))[integration_index];
+                        point_values[(previous - 1) * basis_dim + basis_index - 1] = previous_value * basis_value;
                     }
                 }
                 current_count *= basis_dim;
@@ -591,12 +607,14 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
         }
     }
     if (basis_sets_lower)
-        python_basis_sets_release(ndim, basis_sets_lower, basis_registry->registry);
+        python_basis_sets_release(free_count, basis_sets_lower, basis_registry->registry);
     if (basis_sets)
-        python_basis_sets_release(ndim, basis_sets, basis_registry->registry);
+        python_basis_sets_release(free_count, basis_sets, basis_registry->registry);
+    if (endpoint_sets_lower)
+        python_basis_endpoints_release(ndim, endpoint_sets_lower, basis_registry->registry);
+    if (endpoint_sets)
+        python_basis_endpoints_release(ndim, endpoint_sets, basis_registry->registry);
     cutl_dealloc(&PYTHON_ALLOCATOR, memory);
-    if (endpoint_rule)
-        integration_rule_registry_release_rule(integration_registry->registry, endpoint_rule);
     out->descriptor = (constraint_trace_basis_values_t){
         .component_count = component_count,
         .point_count = point_count,
@@ -607,12 +625,14 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
 
 fail:
     if (basis_sets_lower)
-        python_basis_sets_release(ndim, basis_sets_lower, basis_registry->registry);
+        python_basis_sets_release(free_count, basis_sets_lower, basis_registry->registry);
     if (basis_sets)
-        python_basis_sets_release(ndim, basis_sets, basis_registry->registry);
+        python_basis_sets_release(free_count, basis_sets, basis_registry->registry);
+    if (endpoint_sets_lower)
+        python_basis_endpoints_release(ndim, endpoint_sets_lower, basis_registry->registry);
+    if (endpoint_sets)
+        python_basis_endpoints_release(ndim, endpoint_sets, basis_registry->registry);
     cutl_dealloc(&PYTHON_ALLOCATOR, memory);
-    if (endpoint_rule)
-        integration_rule_registry_release_rule(integration_registry->registry, endpoint_rule);
     release_trace_basis_table(out);
     return -1;
 }
@@ -754,16 +774,14 @@ PyObject *compute_kform_boundary_constraints_impl(const interplib_module_state_t
         surface_weights[point] = fabs(face_map->determinant[source_point]);
     }
 
-    integration_registry_object *const integration_registry =
-        (integration_registry_object *)state->registry_integration;
     basis_registry_object *const basis_registry = (basis_registry_object *)state->registry_basis;
     if (make_trace_basis_table(element_dim, face_dim, order, test_spec->function_space->specs, orientation,
-                               setup.canonical_specs, setup.rules, integration_registry, basis_registry, false,
-                               setup.point_count, &test_basis_table) < 0)
+                               setup.canonical_specs, setup.rules, basis_registry, false, setup.point_count,
+                               &test_basis_table) < 0)
         goto fail;
     if (make_trace_basis_table(element_dim, face_dim, order, element_spec->function_space->specs, orientation,
-                               setup.canonical_specs, setup.rules, integration_registry, basis_registry, true,
-                               setup.point_count, &element_basis_table) < 0)
+                               setup.canonical_specs, setup.rules, basis_registry, true, setup.point_count,
+                               &element_basis_table) < 0)
         goto fail;
 
     const npy_intp row_dims[1] = {(npy_intp)(row_count + 1)};

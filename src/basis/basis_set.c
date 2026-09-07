@@ -44,6 +44,10 @@ struct basis_set_registry_t
     int should_cache;
     unsigned n_buckets;
     basis_bucket_btype_t *buckets;
+    unsigned endpoint_count;
+    unsigned endpoint_capacity;
+    unsigned *endpoint_ref_counts;
+    basis_endpoint_set_t **endpoint_sets;
 };
 
 fdg_result_t basis_set_registry_create(basis_set_registry_t **out, int should_cache, const cutl_allocator_t *allocator)
@@ -127,6 +131,85 @@ static inline fdg_result_t basis_set_create(basis_set_t **out, const integration
     }
 
     return res;
+}
+static fdg_result_t basis_endpoint_set_create(basis_endpoint_set_t **out, const basis_spec_t spec,
+                                              const cutl_allocator_t *allocator)
+{
+    switch (spec.type)
+    {
+    case BASIS_LEGENDRE:
+    case BASIS_BERNSTEIN:
+    case BASIS_LAGRANGE_GAUSS:
+    case BASIS_LAGRANGE_UNIFORM:
+    case BASIS_LAGRANGE_GAUSS_LOBATTO:
+    case BASIS_LAGRANGE_CHEBYSHEV_GAUSS:
+        break;
+    default:
+        return FDG_ERROR_INVALID_ENUM;
+    }
+
+    basis_endpoint_set_t *const this =
+        cutl_alloc(allocator, sizeof *this + 2 * (spec.order + 1) * sizeof(*this->_data));
+    if (!this)
+        return FDG_ERROR_FAILED_ALLOCATION;
+
+    double *const work = cutl_alloc(allocator, (spec.order + 1) * sizeof(*work));
+    if (!work)
+    {
+        cutl_dealloc(allocator, this);
+        return FDG_ERROR_FAILED_ALLOCATION;
+    }
+
+    this->spec = spec;
+    const double endpoints[] = {-1.0, +1.0};
+    basis_compute_at_point_prepare(spec.type, spec.order, work);
+    basis_compute_at_point_values(spec.type, spec.order, 2, endpoints, this->_data, work);
+    cutl_dealloc(allocator, work);
+    *out = this;
+    return FDG_SUCCESS;
+}
+
+static basis_endpoint_set_t *basis_set_registry_find_endpoint_set(const basis_set_registry_t *this,
+                                                                  const basis_spec_t spec)
+{
+    for (unsigned i = 0; i < this->endpoint_count; ++i)
+    {
+        basis_endpoint_set_t *const endpoints = this->endpoint_sets[i];
+        if (endpoints->spec.type == spec.type && endpoints->spec.order == spec.order)
+            return endpoints;
+    }
+    return NULL;
+}
+
+static fdg_result_t basis_set_registry_add_endpoint_set(basis_set_registry_t *this, basis_endpoint_set_t **p_endpoints,
+                                                        const basis_spec_t spec)
+{
+    if (this->endpoint_count == this->endpoint_capacity)
+    {
+        const unsigned new_capacity = this->endpoint_capacity ? 2 * this->endpoint_capacity : 8;
+        basis_endpoint_set_t **const new_sets =
+            cutl_realloc(&this->allocator, this->endpoint_sets, new_capacity * sizeof(*new_sets));
+        if (!new_sets)
+            return FDG_ERROR_FAILED_ALLOCATION;
+        this->endpoint_sets = new_sets;
+        unsigned *const new_ref_counts =
+            cutl_realloc(&this->allocator, this->endpoint_ref_counts, new_capacity * sizeof(*new_ref_counts));
+        if (!new_ref_counts)
+            return FDG_ERROR_FAILED_ALLOCATION;
+        this->endpoint_ref_counts = new_ref_counts;
+        this->endpoint_capacity = new_capacity;
+    }
+
+    basis_endpoint_set_t *endpoints;
+    const fdg_result_t res = basis_endpoint_set_create(&endpoints, spec, &this->allocator);
+    if (res != FDG_SUCCESS)
+        return res;
+
+    this->endpoint_sets[this->endpoint_count] = endpoints;
+    this->endpoint_ref_counts[this->endpoint_count] = 1;
+    this->endpoint_count += 1;
+    *p_endpoints = endpoints;
+    return FDG_SUCCESS;
 }
 
 static inline fdg_result_t basis_set_registry_add_btype_bucket(basis_set_registry_t *this, const basis_set_type_t type,
@@ -305,6 +388,90 @@ fdg_result_t basis_set_registry_get_basis_sets(basis_set_registry_t *this, unsig
 
     return FDG_SUCCESS;
 }
+fdg_result_t basis_set_registry_get_basis_endpoints(basis_set_registry_t *this,
+                                                    const basis_endpoint_set_t **p_endpoints, const basis_spec_t spec)
+{
+    rw_lock_acquire_read(&this->lock);
+    basis_endpoint_set_t *endpoints = basis_set_registry_find_endpoint_set(this, spec);
+    if (endpoints)
+    {
+        for (unsigned i = 0; i < this->endpoint_count; ++i)
+        {
+            if (this->endpoint_sets[i] == endpoints)
+            {
+                this->endpoint_ref_counts[i] += 1;
+                break;
+            }
+        }
+        rw_lock_release_read(&this->lock);
+        *p_endpoints = endpoints;
+        return FDG_SUCCESS;
+    }
+    rw_lock_release_read(&this->lock);
+
+    rw_lock_acquire_write(&this->lock);
+    endpoints = basis_set_registry_find_endpoint_set(this, spec);
+    fdg_result_t res = FDG_SUCCESS;
+    if (endpoints)
+    {
+        for (unsigned i = 0; i < this->endpoint_count; ++i)
+        {
+            if (this->endpoint_sets[i] == endpoints)
+            {
+                this->endpoint_ref_counts[i] += 1;
+                break;
+            }
+        }
+    }
+    else
+    {
+        res = basis_set_registry_add_endpoint_set(this, &endpoints, spec);
+    }
+    rw_lock_release_write(&this->lock);
+    if (res != FDG_SUCCESS)
+        return res;
+    *p_endpoints = endpoints;
+    return FDG_SUCCESS;
+}
+
+fdg_result_t basis_set_registry_release_basis_endpoints(basis_set_registry_t *this,
+                                                        const basis_endpoint_set_t *endpoints)
+{
+    rw_lock_acquire_read(&this->lock);
+    unsigned position = 0;
+    while (position < this->endpoint_count && this->endpoint_sets[position] != endpoints)
+        ++position;
+    if (position == this->endpoint_count)
+    {
+        rw_lock_release_read(&this->lock);
+        return FDG_ERROR_NOT_IN_REGISTRY;
+    }
+    rw_lock_release_read(&this->lock);
+
+    rw_lock_acquire_write(&this->lock);
+    position = 0;
+    while (position < this->endpoint_count && this->endpoint_sets[position] != endpoints)
+        ++position;
+    if (position == this->endpoint_count)
+    {
+        rw_lock_release_write(&this->lock);
+        return FDG_ERROR_NOT_IN_REGISTRY;
+    }
+
+    this->endpoint_ref_counts[position] -= 1;
+    if (this->endpoint_ref_counts[position] == 0 && this->should_cache == 0)
+    {
+        cutl_dealloc(&this->allocator, this->endpoint_sets[position]);
+        for (unsigned i = position + 1; i < this->endpoint_count; ++i)
+        {
+            this->endpoint_sets[i - 1] = this->endpoint_sets[i];
+            this->endpoint_ref_counts[i - 1] = this->endpoint_ref_counts[i];
+        }
+        this->endpoint_count -= 1;
+    }
+    rw_lock_release_write(&this->lock);
+    return FDG_SUCCESS;
+}
 
 fdg_result_t basis_set_registry_release_basis_set(basis_set_registry_t *this, const basis_set_t *basis)
 {
@@ -379,6 +546,10 @@ void basis_set_registry_destroy(basis_set_registry_t *this)
         }
         cutl_dealloc(&this->allocator, first_bucket->buckets);
     }
+    for (unsigned i = 0; i < this->endpoint_count; ++i)
+        cutl_dealloc(&this->allocator, this->endpoint_sets[i]);
+    cutl_dealloc(&this->allocator, this->endpoint_sets);
+    cutl_dealloc(&this->allocator, this->endpoint_ref_counts);
     cutl_dealloc(&this->allocator, this->buckets);
     cutl_dealloc(&this->allocator, this);
 }
@@ -411,6 +582,23 @@ void basis_set_registry_release_unused_basis_sets(basis_set_registry_t *const th
                 }
             }
             second_bucket->count = valid;
+        }
+    }
+    for (unsigned position = 0; position < this->endpoint_count;)
+    {
+        if (this->endpoint_ref_counts[position] == 0 && this->should_cache == 0)
+        {
+            cutl_dealloc(&this->allocator, this->endpoint_sets[position]);
+            for (unsigned i = position + 1; i < this->endpoint_count; ++i)
+            {
+                this->endpoint_sets[i - 1] = this->endpoint_sets[i];
+                this->endpoint_ref_counts[i - 1] = this->endpoint_ref_counts[i];
+            }
+            this->endpoint_count -= 1;
+        }
+        else
+        {
+            position += 1;
         }
     }
     rw_lock_release_write(&this->lock);
@@ -451,6 +639,11 @@ void basis_compute_at_point_prepare(const basis_set_type_t type, const unsigned 
     switch (type)
     {
     case BASIS_LAGRANGE_UNIFORM:
+        if (order == 0)
+        {
+            work[0] = 0.0;
+            break;
+        }
         for (unsigned i = 0; i < order + 1; ++i)
         {
             work[i] = (2.0 * i) / (double)(order)-1.0;

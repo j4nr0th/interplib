@@ -13,6 +13,11 @@ fdg_result_t generate_lagrange_roots(const unsigned order, const basis_set_type_
     switch (type)
     {
     case BASIS_LAGRANGE_UNIFORM:
+        if (order == 0)
+        {
+            roots[0] = 0.0;
+            break;
+        }
         for (unsigned i = 0; i < order + 1; ++i)
         {
             roots[i] = (2.0 * i) / (double)order - 1.0;

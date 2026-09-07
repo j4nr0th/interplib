@@ -143,7 +143,7 @@ def test_plane_projection(orders: tuple[int, ...], btype: BasisType) -> None:
     reconstruction_grid = integration_space.nodes()
 
     # Make a few random projections
-    for proj_val in rng.random(len(orders)):
+    for proj_val in (*rng.random(len(orders)), -1.0, +1.0):
         for idim in range(len(orders)):
             projection = dofs.plane_projection(idim, float(proj_val))
             proj_recon = reconstruct(

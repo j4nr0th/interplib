@@ -8,7 +8,11 @@ Boundary Constraints
 A boundary constraint compares the trace of an element k-form with a test
 k-form on one of its boundaries.  The public function
 :func:`compute_kform_boundary_constraints` constructs the rows for one
-selected element and one selected mesh boundary object.
+selected element and one selected mesh boundary object.  The trace tables
+reuse the integration-independent endpoint basis cache for the element axes
+fixed on the boundary.  Trace assembly needs basis values (including the
+lower-order values used by positive-form components), not basis derivatives;
+there is therefore no separate derivative cache in this path.
 
 Mathematical construction
 -------------------------
