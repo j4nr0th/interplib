@@ -136,3 +136,10 @@ given by Equation :eq:`eq-outer-product-basis`. Based on this it is quite clear 
     \psi_{i_1, \dots, i_N} (\vec{r}) = \prod\limits_{j = 1}^N b^{j}_{i_1}(x_j)
 
 .. autoclass:: FunctionSpace
+
+The function space on either face perpendicular to reference dimension
+:math:`i` is obtained with ``space.boundary(i)``.  The returned space keeps
+the basis specifications of all remaining dimensions in their original order;
+the lower and upper faces therefore share the same function space.  The index
+must refer to an existing dimension, and a zero-dimensional space has no
+boundary space.

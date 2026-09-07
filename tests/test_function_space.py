@@ -87,6 +87,33 @@ def test_3d_function_space():
     assert values_fs == pytest.approx(expected_values)
 
 
+def test_function_space_boundary() -> None:
+    """Check that a boundary space drops the selected reference dimension."""
+    specs = (
+        BasisSpecs("legendre", 2),
+        BasisSpecs("bernstein", 3),
+        BasisSpecs("lagrange-uniform", 4),
+    )
+    function_space = FunctionSpace(*specs)
+
+    expected = (specs[1:], (specs[0], specs[2]), specs[:2])
+    for idim, expected_specs in enumerate(expected):
+        face_space = function_space.boundary(idim)
+        assert face_space.basis_specs == expected_specs
+        assert face_space.dimension == function_space.dimension - 1
+
+    point_space = FunctionSpace(specs[0]).boundary(0)
+    assert point_space.dimension == 0
+    assert point_space.basis_specs == ()
+
+    with pytest.raises(ValueError, match="out of bounds"):
+        function_space.boundary(-1)
+    with pytest.raises(ValueError, match="out of bounds"):
+        function_space.boundary(function_space.dimension)
+    with pytest.raises(ValueError, match="zero-dimensional"):
+        FunctionSpace().boundary(0)
+
+
 def test_integration_points() -> None:
     """Check that integration point values are same as those computed by evaluate."""
     basis_specs1 = BasisSpecs("legendre", 4)

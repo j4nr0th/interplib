@@ -367,6 +367,25 @@ class FunctionSpace:
         """
         ...
 
+    def boundary(self, idim: int) -> FunctionSpace:
+        """Return the function space on a boundary perpendicular to one dimension.
+
+        The lower and upper boundaries perpendicular to the same dimension have
+        the same function space.
+
+        Parameters
+        ----------
+        idim : int
+            Index of the dimension fixed by the boundary.
+
+        Returns
+        -------
+        FunctionSpace
+            New function space containing the basis specifications of the
+            remaining dimensions.
+        """
+        ...
+
 @final
 class IntegrationSpace:
     """Integration space defined with integration rules.

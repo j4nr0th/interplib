@@ -481,8 +481,11 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
             const unsigned element_axis = (unsigned)(mapping < 0 ? -mapping : mapping) - 1;
             const unsigned source_axis = get_source_face_axis(element_dim, face_dim, orientation, element_axis);
             canonical_rules[face_axis] = source_rules[source_axis];
-            free_specs[face_axis] = basis_specs[element_axis];
-            source_axes[element_axis] = face_axis;
+            if (element_table)
+            {
+                free_specs[face_axis] = basis_specs[element_axis];
+                source_axes[element_axis] = face_axis;
+            }
         }
     }
     if (order > 0)
@@ -582,10 +585,12 @@ static int make_trace_basis_table(const unsigned element_dim, const unsigned fac
                 const size_t integration_index = trace_basis_point_index(
                     element_dim, face_dim, orientation, axis, point, canonical_specs, point_strides, element_table);
                 const unsigned source_axis = source_axes[axis];
+                const bool fixed_axis = element_table && source_axis == face_dim;
                 const basis_endpoint_set_t *const endpoint =
-                    element_table ? (active ? endpoint_sets_lower[axis] : endpoint_sets[axis]) : NULL;
+                    fixed_axis ? (active ? endpoint_sets_lower[axis] : endpoint_sets[axis]) : NULL;
                 const basis_set_t *const basis =
-                    element_table ? NULL : (active ? basis_sets_lower[source_axis] : basis_sets[source_axis]);
+                    element_table && fixed_axis ? NULL
+                                                : (active ? basis_sets_lower[source_axis] : basis_sets[source_axis]);
                 const size_t basis_dim = endpoint ? endpoint->spec.order + 1 : (size_t)basis->spec.order + 1;
                 const double *const endpoint_values =
                     endpoint ? basis_endpoint_values(endpoint, (unsigned)integration_index) : NULL;

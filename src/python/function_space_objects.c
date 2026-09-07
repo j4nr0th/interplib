@@ -528,6 +528,58 @@ static PyObject *function_space_object_lower_order(PyObject *self, PyTypeObject 
     return (PyObject *)new_space;
 }
 
+PyDoc_STRVAR(function_space_boundary_docstring,
+             "boundary(idim: int) -> FunctionSpace\n"
+             "Return the function space on a boundary perpendicular to the specified dimension.\n"
+             "The lower and upper boundaries have the same function space.\n"
+             "\n"
+             "Parameters\n"
+             "----------\n"
+             "idim : int\n"
+             "    Index of the dimension fixed by the boundary.\n"
+             "\n"
+             "Returns\n"
+             "-------\n"
+             "FunctionSpace\n"
+             "    New function space containing the basis specifications of the remaining dimensions.\n");
+
+static PyObject *function_space_boundary(PyObject *self, PyTypeObject *defining_class, PyObject *const *args,
+                                         const Py_ssize_t nargs, const PyObject *kwnames)
+{
+    function_space_object *this;
+    const interplib_module_state_t *state;
+    if (ensure_function_space_state(self, defining_class, &this, &state) < 0)
+        return NULL;
+
+    Py_ssize_t idim;
+    if (parse_arguments_check((cpyutl_argument_t[]){{.type = CPYARG_TYPE_SSIZE, .p_val = &idim, .kwname = "idim"}, {}},
+                              args, nargs, kwnames) < 0)
+        return NULL;
+
+    const unsigned ndim = Py_SIZE(this);
+    if (ndim == 0)
+    {
+        PyErr_SetString(PyExc_ValueError, "Cannot get a boundary space from a zero-dimensional function space.");
+        return NULL;
+    }
+    if (idim < 0 || (npy_intp)idim >= (npy_intp)ndim)
+    {
+        PyErr_Format(PyExc_ValueError, "Dimension %zd is out of bounds for a function space with %u dimensions.", idim,
+                     ndim);
+        return NULL;
+    }
+
+    const unsigned face_dim = ndim - 1;
+    function_space_object *const face = function_space_object_create(state->function_space_type, face_dim, this->specs);
+    if (!face)
+        return NULL;
+    if ((unsigned)idim < face_dim)
+    {
+        memmove(face->specs + idim, this->specs + idim + 1, (face_dim - (unsigned)idim) * sizeof(*face->specs));
+    }
+    return (PyObject *)face;
+}
+
 PyDoc_STRVAR(function_space_type_docstring,
              "FunctionSpace(*specs: BasisSpec)\n"
              "Function space defined with basis.\n"
@@ -574,7 +626,6 @@ static PyObject *function_space_rich_compare(PyObject *self, PyObject *other, co
     const function_space_object *const that = (function_space_object *)other;
 
     const int equal = function_space_equal(this, that);
-
     return PyBool_FromLong(op == Py_EQ ? equal : !equal);
 }
 
@@ -628,6 +679,12 @@ PyType_Spec function_space_type_spec = {
                  .ml_meth = (void *)function_space_object_lower_order,
                  .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
                  .ml_doc = function_space_object_lower_order_docstring,
+             },
+             {
+                 .ml_name = "boundary",
+                 .ml_meth = (void *)function_space_boundary,
+                 .ml_flags = METH_METHOD | METH_FASTCALL | METH_KEYWORDS,
+                 .ml_doc = function_space_boundary_docstring,
              },
              {},
          }},
