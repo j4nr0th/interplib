@@ -10,6 +10,10 @@ Examples
 Some examples.
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
@@ -70,23 +74,6 @@ Some examples.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how different domains look and behave like.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_plot_domains_thumb.png
-    :alt:
-
-  :doc:`/auto_examples/plot_domains`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Domain Examples</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates system for N-dimensional mixed Poisson equation can be set up.">
 
 .. only:: html
@@ -121,6 +108,23 @@ Some examples.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Solves the mixed Laplace equation on a single cubic element in three dimensions with a fully weak Dirichlet boundary condition: the natural boundary term B(p, u_D) = \int_{\partial\omega} p \wedge \star u_D prescribes the datum on every outer face through the right-hand side of the momentum equation; no Lagrange multipliers are used anywhere.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_laplace_weak_bc_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_laplace_weak_bc`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mixed Laplace equation with fully-weak Dirichlet boundary conditions.</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates system for N-dimensional advection-diffusion equation can be set up.">
 
 .. only:: html
@@ -133,6 +137,125 @@ Some examples.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">N-D Advection Diffusion</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A boundary row is a trace inner product,">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_boundary_constraints_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_boundary_constraints`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Boundary Constraints and Continuity</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how different domains look and behave like.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_domains_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_domains`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Domain Examples</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how the mixed Poisson equation can be solved on multiple hypercube elements at once, with the continuity of the flux across the shared faces enforced by Mesh.compute_kform_boundary_constraints.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_multi_element_poisson_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_multi_element_poisson`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi-element Poisson equation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example assembles the scalar primal Laplace operator on conforming quadrilateral, hexahedral, and four-dimensional hypercube meshes. Shared strata are processed from faces to edges to points. Only consecutive element pairs are compared for each shared object, so the continuity rows form a forest rather than a cycle.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_multi_element_laplace_continuity_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_multi_element_laplace_continuity`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Hierarchical continuity for a direct multi-element Laplace solve.</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example solves a manufactured mixed Poisson problem on a small A \times B \times C grid of hexahedra. The coordinate map is affine in this first version, which keeps the focus on the boundary-condition API.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_multi_element_poisson_periodic_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_multi_element_poisson_periodic`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mixed Poisson with periodic flux and weak Dirichlet boundaries</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example extends the multi-element mixed Poisson example by applying boundary conditions on the outer boundary of the domain. The outer boundary is deformed: the coordinate map no longer keeps the boundary fixed, so the boundary faces are curved.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_multi_element_poisson_bc_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/plot_multi_element_poisson_bc`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi-element mixed Poisson equation with strong and weak boundary conditions</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The input images are ordered z planes. Each pixel is treated as a square physical cell whose grayscale value is its cell average; the plane dimensions therefore retain the image aspect ratio. The cell averages are reconstructed on a tensor grid, and the resulting three-dimensional field defines both the manufactured solution and a finite-difference Laplacian source.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_image_sequence_poisson_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/image_sequence_poisson`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Solve a mixed Poisson problem manufactured from an image sequence.</div>
     </div>
 
 
@@ -149,10 +272,17 @@ Some examples.
    /auto_examples/plot_function_spaces
    /auto_examples/plot_basis_sets
    /auto_examples/plot_integration_rules
-   /auto_examples/plot_domains
    /auto_examples/plot_poisson
    /auto_examples/plot_gradients
+   /auto_examples/plot_laplace_weak_bc
    /auto_examples/plot_advdif
+   /auto_examples/plot_boundary_constraints
+   /auto_examples/plot_domains
+   /auto_examples/plot_multi_element_poisson
+   /auto_examples/plot_multi_element_laplace_continuity
+   /auto_examples/plot_multi_element_poisson_periodic
+   /auto_examples/plot_multi_element_poisson_bc
+   /auto_examples/image_sequence_poisson
 
 
 .. only:: html

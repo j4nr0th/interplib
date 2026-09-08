@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:16.600** total execution time for 7 files **from all galleries**:
+**01:07.452** total execution time for 14 files **from all galleries**:
 
 .. container::
 
@@ -32,24 +32,45 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_plot_poisson.py` (``../examples/plot_poisson.py``)
-     - 00:08.235
+   * - :ref:`sphx_glr_auto_examples_plot_multi_element_laplace_continuity.py` (``../examples/plot_multi_element_laplace_continuity.py``)
+     - 00:34.605
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_advdif.py` (``../examples/plot_advdif.py``)
-     - 00:03.463
+   * - :ref:`sphx_glr_auto_examples_plot_multi_element_poisson.py` (``../examples/plot_multi_element_poisson.py``)
+     - 00:05.452
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_basis_sets.py` (``../examples/plot_basis_sets.py``)
-     - 00:01.526
+   * - :ref:`sphx_glr_auto_examples_plot_multi_element_poisson_periodic.py` (``../examples/plot_multi_element_poisson_periodic.py``)
+     - 00:05.279
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_gradients.py` (``../examples/plot_gradients.py``)
-     - 00:01.378
+   * - :ref:`sphx_glr_auto_examples_plot_multi_element_poisson_bc.py` (``../examples/plot_multi_element_poisson_bc.py``)
+     - 00:05.144
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_function_spaces.py` (``../examples/plot_function_spaces.py``)
-     - 00:01.176
+   * - :ref:`sphx_glr_auto_examples_plot_laplace_weak_bc.py` (``../examples/plot_laplace_weak_bc.py``)
+     - 00:05.139
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_domains.py` (``../examples/plot_domains.py``)
-     - 00:00.538
+     - 00:04.245
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_advdif.py` (``../examples/plot_advdif.py``)
+     - 00:01.663
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_basis_sets.py` (``../examples/plot_basis_sets.py``)
+     - 00:01.648
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_gradients.py` (``../examples/plot_gradients.py``)
+     - 00:01.382
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_function_spaces.py` (``../examples/plot_function_spaces.py``)
+     - 00:01.314
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_poisson.py` (``../examples/plot_poisson.py``)
+     - 00:00.885
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_boundary_constraints.py` (``../examples/plot_boundary_constraints.py``)
+     - 00:00.363
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_integration_rules.py` (``../examples/plot_integration_rules.py``)
-     - 00:00.283
+     - 00:00.331
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_image_sequence_poisson.py` (``../examples/image_sequence_poisson.py``)
+     - 00:00.000
      - 0.0

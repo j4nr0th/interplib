@@ -1,0 +1,899 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Mesh Topology &#8212; fdg 0.0.1a documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'source/mesh';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="\(k\)-form Type" href="kform_types.html" />
+    <link rel="prev" title="Domain Types" href="domain_types.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">fdg 0.0.1a documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="degrees_of_freedom.html">Degrees of Freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_types.html">Domain Types</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Mesh Topology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="c_api.html">C API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_basis.html">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_topology.html">Topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_constraints.html">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Documentation for Exported Types and Functions</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Mesh Topology</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="mesh-topology">
+<span id="fdg-mesh"></span><h1>Mesh Topology<a class="headerlink" href="#mesh-topology" title="Link to this heading">#</a></h1>
+<p>A <a class="reference internal" href="#fdg.Mesh" title="fdg.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> holds the complete <em>topology</em> of a set of connected
+<span class="math notranslate nohighlight">\(N\)</span>-dimensional hypercube elements: the collections of every
+topological object of every dimension (points, lines, faces, …) and how
+each object is immersed into the elements that contain it. The mesh carries
+no geometry: points are identified by opaque IDs only, and the coordinates of
+the elements come from the <a class="reference internal" href="space_map.html#fdg-space-map"><span class="std std-ref">space mapping</span></a> of each
+element. The primary use of the mesh is the generation of continuity
+constraints between neighboring elements, see
+<a class="reference internal" href="boundary_constraints.html#fdg-boundary-constraints"><span class="std std-ref">Boundary Constraints</span></a>.</p>
+<p>The implementation lives in the C core (<code class="file docutils literal notranslate"><span class="pre">topology/mesh.c</span></code>, documented
+at <a class="reference internal" href="c_topology.html"><span class="doc">Topology</span></a>); this page explains the concepts and the Python
+binding.</p>
+<section id="elements-and-their-objects">
+<h2>Elements and their objects<a class="headerlink" href="#elements-and-their-objects" title="Link to this heading">#</a></h2>
+<p>A hypercube element in <span class="math notranslate nohighlight">\(N\)</span> dimensions has <span class="math notranslate nohighlight">\(2^N\)</span> corners, one per
+plane combination of its axes. Every axis-aligned sub-object of dimension
+<span class="math notranslate nohighlight">\(m\)</span> inside the element is identified by two things:</p>
+<ul class="simple">
+<li><p>its <em>axis mask</em>: the set of the <span class="math notranslate nohighlight">\(m\)</span> axes it spans, one of the
+<span class="math notranslate nohighlight">\(\binom{N}{m}\)</span> masks; and</p></li>
+<li><p>its <em>planes</em>: for each of the <span class="math notranslate nohighlight">\(N - m\)</span> fixed axes, whether the object
+sits at the start or the end plane of the element, one of
+<span class="math notranslate nohighlight">\(2^{N - m}\)</span> positions.</p></li>
+</ul>
+<p>The masks are enumerated in ascending numeric order, which is the
+lexicographic order of the ascending axis sets used for the k-form
+components in <a class="reference internal" href="math_background.html#fdg-math-background"><span class="std std-ref">Mathematical Background</span></a>; the positions are the mixed-radix
+values of the fixed-axis plane indices, with the low axes least significant.
+A corner of the element is the object of dimension zero at the plane
+combination given by its corner coordinate, so its local index is the
+mixed-radix corner index itself (bit <span class="math notranslate nohighlight">\(a\)</span> of the index set = the corner
+lies on the positive side of element axis <span class="math notranslate nohighlight">\(a\)</span>).</p>
+</section>
+<section id="construction-from-corners">
+<h2>Construction from corners<a class="headerlink" href="#construction-from-corners" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="#fdg.Mesh.from_corners" title="fdg.Mesh.from_corners"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.from_corners()</span></code></a> builds the mesh from the corner point IDs of every
+element: <span class="math notranslate nohighlight">\(2^N\)</span> IDs per element, in the element’s own frame, the corner
+with local mixed-radix index <span class="math notranslate nohighlight">\(k\)</span> having its point ID at
+<code class="docutils literal notranslate"><span class="pre">corners[element</span> <span class="pre">*</span> <span class="pre">2**N</span> <span class="pre">+</span> <span class="pre">k]</span></code>. A point that belongs to several elements is
+shared by giving its ID as a corner of each of them.</p>
+<p>For every element, the builder walks the objects of every dimension: for
+each axis mask and each plane combination it collects the <span class="math notranslate nohighlight">\(2^m\)</span> corner
+IDs of the object and merges the object into the global mesh, keyed by its
+<em>sorted</em> corner set. Two objects from different elements are the same global
+object exactly when they consist of the same corner points. The points
+themselves are implicit: point IDs are integers in
+<span class="math notranslate nohighlight">\([0, \texttt{point\_count})\)</span>, and <a class="reference internal" href="#fdg.Mesh.point_count" title="fdg.Mesh.point_count"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.point_count()</span></code></a> is one more
+than the largest corner ID used. The corner data must come from a consistent
+axis-aligned gluing: every object must be embedded identically in all of the
+elements it is in. The input is validated as far as the merging machinery
+allows; inconsistent gluing surfaces as an error from the immersion
+computation.</p>
+<p>The boundaries of an object are written exactly once, from the first element
+that contains it, so the frame of the object — its set of spanning axes in
+the ascending element-axis order — is canonical. The immersion computation
+relies on this stability.</p>
+</section>
+<section id="collections-and-boundary-slots">
+<h2>Collections and boundary slots<a class="headerlink" href="#collections-and-boundary-slots" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="#fdg.Mesh.collections" title="fdg.Mesh.collections"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.collections()</span></code></a> returns one array per object dimension
+<span class="math notranslate nohighlight">\(d = 1, \dots, N\)</span> (copies of the internal data). The array of
+dimension <span class="math notranslate nohighlight">\(d\)</span> has shape <code class="docutils literal notranslate"><span class="pre">(count,</span> <span class="pre">2*d)</span></code>: object <span class="math notranslate nohighlight">\(j\)</span> has
+<span class="math notranslate nohighlight">\(2d\)</span> boundary slots, slot <span class="math notranslate nohighlight">\(i\)</span> being the boundary perpendicular
+to axis <span class="math notranslate nohighlight">\(i\)</span> at its <em>start</em> and slot <span class="math notranslate nohighlight">\(i + d\)</span> the boundary at its
+<em>end</em>. For <span class="math notranslate nohighlight">\(d = 1\)</span> (lines) the boundaries are point IDs; otherwise
+they are IDs into the collection of dimension <span class="math notranslate nohighlight">\(d - 1\)</span>. The last
+collection holds the <span class="math notranslate nohighlight">\(N\)</span>-dimensional elements themselves, whose
+boundaries are the element faces of dimension <span class="math notranslate nohighlight">\(N - 1\)</span>.</p>
+<p>The same layout is accepted by <a class="reference internal" href="#fdg.Mesh.from_collections" title="fdg.Mesh.from_collections"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.from_collections()</span></code></a>, which takes
+the collections of every dimension together with an explicit point count and
+computes the immersion information from them.</p>
+</section>
+<section id="immersion-and-orientation">
+<h2>Immersion and orientation<a class="headerlink" href="#immersion-and-orientation" title="Link to this heading">#</a></h2>
+<p>For every object the mesh records the elements that contain it and, for each
+of them, an <em>orientation record</em>: <span class="math notranslate nohighlight">\(N\)</span> signed, one-based entries. The
+first <span class="math notranslate nohighlight">\(N - m\)</span> entries are the <em>fixed axes</em>: the entry is positive when
+the object sits at the end side of the axis and negative when it sits at the
+start side, which identifies where the object is positioned in the element.
+The remaining <span class="math notranslate nohighlight">\(m\)</span> entries map the object’s own local axes to the
+element axes, with negative entries reversing the direction of the axis.</p>
+<p>The iteration functions of the mesh return these records as an <code class="docutils literal notranslate"><span class="pre">int8</span></code>
+array of shape <code class="docutils literal notranslate"><span class="pre">(element_count,</span> <span class="pre">ndim)</span></code>, one row per element ID. The
+orientation of an object can differ between the elements that contain it;
+this relative orientation is what the constraint assembly
+(<a class="reference internal" href="boundary_constraints.html#fdg-boundary-constraints"><span class="std std-ref">Boundary Constraints</span></a>) uses to match the traces of neighboring
+elements.</p>
+</section>
+<section id="position-lookup">
+<h2>Position lookup<a class="headerlink" href="#position-lookup" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="#fdg.Mesh.element_object" title="fdg.Mesh.element_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.element_object()</span></code></a> resolves the global ID of the object at a given
+position within one element. The position is specified with one signed,
+one-based entry per element axis: zero when the object spans the axis,
+<span class="math notranslate nohighlight">\(-(j + 1)\)</span> when the object is perpendicular to axis <span class="math notranslate nohighlight">\(j\)</span> at its
+start, <span class="math notranslate nohighlight">\(+(j + 1)\)</span> when it is perpendicular to it at its end; at least
+one entry must be nonzero. The dimension of the found object is the number
+of free (zero) entries, so a fully specified position identifies a point.
+For example, <code class="docutils literal notranslate"><span class="pre">(-1,</span> <span class="pre">+2,</span> <span class="pre">-3)</span></code> in three dimensions names the point reached by
+following element axis 0 to its start, axis 1 to its end and axis 2 to its
+start.</p>
+<p>The lookup descends the boundary chains of the collections: starting at the
+element, each fixed axis crosses from the current object into the boundary
+perpendicular to that axis at the requested side, so the cost is
+proportional to the number of fixed axes.</p>
+</section>
+<section id="shared-objects-and-the-mesh-boundary">
+<h2>Shared objects and the mesh boundary<a class="headerlink" href="#shared-objects-and-the-mesh-boundary" title="Link to this heading">#</a></h2>
+<p>The mesh offers three iteration families:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#fdg.Mesh.iterate_shared" title="fdg.Mesh.iterate_shared"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.iterate_shared()</span></code></a> and <a class="reference internal" href="#fdg.Mesh.iterate_shared_all" title="fdg.Mesh.iterate_shared_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.iterate_shared_all()</span></code></a> visit the
+objects that are contained in at least two elements, with the element IDs
+sorted in ascending order. These are the objects on which continuity must
+be enforced. To build constraints without over-constraining, pair the
+consecutive elements of each shared object and constrain only the interior
+of the object, skipping its own boundaries.</p></li>
+<li><p><a class="reference internal" href="#fdg.Mesh.compute_kform_continuity_constraints" title="fdg.Mesh.compute_kform_continuity_constraints"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.compute_kform_continuity_constraints()</span></code></a> performs that pairing and
+assembles physical trace rows from faces down to points. Its
+<code class="docutils literal notranslate"><span class="pre">test_specs[mdim][object_id]</span></code> entries are supplied by the caller, so basis
+types and orders are never inferred. An empty entry skips that stratum.</p></li>
+<li><p><a class="reference internal" href="#fdg.Mesh.iterate_boundary" title="fdg.Mesh.iterate_boundary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.iterate_boundary()</span></code></a> and <a class="reference internal" href="#fdg.Mesh.iterate_boundary_all" title="fdg.Mesh.iterate_boundary_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.iterate_boundary_all()</span></code></a> visit
+the objects that lie on the outer boundary of the mesh: an object lies on
+the boundary when it is contained in a <em>boundary face</em>, an object of
+dimension <span class="math notranslate nohighlight">\(N - 1\)</span> that is in exactly one element. Objects of
+dimension <span class="math notranslate nohighlight">\(N - 1\)</span> on the boundary are therefore in exactly one
+element, while lower-dimensional objects on the boundary can still be in
+several elements — for example a point in the middle of a boundary edge of
+a two-dimensional mesh.</p></li>
+</ul>
+<p>Each visited object is reported as a tuple
+<code class="docutils literal notranslate"><span class="pre">(mdim,</span> <span class="pre">object_id,</span> <span class="pre">element_ids,</span> <span class="pre">orientations)</span></code>:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mdim</span></code></dt><dd><p>Dimension of the object.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">object_id</span></code></dt><dd><p>Global ID of the object: a point ID for <span class="math notranslate nohighlight">\(\texttt{mdim} = 0\)</span>,
+otherwise an index into the corresponding collection.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">element_ids</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">uint64</span></code> array with the IDs of the elements the object is contained
+in, sorted in ascending order.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">orientations</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">int8</span></code> array of shape <code class="docutils literal notranslate"><span class="pre">(element_count,</span> <span class="pre">ndim)</span></code> with the orientation
+records; row <code class="docutils literal notranslate"><span class="pre">i</span></code> belongs to <code class="docutils literal notranslate"><span class="pre">element_ids[i]</span></code>.</p>
+</dd>
+</dl>
+<p>The <code class="docutils literal notranslate"><span class="pre">*_all</span></code> variants iterate the object dimensions from <span class="math notranslate nohighlight">\(N - 1\)</span>
+down to zero. This is the order required for continuity constraints:
+constraining the shared objects dimension by dimension, from the highest to
+the lowest, ensures that no degree of freedom is constrained more than once.</p>
+</section>
+<section id="hierarchical-continuity">
+<h2>Hierarchical continuity<a class="headerlink" href="#hierarchical-continuity" title="Link to this heading">#</a></h2>
+<p>The global method accepts three explicit sequences:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">element_specs</span></code></dt><dd><p>One volume <a class="reference internal" href="kform_types.html#fdg.KFormSpecs" title="fdg.KFormSpecs"><code class="xref py py-class docutils literal notranslate"><span class="pre">KFormSpecs</span></code></a> per element. The sequence length must equal
+<code class="docutils literal notranslate"><span class="pre">mesh.element_count</span></code>; all specifications have the mesh dimension and the
+same k-form degree, while their basis orders may differ.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">element_maps</span></code></dt><dd><p>One <a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg.SpaceMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpaceMap</span></code></a> per element, also of length <code class="docutils literal notranslate"><span class="pre">mesh.element_count</span></code>.
+These maps provide the physical geometry used for each trace.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">test_specs</span></code></dt><dd><p>Nested as <code class="docutils literal notranslate"><span class="pre">test_specs[mdim][object_id][component]</span></code>. It has one outer
+entry per object dimension, one object entry per mesh object, and one
+explicit <a class="reference internal" href="kform_types.html#fdg.KFormSpecs" title="fdg.KFormSpecs"><code class="xref py py-class docutils literal notranslate"><span class="pre">KFormSpecs</span></code></a> per canonical k-form component when
+<code class="docutils literal notranslate"><span class="pre">mdim</span> <span class="pre">&gt;=</span> <span class="pre">k</span></code>. Entries for lower-dimensional objects are empty. Basis types
+and orders are never inferred; callers can therefore weakly constrain a
+higher-order trace with a lower-order test space.</p>
+</dd>
+</dl>
+<p>The method returns five packed one-dimensional arrays:
+<code class="docutils literal notranslate"><span class="pre">(row_offsets,</span> <span class="pre">element_ids,</span> <span class="pre">components,</span> <span class="pre">local_dofs,</span> <span class="pre">coefficients)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">row_offsets</span></code> is a CSR-like boundary array of length <code class="docutils literal notranslate"><span class="pre">n_rows</span> <span class="pre">+</span> <span class="pre">1</span></code>;
+<code class="docutils literal notranslate"><span class="pre">element_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">components</span></code>, <code class="docutils literal notranslate"><span class="pre">local_dofs</span></code> and <code class="docutils literal notranslate"><span class="pre">coefficients</span></code> contain
+one record per nonzero row entry. The element IDs replace the side field of
+the one-boundary API, and the two consecutive traces appear with opposite
+signs. Empty or skipped stages keep the valid empty representation
+<code class="docutils literal notranslate"><span class="pre">row_offsets</span> <span class="pre">==</span> <span class="pre">[0]</span></code> with empty entry arrays.</p>
+</section>
+<section id="global-boundary-and-periodic-constraints">
+<h2>Global boundary and periodic constraints<a class="headerlink" href="#global-boundary-and-periodic-constraints" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="#fdg.Mesh.compute_kform_global_constraints" title="fdg.Mesh.compute_kform_global_constraints"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.compute_kform_global_constraints()</span></code></a> combines the ordinary shared
+object continuity rows with optional prescribed data and boundary-to-boundary
+relations. <code class="docutils literal notranslate"><span class="pre">boundary_conditions</span></code> maps codimension-one outer-face IDs to a
+callable, or accepts <code class="xref py py-class docutils literal notranslate"><span class="pre">BoundaryCondition</span></code> records. A callable receives
+one array of physical coordinates per ambient dimension. For a positive
+k-form, provide one callable per ambient physical k-form component in
+canonical combination order.</p>
+<p>Each selected face is expanded to all of its lower-dimensional descendants.
+When selected faces meet, the descendant is processed once; the library checks
+that all callables assigned to that object produce the same trace moments. The
+trace rows are imposed on the lowest-ID incident element, while retained
+continuity rows propagate the value to the remaining elements.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundaryPair</span></code> describes periodic, mirrored, or axis-rotated equality
+between two outer faces. Its <code class="docutils literal notranslate"><span class="pre">axis_map</span></code> is a signed permutation of canonical
+boundary axes. For subdivided boundaries, <code class="xref py py-class docutils literal notranslate"><span class="pre">BoundaryPairGroup</span></code> accepts
+ordered <code class="docutils literal notranslate"><span class="pre">left_faces</span></code> and <code class="docutils literal notranslate"><span class="pre">right_faces</span></code> collections of equal length and
+pairs entries at equal positions. For example, <code class="docutils literal notranslate"><span class="pre">BoundaryPairGroup(x_min,</span>
+<span class="pre">x_max,</span> <span class="pre">(1,</span> <span class="pre">2))</span></code> connects every patch in <code class="docutils literal notranslate"><span class="pre">x_min</span></code> to its corresponding patch
+in <code class="docutils literal notranslate"><span class="pre">x_max</span></code>. The group is expanded by the global method; no face geometry is
+inferred. Multiple groups can describe the x, y, and z identifications of a
+periodic cube. Lower-dimensional duplicate relations are reduced to an
+acyclic spanning forest, avoiding redundant cycles at face intersections.</p>
+<p>The face pair is expanded to corresponding lower-dimensional objects, with the
+induced k-form component signs and basis reversals included in the packed rows.
+Pairing is explicit because mesh topology does not contain geometric
+information with which to infer periodic counterparts.</p>
+<p>For repeated one-sided traces sharing one test specification, <a class="reference internal" href="#fdg.Mesh.compute_kform_boundary_constraints_batch" title="fdg.Mesh.compute_kform_boundary_constraints_batch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.compute_kform_boundary_constraints_batch()</span></code></a>
+accepts one element specification and equal-length <code class="docutils literal notranslate"><span class="pre">element_maps</span></code>,
+<code class="docutils literal notranslate"><span class="pre">element_ids</span></code>, and <code class="docutils literal notranslate"><span class="pre">boundary_ids</span></code> sequences. The batch items are paired
+by position: item <code class="docutils literal notranslate"><span class="pre">i</span></code> uses <code class="docutils literal notranslate"><span class="pre">element_maps[i]</span></code> and <code class="docutils literal notranslate"><span class="pre">boundary_ids[i]</span></code> on
+<code class="docutils literal notranslate"><span class="pre">element_ids[i]</span></code>. <code class="docutils literal notranslate"><span class="pre">test_spec</span></code> supplies the trace basis type, per-axis
+orders, and k-form degree; <code class="docutils literal notranslate"><span class="pre">element_spec</span></code> is the shared volume trial
+specification. The method does not infer a test space or geometry.</p>
+<p>It returns five packed arrays:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">row_offsets</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">uintp</span></code> CSR-like offsets of length <code class="docutils literal notranslate"><span class="pre">row_count</span> <span class="pre">+</span> <span class="pre">1</span></code>. Rows for each
+batch item are concatenated in input order.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">element_ids</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">uint64</span></code> global element ID for each packed row entry.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">components</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">uint32</span></code> element-frame k-form component for each packed row entry.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">local_dofs</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">uintp</span></code> DoF index within the component named by <code class="docutils literal notranslate"><span class="pre">components</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">coefficients</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">double</span></code> physical trace coefficient for each packed row entry. The
+batch method assembles one positive-side trace per requested item.</p>
+</dd>
+</dl>
+<p>An empty batch has <code class="docutils literal notranslate"><span class="pre">row_offsets</span> <span class="pre">==</span> <span class="pre">[0]</span></code> and empty entry arrays. The method
+raises if the three input sequences have different lengths, a map has the
+wrong dimension, an element ID is outside the mesh, or a requested boundary
+object is not present in its element.</p>
+<p>The global method returns the packed five-array row representation and a sixth
+<code class="docutils literal notranslate"><span class="pre">rhs</span></code> array with one prescribed value per row. Shared and periodic rows have
+zero right-hand side; only prescribed boundary rows contribute nonzero values.</p>
+</section>
+<section id="boundary-constraints">
+<h2>Boundary constraints<a class="headerlink" href="#boundary-constraints" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="#fdg.Mesh.compute_kform_boundary_constraints" title="fdg.Mesh.compute_kform_boundary_constraints"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.compute_kform_boundary_constraints()</span></code></a> is identical to the free
+function <a class="reference internal" href="boundary_constraints.html#fdg.compute_kform_boundary_constraints" title="fdg.compute_kform_boundary_constraints"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_kform_boundary_constraints()</span></code></a>, except that the mesh
+collections, the point count and the orientation of the selected boundary
+within the selected element are taken from the mesh itself. See
+<a class="reference internal" href="boundary_constraints.html#fdg-boundary-constraints"><span class="std std-ref">Boundary Constraints</span></a> for the mathematical construction and the
+packed format of the returned rows.</p>
+<p>The gallery example
+<a class="reference internal" href="../auto_examples/plot_multi_element_poisson.html#sphx-glr-auto-examples-plot-multi-element-poisson-py"><span class="std std-ref">Multi-element Poisson equation</span></a> builds a mesh
+with <a class="reference internal" href="#fdg.Mesh.from_corners" title="fdg.Mesh.from_corners"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.from_corners()</span></code></a>, enumerates the shared faces with
+<a class="reference internal" href="#fdg.Mesh.iterate_shared" title="fdg.Mesh.iterate_shared"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.iterate_shared()</span></code></a> and assembles the flux continuity with
+<a class="reference internal" href="#fdg.Mesh.compute_kform_boundary_constraints" title="fdg.Mesh.compute_kform_boundary_constraints"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Mesh.compute_kform_boundary_constraints()</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="fdg.Mesh">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><a class="headerlink" href="#fdg.Mesh" title="Link to this definition">#</a></dt>
+<dd><p>Topological mesh built from connected hypercube elements.</p>
+<p>The mesh holds the complete topology of a set of hypercube elements: the
+collections of all topological objects of every dimension and their
+immersion information, but no geometry. Its primary use is the generation
+of continuity constraints between neighboring elements, see
+<code class="docutils literal notranslate"><span class="pre">compute_kform_boundary_constraints</span></code>.</p>
+<p>The type cannot be instantiated directly; use <code class="docutils literal notranslate"><span class="pre">from_corners</span></code> or
+<code class="docutils literal notranslate"><span class="pre">from_collections</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.from_collections">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_collections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collections</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#fdg.Mesh" title="fdg.Mesh"><span class="pre">Mesh</span></a></span></span><a class="headerlink" href="#fdg.Mesh.from_collections" title="Link to this definition">#</a></dt>
+<dd><p>Create a mesh from the collections of topological objects.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.from_corners">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_corners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corners</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#fdg.Mesh" title="fdg.Mesh"><span class="pre">Mesh</span></a></span></span><a class="headerlink" href="#fdg.Mesh.from_corners" title="Link to this definition">#</a></dt>
+<dd><p>Create a mesh from the corner point IDs of every hypercube element.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.compute_kform_boundary_constraints">
+<span class="sig-name descname"><span class="pre">compute_kform_boundary_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_id</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple[numpy.ndarray,</span> <span class="pre">...]\nCompute</span> <span class="pre">one</span> <span class="pre">element's</span> <span class="pre">physical</span> <span class="pre">k-form</span> <span class="pre">boundary</span> <span class="pre">rows</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">boundary</span> <span class="pre">object</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">mesh.</span></span></span><a class="headerlink" href="#fdg.Mesh.compute_kform_boundary_constraints" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.compute_kform_boundary_constraints_batch">
+<span class="sig-name descname"><span class="pre">compute_kform_boundary_constraints_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_maps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_ids</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.compute_kform_boundary_constraints_batch" title="Link to this definition">#</a></dt>
+<dd><p>Assemble one test trace specification for each requested element boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> (<a class="reference internal" href="kform_types.html#fdg.KFormSpecs" title="fdg.KFormSpecs"><em>KFormSpecs</em></a>) – Trace test-space specification. Its dimension is the boundary-object dimension, and its k-form order must equal element_spec.order.</p></li>
+<li><p><strong>element_spec</strong> (<a class="reference internal" href="kform_types.html#fdg.KFormSpecs" title="fdg.KFormSpecs"><em>KFormSpecs</em></a>) – Volume trial-space specification shared by every item in the batch.</p></li>
+<li><p><strong>element_maps</strong> (<em>sequence</em><em> of </em><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg.SpaceMap"><em>SpaceMap</em></a>) – Element maps, one per item, in the same order as element_ids and boundary_ids.</p></li>
+<li><p><strong>element_ids</strong> (<em>sequence</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Global mesh element ID for each requested boundary trace.</p></li>
+<li><p><strong>boundary_ids</strong> (<em>sequence</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Boundary-object ID for each trace. Item i must belong to element_ids[i].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Five packed arrays: row_offsets, element_ids, components, local_dofs, and coefficients. Rows are concatenated in input order; components and local_dofs identify element-local k-form entries, and coefficients contain physical trace weights. An empty batch returns row_offsets=[0] and empty entry arrays.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.compute_kform_continuity_constraints">
+<span class="sig-name descname"><span class="pre">compute_kform_continuity_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_maps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_specs</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.compute_kform_continuity_constraints" title="Link to this definition">#</a></dt>
+<dd><p>Assemble hierarchical physical k-form continuity rows from shared faces down to points.
+test_specs is indexed by object dimension, object ID, and canonical component.
+Returns five packed one-dimensional arrays; empty output has row_offsets=[0].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.compute_kform_global_constraints">
+<span class="sig-name descname"><span class="pre">compute_kform_global_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_maps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periodic_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.compute_kform_global_constraints" title="Link to this definition">#</a></dt>
+<dd><p>Assemble shared, prescribed-boundary, and signed-axis periodic k-form trace rows.
+Boundary data are physical k-form callables; pair descriptors define boundary face mappings.
+Returns five packed row arrays and one right-hand-side array.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.element_object">
+<span class="sig-name descname"><span class="pre">element_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="headerlink" href="#fdg.Mesh.element_object" title="Link to this definition">#</a></dt>
+<dd><p>Look up the global ID of the object at the given position within one element.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.iterate_boundary">
+<span class="sig-name descname"><span class="pre">iterate_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdim</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.iterate_boundary" title="Link to this definition">#</a></dt>
+<dd><p>Iterate over all objects of one dimension on the outer boundary of the mesh.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.iterate_boundary_all">
+<span class="sig-name descname"><span class="pre">iterate_boundary_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.iterate_boundary_all" title="Link to this definition">#</a></dt>
+<dd><p>Iterate over all boundary objects, from dimension ndim - 1 down to 0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.iterate_shared">
+<span class="sig-name descname"><span class="pre">iterate_shared</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdim</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.iterate_shared" title="Link to this definition">#</a></dt>
+<dd><p>Iterate over all objects of one dimension shared by at least two elements.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Mesh.iterate_shared_all">
+<span class="sig-name descname"><span class="pre">iterate_shared_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Mesh.iterate_shared_all" title="Link to this definition">#</a></dt>
+<dd><p>Iterate over all shared objects, from dimension ndim - 1 down to 0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fdg.Mesh.collections">
+<span class="sig-name descname"><span class="pre">collections</span></span><a class="headerlink" href="#fdg.Mesh.collections" title="Link to this definition">#</a></dt>
+<dd><p>Collections of topological objects of the mesh, one uint64 array per dimension (copies).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fdg.Mesh.element_count">
+<span class="sig-name descname"><span class="pre">element_count</span></span><a class="headerlink" href="#fdg.Mesh.element_count" title="Link to this definition">#</a></dt>
+<dd><p>Number of elements of the mesh.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fdg.Mesh.ndim">
+<span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#fdg.Mesh.ndim" title="Link to this definition">#</a></dt>
+<dd><p>Number of dimensions of the space the mesh is in.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fdg.Mesh.point_count">
+<span class="sig-name descname"><span class="pre">point_count</span></span><a class="headerlink" href="#fdg.Mesh.point_count" title="Link to this definition">#</a></dt>
+<dd><p>Number of points of the mesh.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="domain_types.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Domain Types</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="kform_types.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="math notranslate nohighlight">\(k\)</span>-form Type</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#elements-and-their-objects">Elements and their objects</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#construction-from-corners">Construction from corners</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collections-and-boundary-slots">Collections and boundary slots</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#immersion-and-orientation">Immersion and orientation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#position-lookup">Position lookup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#shared-objects-and-the-mesh-boundary">Shared objects and the mesh boundary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hierarchical-continuity">Hierarchical continuity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#global-boundary-and-periodic-constraints">Global boundary and periodic constraints</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-constraints">Boundary constraints</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.from_collections"><code class="docutils literal notranslate"><span class="pre">Mesh.from_collections()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.from_corners"><code class="docutils literal notranslate"><span class="pre">Mesh.from_corners()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.compute_kform_boundary_constraints"><code class="docutils literal notranslate"><span class="pre">Mesh.compute_kform_boundary_constraints()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.compute_kform_boundary_constraints_batch"><code class="docutils literal notranslate"><span class="pre">Mesh.compute_kform_boundary_constraints_batch()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.compute_kform_continuity_constraints"><code class="docutils literal notranslate"><span class="pre">Mesh.compute_kform_continuity_constraints()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.compute_kform_global_constraints"><code class="docutils literal notranslate"><span class="pre">Mesh.compute_kform_global_constraints()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.element_object"><code class="docutils literal notranslate"><span class="pre">Mesh.element_object()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.iterate_boundary"><code class="docutils literal notranslate"><span class="pre">Mesh.iterate_boundary()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.iterate_boundary_all"><code class="docutils literal notranslate"><span class="pre">Mesh.iterate_boundary_all()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.iterate_shared"><code class="docutils literal notranslate"><span class="pre">Mesh.iterate_shared()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.iterate_shared_all"><code class="docutils literal notranslate"><span class="pre">Mesh.iterate_shared_all()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.collections"><code class="docutils literal notranslate"><span class="pre">Mesh.collections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.element_count"><code class="docutils literal notranslate"><span class="pre">Mesh.element_count</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.ndim"><code class="docutils literal notranslate"><span class="pre">Mesh.ndim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Mesh.point_count"><code class="docutils literal notranslate"><span class="pre">Mesh.point_count</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/mesh.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Jan Roth.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

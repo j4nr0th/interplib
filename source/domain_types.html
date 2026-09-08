@@ -27,51 +27,59 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source/domain_types';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="\(k\)-form Type" href="kform_types.html" />
+    <link rel="next" title="Mesh Topology" href="mesh.html" />
     <link rel="prev" title="Space Map" href="space_map.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -97,7 +105,7 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -167,11 +175,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -244,33 +259,62 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="degrees_of_freedom.html">Degrees of Freedom</a></li>
 <li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Domain Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh Topology</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="c_api.html">C API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_basis.html">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_topology.html">Topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_constraints.html">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
 </ul>
 </div>
 </nav></div>
@@ -334,12 +378,18 @@
   <section id="domain-types">
 <span id="fdg-domain-types"></span><h1>Domain Types<a class="headerlink" href="#domain-types" title="Link to this heading">#</a></h1>
 <p>To help with generating <code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateMapping</span></code> and <a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg.SpaceMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpaceMap</span></code></a> objects
-based on more common ways to define domains by linearly interpolating between
-its boundaries, a few helper types are provided to allow for 1D and 2D deformed
-domain generation. To see an example of how these work, see <a class="reference internal" href="../auto_examples/plot_domains.html#sphx-glr-auto-examples-plot-domains-py"><span class="std std-ref">Domain Examples</span></a>.</p>
+based on common domain boundaries, helper types are provided for deformed domains
+of arbitrary reference dimension. <a class="reference internal" href="#fdg.Line" title="fdg.Line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Line</span></code></a> and <a class="reference internal" href="#fdg.Quad" title="fdg.Quad"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quad</span></code></a> remain convenient
+constructors for one- and two-dimensional domains; <a class="reference internal" href="#fdg.Hypercube" title="fdg.Hypercube"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hypercube</span></code></a> assembles an
+N-dimensional domain from opposite boundary pairs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Hypercube.from_boundary_points</span></code> accepts one pair of tensor-product point arrays
+per reference axis.  Each array has shape <code class="docutils literal notranslate"><span class="pre">(n_0,</span> <span class="pre">...,</span> <span class="pre">n_(N-2),</span> <span class="pre">n_physical)</span></code> and
+uses the remaining parent axes in ascending order.  The arrays are fitted with
+uniform Lagrange interpolation, and neighboring boundaries must agree on every
+shared trace.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.Line">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">Line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">knots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/domains.html#Line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Line" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">Line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">knots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/domains.html#Line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Line" title="Link to this definition">#</a></dt>
 <dd><p>One dimensional object connecting two points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -349,8 +399,14 @@ the same number of entries, but their number is not limited.</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="fdg.Line.from_boundary_pairs">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_boundary_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">HypercubeDomain</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">HypercubeDomain</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Line.from_boundary_pairs" title="Link to this definition">#</a></dt>
+<dd><p>Create a new domain from its boundaries by transfinite blending.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="fdg.Line.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space:</span> <span class="pre">~fdg._fdg.IntegrationSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry:</span> <span class="pre">~fdg._fdg.IntegrationRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry:</span> <span class="pre">~fdg._fdg.BasisRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg._fdg.SpaceMap"><span class="pre">SpaceMap</span></a></span></span><a class="headerlink" href="#fdg.Line.__call__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg._fdg.SpaceMap"><span class="pre">SpaceMap</span></a></span></span><a class="headerlink" href="#fdg.Line.__call__" title="Link to this definition">#</a></dt>
 <dd><p>Create a space map based on the integration space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -370,8 +426,14 @@ the same number of entries, but their number is not limited.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="fdg.Line.boundary">
+<span class="sig-name descname"><span class="pre">boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Line.boundary" title="Link to this definition">#</a></dt>
+<dd><p>Extract a boundary.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="fdg.Line.compute_size">
-<span class="sig-name descname"><span class="pre">compute_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_space:</span> <span class="pre">~fdg._fdg.IntegrationSpace</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry:</span> <span class="pre">~fdg._fdg.IntegrationRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry:</span> <span class="pre">~fdg._fdg.BasisRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Line.compute_size" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">compute_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Line.compute_size" title="Link to this definition">#</a></dt>
 <dd><p>Compute the size of the domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -394,7 +456,7 @@ is the surface area, for a 3D domain it is the volume, and so on.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.Line.integrate">
-<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn:</span> <span class="pre">~fdg.integration.Integrable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_space:</span> <span class="pre">~fdg._fdg.IntegrationSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry:</span> <span class="pre">~fdg._fdg.IntegrationRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry:</span> <span class="pre">~fdg._fdg.BasisRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Line.integrate" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Integrable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Line.integrate" title="Link to this definition">#</a></dt>
 <dd><p>Integrates the callable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -466,47 +528,47 @@ at the specified points.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="fdg.Line.dofs">
-<span class="sig-name descname"><span class="pre">dofs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="degrees_of_freedom.html#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Line.dofs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dofs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="degrees_of_freedom.html#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Line.dofs" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Line.end">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Line.end" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">end</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Line.end" title="Link to this definition">#</a></dt>
 <dd><p>The end point of the line.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Line.endpoints">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Line.endpoints" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">endpoints</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Line.endpoints" title="Link to this definition">#</a></dt>
 <dd><p>Return the end points of the domain.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Line.function_space">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg._fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></em><a class="headerlink" href="#fdg.Line.function_space" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function_space</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg._fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></span><a class="headerlink" href="#fdg.Line.function_space" title="Link to this definition">#</a></dt>
 <dd><p>Function space used by all the DoFs.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="fdg.Line.knots">
-<span class="sig-name descname"><span class="pre">knots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.4)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Line.knots" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">knots</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Line.knots" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Line.ndim_physical">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_physical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#fdg.Line.ndim_physical" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ndim_physical</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#fdg.Line.ndim_physical" title="Link to this definition">#</a></dt>
 <dd><p>Number of physical dimensions of the domain.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Line.ndim_reference">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_reference</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#fdg.Line.ndim_reference" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ndim_reference</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#fdg.Line.ndim_reference" title="Link to this definition">#</a></dt>
 <dd><p>Number of reference dimensions of the domain.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Line.start">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Line.start" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Line.start" title="Link to this definition">#</a></dt>
 <dd><p>The start point of the line.</p>
 </dd></dl>
 
@@ -514,7 +576,7 @@ at the specified points.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.Quad">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">Quad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bottom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/domains.html#Quad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Quad" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">Quad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bottom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.Line" title="fdg.domains.Line"><span class="pre">Line</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/domains.html#Quad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Quad" title="Link to this definition">#</a></dt>
 <dd><p>Two dimensional object with four corners.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -532,7 +594,7 @@ the top boundary ends and ends where the bottom boundary starts.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.Quad.from_corners">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_corners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bottom_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><span class="pre">Self</span></a></span></span><a class="reference internal" href="../_modules/fdg/domains.html#Quad.from_corners"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Quad.from_corners" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_corners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bottom_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><span class="pre">Self</span></a></span></span><a class="reference internal" href="../_modules/fdg/domains.html#Quad.from_corners"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Quad.from_corners" title="Link to this definition">#</a></dt>
 <dd><p>Create a new (linear) Quad based on four corners.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -553,8 +615,14 @@ the top boundary ends and ends where the bottom boundary starts.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="fdg.Quad.from_boundary_pairs">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_boundary_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">HypercubeDomain</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">HypercubeDomain</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Quad.from_boundary_pairs" title="Link to this definition">#</a></dt>
+<dd><p>Create a new domain from its boundaries by transfinite blending.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="fdg.Quad.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space:</span> <span class="pre">~fdg._fdg.IntegrationSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry:</span> <span class="pre">~fdg._fdg.IntegrationRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry:</span> <span class="pre">~fdg._fdg.BasisRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg._fdg.SpaceMap"><span class="pre">SpaceMap</span></a></span></span><a class="headerlink" href="#fdg.Quad.__call__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg._fdg.SpaceMap"><span class="pre">SpaceMap</span></a></span></span><a class="headerlink" href="#fdg.Quad.__call__" title="Link to this definition">#</a></dt>
 <dd><p>Create a space map based on the integration space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -574,8 +642,14 @@ the top boundary ends and ends where the bottom boundary starts.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="fdg.Quad.boundary">
+<span class="sig-name descname"><span class="pre">boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Quad.boundary" title="Link to this definition">#</a></dt>
+<dd><p>Extract a boundary.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="fdg.Quad.compute_size">
-<span class="sig-name descname"><span class="pre">compute_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_space:</span> <span class="pre">~fdg._fdg.IntegrationSpace</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry:</span> <span class="pre">~fdg._fdg.IntegrationRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry:</span> <span class="pre">~fdg._fdg.BasisRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Quad.compute_size" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">compute_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Quad.compute_size" title="Link to this definition">#</a></dt>
 <dd><p>Compute the size of the domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -598,7 +672,7 @@ is the surface area, for a 3D domain it is the volume, and so on.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.Quad.integrate">
-<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn:</span> <span class="pre">~fdg.integration.Integrable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_space:</span> <span class="pre">~fdg._fdg.IntegrationSpace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry:</span> <span class="pre">~fdg._fdg.IntegrationRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry:</span> <span class="pre">~fdg._fdg.BasisRegistry</span> <span class="pre">=</span> <span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Quad.integrate" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Integrable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Quad.integrate" title="Link to this definition">#</a></dt>
 <dd><p>Integrates the callable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -656,30 +730,232 @@ at the specified points.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="fdg.Quad.dofs">
-<span class="sig-name descname"><span class="pre">dofs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="degrees_of_freedom.html#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Quad.dofs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dofs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="degrees_of_freedom.html#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Quad.dofs" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Quad.endpoints">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fdg.Quad.endpoints" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">endpoints</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Quad.endpoints" title="Link to this definition">#</a></dt>
 <dd><p>Return the end points of the domain.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Quad.function_space">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg._fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></em><a class="headerlink" href="#fdg.Quad.function_space" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function_space</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg._fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></span><a class="headerlink" href="#fdg.Quad.function_space" title="Link to this definition">#</a></dt>
 <dd><p>Function space used by all the DoFs.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Quad.ndim_physical">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_physical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#fdg.Quad.ndim_physical" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ndim_physical</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#fdg.Quad.ndim_physical" title="Link to this definition">#</a></dt>
 <dd><p>Number of physical dimensions of the domain.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fdg.Quad.ndim_reference">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_reference</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#fdg.Quad.ndim_reference" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ndim_reference</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#fdg.Quad.ndim_reference" title="Link to this definition">#</a></dt>
+<dd><p>Number of reference dimensions of the domain.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fdg.Hypercube">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">Hypercube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/domains.html#Hypercube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Hypercube" title="Link to this definition">#</a></dt>
+<dd><p>N-dimensional hypercube assembled from opposite boundary pairs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*boundaries</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><em>HypercubeDomain</em>) – One <code class="docutils literal notranslate"><span class="pre">(negative,</span> <span class="pre">positive)</span></code> boundary pair for every reference axis.
+Each boundary must use the remaining reference axes in ascending order.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Boundaries are combined with inclusion-exclusion blending.  Consequently,
+curved boundaries are preserved when all neighboring boundary intersections
+agree, while each boundary may have a different polynomial order.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.from_boundary_points">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_boundary_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">TypeAliasForwardRef</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'array_like'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TypeAliasForwardRef</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'array_like'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><span class="pre">Self</span></a></span></span><a class="reference internal" href="../_modules/fdg/domains.html#Hypercube.from_boundary_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Hypercube.from_boundary_points" title="Link to this definition">#</a></dt>
+<dd><p>Create a hypercube from tensor-product points on its boundaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*boundaries</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><em>array_like</em>) – One <code class="docutils literal notranslate"><span class="pre">(negative,</span> <span class="pre">positive)</span></code> pair for every reference axis.  Each
+array has shape <code class="docutils literal notranslate"><span class="pre">(n_0,</span> <span class="pre">...,</span> <span class="pre">n_(N-2),</span> <span class="pre">n_physical)</span></code> and stores points
+on a boundary at uniform reference coordinates.  Its axes correspond
+to the parent axes other than the boundary axis, in ascending order.
+Intersections of neighboring boundaries must contain the same points.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hypercube whose boundary maps interpolate the supplied points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#fdg.Hypercube" title="fdg.Hypercube">Hypercube</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The points are treated as Lagrange-uniform nodal values.  Boundaries with
+different nodal orders are projected to common orders before their shared
+traces are checked and blended.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.from_corners">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_corners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">corners</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array_like</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><span class="pre">Self</span></a></span></span><a class="reference internal" href="../_modules/fdg/domains.html#Hypercube.from_corners"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.Hypercube.from_corners" title="Link to this definition">#</a></dt>
+<dd><p>Create a multilinear hypercube from its corner coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*corners</strong> (<em>npt.ArrayLike</em>) – The <code class="docutils literal notranslate"><span class="pre">2**N</span></code> physical corner coordinates.  Corner <code class="docutils literal notranslate"><span class="pre">k</span></code> is on the
+positive side of reference axis <code class="docutils literal notranslate"><span class="pre">a</span></code> when bit <code class="docutils literal notranslate"><span class="pre">a</span></code> of <code class="docutils literal notranslate"><span class="pre">k</span></code> is set.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hypercube with linear interpolation in every reference axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#fdg.Hypercube" title="fdg.Hypercube">Hypercube</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.from_boundary_pairs">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_boundary_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">HypercubeDomain</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">HypercubeDomain</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Hypercube.from_boundary_pairs" title="Link to this definition">#</a></dt>
+<dd><p>Create a new domain from its boundaries by transfinite blending.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg._fdg.SpaceMap"><span class="pre">SpaceMap</span></a></span></span><a class="headerlink" href="#fdg.Hypercube.__call__" title="Link to this definition">#</a></dt>
+<dd><p>Create a space map based on the integration space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>space</strong> (<em>IntegratinoSpace</em>) – Integration space to base the space map on.</p></li>
+<li><p><strong>integration_registry</strong> (<a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><em>IntegrationRegistry</em></a><em>, </em><em>optional</em>) – Integration registry to use for retrieving the integration nodes and weights.</p></li>
+<li><p><strong>basis_registry</strong> (<a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><em>BasisRegistry</em></a>) – Basis registry to use for retrieving basis values from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Space mapping of the domain for the specified integration space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="space_map.html#fdg.SpaceMap" title="fdg.SpaceMap">SpaceMap</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.boundary">
+<span class="sig-name descname"><span class="pre">boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Hypercube.boundary" title="Link to this definition">#</a></dt>
+<dd><p>Extract a boundary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.compute_size">
+<span class="sig-name descname"><span class="pre">compute_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Hypercube.compute_size" title="Link to this definition">#</a></dt>
+<dd><p>Compute the size of the domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>int_space</strong> (<a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><em>IntegrationSpace</em></a><em>, </em><em>optional</em>) – Integration space to use for computing the size of the domain. If it is not
+given, a new one will be created, such that the size is computed exactly.</p></li>
+<li><p><strong>integration_registry</strong> (<a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><em>IntegrationRegistry</em></a><em>, </em><em>optional</em>) – Integration registry to use for retrieving the integration nodes and weights.</p></li>
+<li><p><strong>basis_registry</strong> (<a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><em>BasisRegistry</em></a>) – Basis registry to use for retrieving basis values from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Size of the domain. For a 1D domain this is the lenght, for a 2D domain this
+is the surface area, for a 3D domain it is the volume, and so on.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Integrable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg._fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg._fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg._fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;fdg._fdg.BasisRegistry</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#fdg.Hypercube.integrate" title="Link to this definition">#</a></dt>
+<dd><p>Integrates the callable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> (<em>Integrable</em>) – Callable to integrate.</p></li>
+<li><p><strong>int_space</strong> (<a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><em>IntegrationSpace</em></a>) – Integration space to use for integration.</p></li>
+<li><p><strong>integration_registry</strong> (<a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><em>IntegrationRegistry</em></a><em>, </em><em>default: DEFAULT_INTEGRATION_REGISTRY</em>) – Integration registry to use for retrieving integration rules.</p></li>
+<li><p><strong>basis_registry</strong> (<a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><em>BasisRegistry</em></a><em>, </em><em>default: DEFAULT_BASIS_REGISTRY</em>) – Basis registry to use for retrieving basis values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of integrating the callable on the domain.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.Hypercube.sample" title="Link to this definition">#</a></dt>
+<dd><p>Sample coordinates in the physical domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*x</strong> (<em>array</em>) – Arrays of coordinate positions to evaluate the points in domain at.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Arrays with the shape of <code class="docutils literal notranslate"><span class="pre">x</span></code>, containing values of coordinates
+at the specified points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.Hypercube.subregion">
+<span class="sig-name descname"><span class="pre">subregion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">ranges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">HypercubeDomain</span></span></span><a class="headerlink" href="#fdg.Hypercube.subregion" title="Link to this definition">#</a></dt>
+<dd><p>Split self into a sub-region of the domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*ranges</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Range of the domain to include for each dimension.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Subregion of the domain, where the boundaries are determined from where the
+<code class="docutils literal notranslate"><span class="pre">ranges</span></code> parameters constrain the original domain.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HypercubeDomain</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fdg.Hypercube.dofs">
+<span class="sig-name descname"><span class="pre">dofs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="degrees_of_freedom.html#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Hypercube.dofs" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fdg.Hypercube.endpoints">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">endpoints</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">npt.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">np.double</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#fdg.Hypercube.endpoints" title="Link to this definition">#</a></dt>
+<dd><p>Return the end points of the domain.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fdg.Hypercube.function_space">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function_space</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg._fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></span><a class="headerlink" href="#fdg.Hypercube.function_space" title="Link to this definition">#</a></dt>
+<dd><p>Function space used by all the DoFs.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fdg.Hypercube.ndim_physical">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ndim_physical</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#fdg.Hypercube.ndim_physical" title="Link to this definition">#</a></dt>
+<dd><p>Number of physical dimensions of the domain.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fdg.Hypercube.ndim_reference">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ndim_reference</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#fdg.Hypercube.ndim_reference" title="Link to this definition">#</a></dt>
 <dd><p>Number of reference dimensions of the domain.</p>
 </dd></dl>
 
@@ -707,11 +983,11 @@ at the specified points.</p>
       </div>
     </a>
     <a class="right-next"
-       href="kform_types.html"
+       href="mesh.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="math notranslate nohighlight">\(k\)</span>-form Type</p>
+        <p class="prev-next-title">Mesh Topology</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -732,10 +1008,12 @@ at the specified points.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line"><code class="docutils literal notranslate"><span class="pre">Line</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line.from_boundary_pairs"><code class="docutils literal notranslate"><span class="pre">Line.from_boundary_pairs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line.__call__"><code class="docutils literal notranslate"><span class="pre">Line.__call__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line.boundary"><code class="docutils literal notranslate"><span class="pre">Line.boundary()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line.compute_size"><code class="docutils literal notranslate"><span class="pre">Line.compute_size()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line.integrate"><code class="docutils literal notranslate"><span class="pre">Line.integrate()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Line.reverse"><code class="docutils literal notranslate"><span class="pre">Line.reverse()</span></code></a></li>
@@ -753,7 +1031,9 @@ at the specified points.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad"><code class="docutils literal notranslate"><span class="pre">Quad</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.from_corners"><code class="docutils literal notranslate"><span class="pre">Quad.from_corners()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.from_boundary_pairs"><code class="docutils literal notranslate"><span class="pre">Quad.from_boundary_pairs()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.__call__"><code class="docutils literal notranslate"><span class="pre">Quad.__call__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.boundary"><code class="docutils literal notranslate"><span class="pre">Quad.boundary()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.compute_size"><code class="docutils literal notranslate"><span class="pre">Quad.compute_size()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.integrate"><code class="docutils literal notranslate"><span class="pre">Quad.integrate()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.sample"><code class="docutils literal notranslate"><span class="pre">Quad.sample()</span></code></a></li>
@@ -765,17 +1045,34 @@ at the specified points.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Quad.ndim_reference"><code class="docutils literal notranslate"><span class="pre">Quad.ndim_reference</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube"><code class="docutils literal notranslate"><span class="pre">Hypercube</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.from_boundary_points"><code class="docutils literal notranslate"><span class="pre">Hypercube.from_boundary_points()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.from_corners"><code class="docutils literal notranslate"><span class="pre">Hypercube.from_corners()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.from_boundary_pairs"><code class="docutils literal notranslate"><span class="pre">Hypercube.from_boundary_pairs()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.__call__"><code class="docutils literal notranslate"><span class="pre">Hypercube.__call__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.boundary"><code class="docutils literal notranslate"><span class="pre">Hypercube.boundary()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.compute_size"><code class="docutils literal notranslate"><span class="pre">Hypercube.compute_size()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.integrate"><code class="docutils literal notranslate"><span class="pre">Hypercube.integrate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.sample"><code class="docutils literal notranslate"><span class="pre">Hypercube.sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.subregion"><code class="docutils literal notranslate"><span class="pre">Hypercube.subregion()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.dofs"><code class="docutils literal notranslate"><span class="pre">Hypercube.dofs</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.endpoints"><code class="docutils literal notranslate"><span class="pre">Hypercube.endpoints</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.function_space"><code class="docutils literal notranslate"><span class="pre">Hypercube.function_space</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.ndim_physical"><code class="docutils literal notranslate"><span class="pre">Hypercube.ndim_physical</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.Hypercube.ndim_reference"><code class="docutils literal notranslate"><span class="pre">Hypercube.ndim_reference</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/source/domain_types.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/domain_types.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -790,8 +1087,8 @@ at the specified points.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -811,7 +1108,7 @@ at the specified points.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -825,7 +1122,7 @@ at the specified points.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

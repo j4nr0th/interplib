@@ -1,0 +1,1358 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Basis Sets &#8212; fdg 0.0.1a documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'source/c_basis';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Polynomials" href="c_polynomials.html" />
+    <link rel="prev" title="Common Utilities" href="c_common.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">fdg 0.0.1a documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="degrees_of_freedom.html">Degrees of Freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_types.html">Domain Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh Topology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="c_api.html">C API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_topology.html">Topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_constraints.html">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Documentation for Exported Types and Functions</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="c_api.html" class="nav-link">C API</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Basis Sets</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="basis-sets">
+<h1>Basis Sets<a class="headerlink" href="#basis-sets" title="Link to this heading">#</a></h1>
+<p>Basis function sets of various types (Legendre, Lagrange, Bernstein),
+their precomputation at integration nodes, the integration-independent endpoint
+cache, the basis set registry, and the covector basis algebra used for
+differential forms.</p>
+<p>A basis set of <em>order</em> <span class="math notranslate nohighlight">\(o\)</span> holds the <span class="math notranslate nohighlight">\(o + 1\)</span> basis functions
+of degree <span class="math notranslate nohighlight">\(o\)</span> evaluated (together with their first derivatives) at the
+nodes of an integration rule; the tensor products of these one-
+dimensional sets span the <a class="reference internal" href="basis_functions.html#fdg-basis-functions"><span class="std std-ref">Basis Functions</span></a> function spaces.  The
+registry separately stores the two <span class="math notranslate nohighlight">\(o + 1\)</span>-entry endpoint vectors for
+each basis specification, since those values do not depend on the integration
+rule.  The covector basis algebra encodes the wedge monomials
+<span class="math notranslate nohighlight">\(\mathrm{d} x_{i_1} \wedge \dots \wedge \mathrm{d} x_{i_k}\)</span> of the
+<a class="reference internal" href="math_background.html#fdg-math-background"><span class="std std-ref">Mathematical Background</span></a> exterior algebra: each basis is a bit mask of
+its indices together with a sign bit holding the permutation parity, and
+the wedge product, Hodge star and ordering follow the sign conventions
+described in <a class="reference internal" href="covector_basis.html#fdg-covector-basis"><span class="std std-ref">Covector Basis</span></a>.</p>
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.basis_set_type_t">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_type_t</span></span></span><a class="headerlink" href="#c.basis_set_type_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Types of 1D basis functions supported by the library.</p>
+<p>The Lagrange variants differ in the placement of their nodes (roots):
+Gauss nodes are the roots of Legendre polynomials, Gauss-Lobatto nodes
+additionally include the endpoints of the interval, uniform nodes are
+equally spaced, and Chebyshev-Gauss nodes are the roots of Chebyshev
+polynomials. All bases are defined on the interval [-1, 1].</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.basis_spec_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_spec_t</span></span></span><a class="headerlink" href="#c.basis_spec_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Specification of a 1D basis: its type and order.</p>
+<p>The order is the polynomial degree, so the basis has <cite>order + 1</cite> basis
+functions. The order must be such that <cite>order + 1</cite> is representable and
+fits into the arrays sized with it.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.basis_set_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_t</span></span></span><a class="headerlink" href="#c.basis_set_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Precomputed values and derivatives of a 1D basis at integration nodes.</p>
+<p>The data is laid out in the flexible array <cite>_data</cite> as, for each of the
+<cite>order + 1</cite> basis functions, its values at the integration nodes followed
+by its derivatives at the integration nodes. In other words, the first
+<cite>(order + 1) * (integration_spec.order + 1)</cite> doubles hold the values and
+the next block of equal size holds the derivatives. Use the inline accessor
+functions in this header instead of accessing <cite>_data</cite> directly.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.basis_endpoint_set_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_endpoint_set_t</span></span></span><a class="headerlink" href="#c.basis_endpoint_set_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Cached values of a 1D basis at the interval endpoints.</p>
+<p>The data is laid out as the values at <cite>-1</cite> followed by the values at
+<cite>+1</cite>, with <cite>order + 1</cite> entries for each endpoint.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_endpoint_values">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">basis_endpoint_values</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_endpoint_set_t" title="basis_endpoint_set_t"><span class="n"><span class="pre">basis_endpoint_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">end</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_endpoint_values" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get basis values at one interval endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Cached endpoint values.</p></li>
+<li><p><strong>end</strong> – Zero for <cite>-1</cite>, one for <cite>+1</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to <cite>order + 1</cite> basis values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_values_all">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_values_all</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_values_all" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get a pointer to all basis values at all integration nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Basis set to get the values from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to an array of <cite>(order + 1) * (integration order + 1)</cite>
+doubles: for each basis function, its values at the integration
+nodes in order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_basis_values">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_basis_values</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">index</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_basis_values" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get a pointer to the values of one basis function at all integration nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Basis set to get the values from.</p></li>
+<li><p><strong>index</strong> – Index of the basis function, in the range [0, order].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to <cite>integration order + 1</cite> doubles with the values of the
+basis function at the integration nodes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_derivatives_all">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_derivatives_all</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_derivatives_all" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get a pointer to all basis derivatives at all integration nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Basis set to get the derivatives from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to an array of <cite>(order + 1) * (integration order + 1)</cite>
+doubles: for each basis function, its derivatives at the
+integration nodes in order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_basis_derivatives">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_basis_derivatives</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">index</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_basis_derivatives" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get a pointer to the derivatives of one basis function at all integration nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Basis set to get the derivatives from.</p></li>
+<li><p><strong>index</strong> – Index of the basis function, in the range [0, order].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to <cite>integration order + 1</cite> doubles with the derivatives of
+the basis function at the integration nodes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_create">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_create</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">should_cache</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a new basis set registry.</p>
+<p>The registry caches basis sets so that requesting the same basis
+specification multiple times returns the same object. The registry is
+thread-safe: it uses an internal reader-writer lock, and retrieved basis
+sets are reference counted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out</strong> – Receives the pointer to the newly created registry on success.</p></li>
+<li><p><strong>should_cache</strong> – When non-zero, released basis sets are kept in the
+registry until explicitly cleared; otherwise they are deallocated
+as soon as their reference count drops to zero.</p></li>
+<li><p><strong>allocator</strong> – Allocator used for all memory managed by the registry,
+including the registry object itself.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, FDG_ERROR_FAILED_ALLOCATION if memory
+allocation fails. On failure, <cite>*out</cite> is left unmodified.</p>
+</dd>
+</dl>
+<p>The caller owns the created registry and must destroy it with
+basis_set_registry_destroy.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_get_basis_set">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_get_basis_set</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_basis</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="c_integration.html#c.integration_rule_t" title="integration_rule_t"><span class="n"><span class="pre">integration_rule_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">integration_rule</span></span>, <a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">spec</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_get_basis_set" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get a basis set matching the given specification, creating it if needed.</p>
+<p>The basis set is stored in the registry and reference counted; every
+successful call increments the reference count by one, and the caller must
+call basis_set_registry_release_basis_set exactly once for the returned
+basis set when it is no longer needed. The returned pointer stays valid as
+long as its reference count is positive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to get the basis set from.</p></li>
+<li><p><strong>p_basis</strong> – Receives the pointer to the basis set on success.</p></li>
+<li><p><strong>integration_rule</strong> – Integration rule whose nodes the basis set is
+evaluated at. Only the rule’s type and order are used to identify
+the basis set.</p></li>
+<li><p><strong>spec</strong> – Specification (type and order) of the basis set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, FDG_ERROR_FAILED_ALLOCATION if memory
+allocation fails, or FDG_ERROR_INVALID_ENUM if the basis type is
+not supported. On failure, <cite>*p_basis</cite> is left unmodified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_get_basis_sets">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_get_basis_sets</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">cnt</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_basis</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#c.basis_set_registry_get_basis_sets" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="c_integration.html#c.integration_rule_t" title="integration_rule_t"><span class="n"><span class="pre">integration_rule_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">integration_rule</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_registry_get_basis_sets" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">specs</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_registry_get_basis_sets" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_get_basis_sets" title="Link to this definition">#</a><br /></dt>
+<dd><p>Batched version of basis_set_registry_get_basis_set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to get the basis sets from.</p></li>
+<li><p><strong>cnt</strong> – Number of basis sets to retrieve.</p></li>
+<li><p><strong>p_basis</strong> – Array of <cite>cnt</cite> pointers which receives the basis sets, in
+the same order as the corresponding specifications.</p></li>
+<li><p><strong>integration_rule</strong> – Array of <cite>cnt</cite> integration rules used for the
+basis sets.</p></li>
+<li><p><strong>specs</strong> – Array of <cite>cnt</cite> basis specifications.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, otherwise an error code as returned by
+basis_set_registry_get_basis_set. On failure, all basis sets
+acquired before the failing one are released again, and the
+contents of <cite>p_basis</cite> are indeterminate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_get_basis_endpoints">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_get_basis_endpoints</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_endpoint_set_t" title="basis_endpoint_set_t"><span class="n"><span class="pre">basis_endpoint_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_endpoints</span></span>, <a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">spec</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_get_basis_endpoints" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get cached basis values at the interval endpoints.</p>
+<p>Endpoint values are keyed only by the basis specification and therefore do
+not depend on an integration rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to get the endpoint values from.</p></li>
+<li><p><strong>p_endpoints</strong> – Receives the endpoint values on success.</p></li>
+<li><p><strong>spec</strong> – Specification of the basis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, or an error code on failure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_release_basis_endpoints">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_release_basis_endpoints</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_endpoint_set_t" title="basis_endpoint_set_t"><span class="n"><span class="pre">basis_endpoint_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">endpoints</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_release_basis_endpoints" title="Link to this definition">#</a><br /></dt>
+<dd><p>Release a previously retrieved endpoint basis set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry the endpoint values were retrieved from.</p></li>
+<li><p><strong>endpoints</strong> – Endpoint values to release.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS if the endpoint values were found and released.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_release_basis_set">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_release_basis_set</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">basis</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_release_basis_set" title="Link to this definition">#</a><br /></dt>
+<dd><p>Release a previously retrieved basis set.</p>
+<p>Decrements the reference count of the basis set by one. If the count
+reaches zero and the registry was created with caching disabled, the basis
+set is deallocated and removed from the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry the basis set was retrieved from.</p></li>
+<li><p><strong>basis</strong> – Basis set to release. It must have been obtained from this
+registry with basis_set_registry_get_basis_set or
+basis_set_registry_get_basis_sets and must not have been released
+already.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS if the basis set was found and released,
+FDG_ERROR_NOT_IN_REGISTRY if it is not in the registry.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_destroy">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_destroy</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_destroy" title="Link to this definition">#</a><br /></dt>
+<dd><p>Destroy a basis set registry and free all its basis sets.</p>
+<p>All memory managed by the registry, including all cached basis sets and
+the registry object itself, is deallocated with the registry’s allocator.
+The registry must not be used by any other thread during or after this
+call, and no basis set obtained from it may be used afterwards.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to destroy.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_release_unused_basis_sets">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_release_unused_basis_sets</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_release_unused_basis_sets" title="Link to this definition">#</a><br /></dt>
+<dd><p>Deallocate basis sets whose reference count has reached zero.</p>
+<p>Basis sets with a zero reference count are removed from the registry and
+deallocated. This only applies to registries created with caching
+disabled; registries with caching enabled retain all basis sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to clean up.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_release_all_basis_sets">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_release_all_basis_sets</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_release_all_basis_sets" title="Link to this definition">#</a><br /></dt>
+<dd><p>Release all basis sets from the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to release the basis sets of.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_set_registry_get_sets">
+<span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_set_registry_get_sets</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">basis_set_registry_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">max_count</span></span>, <a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis_spec</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#c.basis_set_registry_get_sets" title="max_count"><span class="n"><span class="pre">max_count</span></span></a><span class="p"><span class="pre">]</span></span>, <a class="reference internal" href="c_integration.html#c.integration_spec_t" title="integration_spec_t"><span class="n"><span class="pre">integration_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">integration_spec</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#c.basis_set_registry_get_sets" title="max_count"><span class="n"><span class="pre">max_count</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_set_registry_get_sets" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the specifications of all basis sets in the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Registry to query.</p></li>
+<li><p><strong>max_count</strong> – Maximum number of specifications to write.</p></li>
+<li><p><strong>basis_spec</strong> – Array of <cite>max_count</cite> entries which receives the basis
+specifications of the basis sets.</p></li>
+<li><p><strong>integration_spec</strong> – Array of <cite>max_count</cite> entries which receives the
+integration specifications of the basis sets.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The total number of basis sets in the registry, which may exceed
+<cite>max_count</cite>; in that case only the first <cite>max_count</cite> entries of the
+output arrays are written.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_compute_at_point_prepare">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_compute_at_point_prepare</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.basis_set_type_t" title="basis_set_type_t"><span class="n"><span class="pre">basis_set_type_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">work</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_prepare" title="order"><span class="n"><span class="pre">order</span></span></a><span class="w"> </span><span class="o"><span class="pre">+</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_compute_at_point_prepare" title="Link to this definition">#</a><br /></dt>
+<dd><p>Prepare the work array with the nodes of the basis.</p>
+<p>For Lagrange bases the nodes (roots) of the basis are computed into
+<cite>work</cite>; the roots depend on the basis type and order. For other basis
+types nothing is written and the contents of <cite>work</cite> are unspecified. The
+result is used by basis_compute_at_point_values and
+basis_compute_at_point_derivatives.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> – Type of the basis. Only the BASIS_LAGRANGE_* types have any
+effect.</p></li>
+<li><p><strong>order</strong> – Order of the basis.</p></li>
+<li><p><strong>work</strong> – Array of <cite>order + 1</cite> doubles which receives the nodes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_compute_at_point_values">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_compute_at_point_values</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.basis_set_type_t" title="basis_set_type_t"><span class="n"><span class="pre">basis_set_type_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">cnt</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_values" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_values" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><a class="reference internal" href="#c.basis_compute_at_point_values" title="order"><span class="n"><span class="pre">order</span></span></a><span class="w"> </span><span class="o"><span class="pre">+</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">work</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_values" title="order"><span class="n"><span class="pre">order</span></span></a><span class="w"> </span><span class="o"><span class="pre">+</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_compute_at_point_values" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the values of all basis functions at the given points.</p>
+<p>For each point, writes the values of the <cite>order + 1</cite> basis functions of
+the given type, evaluated at that point. The values are written
+row-major: the values for point <cite>i</cite> start at <cite>out[i * (order + 1)]</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> – Type of the basis functions.</p></li>
+<li><p><strong>order</strong> – Order of the basis.</p></li>
+<li><p><strong>cnt</strong> – Number of points to evaluate at.</p></li>
+<li><p><strong>x</strong> – Array of <cite>cnt</cite> points at which the basis is evaluated. The points
+must lie in the domain of the basis; for Lagrange bases prepared
+nodes in <cite>work</cite> must have been computed first with
+basis_compute_at_point_prepare.</p></li>
+<li><p><strong>out</strong> – Array of <cite>cnt * (order + 1)</cite> doubles which receives the basis
+values.</p></li>
+<li><p><strong>work</strong> – Array of <cite>order + 1</cite> doubles, prepared by
+basis_compute_at_point_prepare, used as scratch space.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_compute_at_point_derivatives">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_compute_at_point_derivatives</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.basis_set_type_t" title="basis_set_type_t"><span class="n"><span class="pre">basis_set_type_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">cnt</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_derivatives" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_derivatives" title="cnt"><span class="n"><span class="pre">cnt</span></span></a><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><a class="reference internal" href="#c.basis_compute_at_point_derivatives" title="order"><span class="n"><span class="pre">order</span></span></a><span class="w"> </span><span class="o"><span class="pre">+</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">work</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_at_point_derivatives" title="order"><span class="n"><span class="pre">order</span></span></a><span class="w"> </span><span class="o"><span class="pre">+</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_compute_at_point_derivatives" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the first derivatives of all basis functions at the given points.</p>
+<p>For each point, writes the derivatives of the <cite>order + 1</cite> basis functions
+of the given type, evaluated at that point. The layout of <cite>out</cite> is the
+same as in basis_compute_at_point_values: the derivatives for point <cite>i</cite>
+start at <cite>out[i * (order + 1)]</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> – Type of the basis functions.</p></li>
+<li><p><strong>order</strong> – Order of the basis.</p></li>
+<li><p><strong>cnt</strong> – Number of points to evaluate at.</p></li>
+<li><p><strong>x</strong> – Array of <cite>cnt</cite> points at which the derivatives are evaluated. For
+Lagrange bases, <cite>work</cite> must have been prepared with
+basis_compute_at_point_prepare first.</p></li>
+<li><p><strong>out</strong> – Array of <cite>cnt * (order + 1)</cite> doubles which receives the basis
+derivatives.</p></li>
+<li><p><strong>work</strong> – Array of <cite>order + 1</cite> doubles, prepared by
+basis_compute_at_point_prepare, used as scratch space.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_compute_outer_product_basis_required_memory">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_compute_outer_product_basis_required_memory</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n_basis</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis_specs</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#c.basis_compute_outer_product_basis_required_memory" title="n_basis"><span class="n"><span class="pre">n_basis</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">cnt</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_elements</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">work_elements</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tmp_elements</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">iterator_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_compute_outer_product_basis_required_memory" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the sizes of the buffers needed for the outer product of 1D bases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_basis</strong> – Number of 1D bases in the tensor product.</p></li>
+<li><p><strong>basis_specs</strong> – Array of <cite>n_basis</cite> basis specifications.</p></li>
+<li><p><strong>cnt</strong> – Number of points the outer product will be evaluated at.</p></li>
+<li><p><strong>out_elements</strong> – Receives the number of doubles needed in the <cite>out</cite>
+buffer of basis_compute_outer_product_basis.</p></li>
+<li><p><strong>work_elements</strong> – Receives the number of doubles needed in the <cite>work</cite>
+buffer.</p></li>
+<li><p><strong>tmp_elements</strong> – Receives the number of doubles needed in the <cite>tmp</cite>
+buffer.</p></li>
+<li><p><strong>iterator_size</strong> – Receives the size in bytes of the
+multidim_iterator_t buffer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.basis_compute_outer_product_basis">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">basis_compute_outer_product_basis</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n_basis_dims</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis_specs</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#c.basis_compute_outer_product_basis" title="n_basis_dims"><span class="n"><span class="pre">n_basis_dims</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">cnt</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_compute_outer_product_basis" title="n_basis_dims"><span class="n"><span class="pre">n_basis_dims</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">work</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">tmp</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">multidim_iterator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">iter</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.basis_compute_outer_product_basis" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the tensor-product (outer product) of 1D bases at the given points.</p>
+<p>For each point, computes the product of the 1D basis functions of all
+dimensions, i.e. for point <cite>i</cite> and multi-index <cite>(j_1, …, j_n)</cite> the value
+<cite>out[i * total + flat(j)] = prod_k basis_k(x_k[i])[j_k]</cite>, where <cite>total</cite> is
+the number of tensor-product basis functions and <cite>flat</cite> enumerates the
+multi-indices in the order of the multidim_iterator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_basis_dims</strong> – Number of 1D bases in the tensor product.</p></li>
+<li><p><strong>basis_specs</strong> – Array of <cite>n_basis_dims</cite> basis specifications.</p></li>
+<li><p><strong>cnt</strong> – Number of points to evaluate at.</p></li>
+<li><p><strong>x</strong> – Array of <cite>n_basis_dims</cite> pointers, each to <cite>cnt</cite> points along that
+dimension.</p></li>
+<li><p><strong>out</strong> – Buffer of <cite>out_elements</cite> doubles (see
+basis_compute_outer_product_basis_required_memory) which receives
+the tensor-product values.</p></li>
+<li><p><strong>work</strong> – Buffer of <cite>work_elements</cite> doubles, used as scratch space.</p></li>
+<li><p><strong>tmp</strong> – Buffer of <cite>tmp_elements</cite> doubles, used as scratch space.</p></li>
+<li><p><strong>iter</strong> – Iterator of at least <cite>iterator_size</cite> bytes, which is
+initialized by this function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.bernstein_basis_create">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">bernstein_basis_create</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="c_integration.html#c.integration_rule_t" title="integration_rule_t"><span class="n"><span class="pre">integration_rule_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">rule</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.bernstein_basis_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a Bernstein basis set evaluated at the nodes of an integration rule.</p>
+<p>The created basis set holds the values and first derivatives of the
+<cite>spec.order + 1</cite> Bernstein basis functions at the integration nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out</strong> – Receives the pointer to the newly created basis set on success.</p></li>
+<li><p><strong>spec</strong> – Specification of the basis. The type field is ignored and the
+basis is always created as a Bernstein basis.</p></li>
+<li><p><strong>rule</strong> – Integration rule whose nodes the basis is evaluated at. Must
+be a valid integration rule with <cite>n_nodes</cite> at least 1.</p></li>
+<li><p><strong>allocator</strong> – Allocator used to allocate the basis set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, FDG_ERROR_FAILED_ALLOCATION if memory
+allocation fails. On failure, <cite>*out</cite> is left unmodified.</p>
+</dd>
+</dl>
+<p>The caller owns the created basis set and is responsible for deallocating
+it with the same allocator once it is no longer needed.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lagrange_basis_roots">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">lagrange_basis_roots</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">this</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lagrange_basis_roots" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the roots (nodes) of a Lagrange basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> – Lagrange basis set whose roots to return. Must be a Lagrange
+basis, i.e. the basis type must be one of the BASIS_LAGRANGE_*
+types, otherwise an assertion fires.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to the <cite>order + 1</cite> roots of the basis, stored inside the
+basis set’s data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lagrange_basis_create">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lagrange_basis_create</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="c_integration.html#c.integration_rule_t" title="integration_rule_t"><span class="n"><span class="pre">integration_rule_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">rule</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lagrange_basis_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a Lagrange basis set evaluated at the nodes of an integration rule.</p>
+<p>The created basis set holds the values and first derivatives of the
+<cite>spec.order + 1</cite> Lagrange basis functions at the integration nodes, as
+well as the roots of the basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out</strong> – Receives the pointer to the newly created basis set on success.</p></li>
+<li><p><strong>spec</strong> – Specification of the basis. The type must be one of the
+BASIS_LAGRANGE_* types.</p></li>
+<li><p><strong>rule</strong> – Integration rule whose nodes the basis is evaluated at. Must
+be a valid integration rule with <cite>n_nodes</cite> at least 1.</p></li>
+<li><p><strong>allocator</strong> – Allocator used to allocate the basis set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, FDG_ERROR_INVALID_ENUM if the basis type
+is not a Lagrange type, FDG_ERROR_FAILED_ALLOCATION if memory
+allocation fails. On failure, <cite>*out</cite> is left unmodified.</p>
+</dd>
+</dl>
+<p>The caller owns the created basis set and is responsible for deallocating
+it with the same allocator once it is no longer needed.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.generate_lagrange_roots">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">generate_lagrange_roots</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">order</span></span>, <a class="reference internal" href="#c.basis_set_type_t" title="basis_set_type_t"><span class="n"><span class="pre">basis_set_type_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">roots</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.generate_lagrange_roots" title="order"><span class="n"><span class="pre">order</span></span></a><span class="w"> </span><span class="o"><span class="pre">+</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.generate_lagrange_roots" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the roots (nodes) of a Lagrange basis of the given type.</p>
+<p>The roots are computed into <cite>roots</cite> in increasing order. For Gauss and
+Gauss-Lobatto types the roots are computed numerically using Newton
+iterations with a tolerance of 1e-12 and at most 100 iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> – Order of the basis; the roots array holds <cite>order + 1</cite> entries.</p></li>
+<li><p><strong>type</strong> – Type of the Lagrange basis, one of the BASIS_LAGRANGE_* types.</p></li>
+<li><p><strong>roots</strong> – Array of <cite>order + 1</cite> doubles which receives the roots.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, FDG_ERROR_INVALID_ENUM if the type is not
+a Lagrange type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.legendre_basis_create">
+<a class="reference internal" href="c_common.html#c.fdg_result_t" title="fdg_result_t"><span class="n"><span class="pre">fdg_result_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">legendre_basis_create</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.basis_set_t" title="basis_set_t"><span class="n"><span class="pre">basis_set_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <a class="reference internal" href="#c.basis_spec_t" title="basis_spec_t"><span class="n"><span class="pre">basis_spec_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="c_integration.html#c.integration_rule_t" title="integration_rule_t"><span class="n"><span class="pre">integration_rule_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">rule</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.legendre_basis_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a Legendre basis set evaluated at the nodes of an integration rule.</p>
+<p>The created basis set holds the values and first derivatives of the
+<cite>spec.order + 1</cite> Legendre basis functions at the integration nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out</strong> – Receives the pointer to the newly created basis set on success.</p></li>
+<li><p><strong>spec</strong> – Specification of the basis. The type field is ignored and the
+basis is always created as a Legendre basis.</p></li>
+<li><p><strong>rule</strong> – Integration rule whose nodes the basis is evaluated at. Must
+be a valid integration rule with <cite>n_nodes</cite> at least 1.</p></li>
+<li><p><strong>allocator</strong> – Allocator used to allocate the basis set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FDG_SUCCESS on success, FDG_ERROR_FAILED_ALLOCATION if memory
+allocation fails. On failure, <cite>*out</cite> is left unmodified.</p>
+</dd>
+</dl>
+<p>The caller owns the created basis set and is responsible for deallocating
+it with the same allocator once it is no longer needed.</p>
+</dd></dl>
+
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.&#64;anonymous_01337bf2c569bf4ebce75481b61cf0cb">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">[anonymous]</span></span></span><a class="headerlink" href="#c.@anonymous_01337bf2c569bf4ebce75481b61cf0cb" title="Link to this definition">#</a><br /></dt>
+<dd><p>The highest number of basis dimensions and rank.</p>
+<p>This is due to the number of bits that can be packed in an <cite>unsigned</cite>
+type. Since <cite>unsigned</cite> is 32 bits basically everywhere, this is unlikely
+to ever be too few.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.covector_basis_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_t</span></span></span><a class="headerlink" href="#c.covector_basis_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Representation of the bundle of basis covectors.</p>
+<p>The basis consist of wedge products of individual covectors, such as
+<cite>dx_1 ^ dx_3 ^ dx_4</cite>, <cite>dx_2 ^ dx_3</cite>. Due to the nature of how the wedge
+product affects the sign, these basis have their sign, which can change
+when applying wedge or Hodge to them.</p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.COVECTOR_BASIS_ZERO">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">COVECTOR_BASIS_ZERO</span></span></span><a class="headerlink" href="#c.COVECTOR_BASIS_ZERO" title="Link to this definition">#</a><br /></dt>
+<dd><p>The zero covector basis, used to represent the result of a wedge
+product of bases with overlapping dimensions.</p>
+<p>When the dimension is zero, the basis is assumed to be zero.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_has_component">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_has_component</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dim</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_has_component" title="Link to this definition">#</a><br /></dt>
+<dd><p>Check whether the basis has the given covariant component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis</strong> – Basis to check.</p></li>
+<li><p><strong>dim</strong> – Index of the covariant component. Must be less than
+<cite>basis.dimension</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-zero if the basis contains the component <cite>dim</cite>, zero
+otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_wedge">
+<a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_wedge</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">b1</span></span>, <a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">b2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_wedge" title="Link to this definition">#</a><br /></dt>
+<dd><p>Computes the exterior wedge product of two covector bases.</p>
+<p>The wedge product computes a new covector basis in which the dimensions
+of the input bases are merged, considering their orientation. If the input
+bases have overlapping dimensions, the resulting covector is zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b1</strong> – A pointer to the first covector basis.</p></li>
+<li><p><strong>b2</strong> – A pointer to the second covector basis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new covector basis resulting from the wedge product of b1 and b2.
+The result contains the combined dimension, updated sign, and basis bits.
+If the dimensions of b1 and b2 overlap, the result is a zero basis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_rank">
+<span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_rank</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_rank" title="Link to this definition">#</a><br /></dt>
+<dd><p>Computes the rank of the given covector basis.
+The rank is determined by the number of covector basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis</strong> – A pointer to the covector_basis_t structure representing
+the covector basis whose rank is to be computed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rank of the covector basis, which is the count of set bits
+in the basis_bits field of the provided structure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_create">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_create</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">sign</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">rank</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.covector_basis_create" title="rank"><span class="n"><span class="pre">rank</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Constructs a covector basis representation with the specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> – The dimension of the covector space. Must be less than COVECTOR_BASIS_MAX_DIM.</p></li>
+<li><p><strong>sign</strong> – The sign of the covector basis. Negative values mean the basis have a negative sign.</p></li>
+<li><p><strong>rank</strong> – The number of active components in the covector basis. Must not exceed the dimension.</p></li>
+<li><p><strong>indices</strong> – Sorted indices specifying the indices of the components to be set in the basis.
+Each index must be within the bounds of the dimension and must be unique.
+Behavior is undefined if an index is repeated, out of bounds, or unsorted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The constructed covector_basis_t structure representing the basis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_create_u8">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_create_u8</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">sign</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">rank</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.covector_basis_create_u8" title="rank"><span class="n"><span class="pre">rank</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_create_u8" title="Link to this definition">#</a><br /></dt>
+<dd><p>Constructs a covector basis representation with the specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> – The dimension of the covector space. Must be less than COVECTOR_BASIS_MAX_DIM.</p></li>
+<li><p><strong>sign</strong> – The sign of the covector basis. Negative values mean the basis have a negative sign.</p></li>
+<li><p><strong>rank</strong> – The number of active components in the covector basis. Must not exceed the dimension.</p></li>
+<li><p><strong>indices</strong> – Sorted indices specifying the indices of the components to be set in the basis.
+Each index must be within the bounds of the dimension and must be unique.
+Behavior is undefined if an index is repeated, out of bounds, or unsorted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The constructed covector_basis_t structure representing the basis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_apply_contra_basis">
+<a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_apply_contra_basis</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dim</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_apply_contra_basis" title="Link to this definition">#</a><br /></dt>
+<dd><p>Computes the result of applying a contravector basis on the covector basis bundle.</p>
+<p>The function can only be called if the basis has the covariant component corresponding to
+the contravariant basis that is to be applied. Otherwise, the result is by definition zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis</strong> – Pointer to the covector basis structure to be transformed.</p></li>
+<li><p><strong>dim</strong> – The index of the contravector basis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Resulting covector basis bundle.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_determine_order">
+<span class="n"><span class="pre">covector_basis_order_relation_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_determine_order</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis_1</span></span>, <a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis_2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_determine_order" title="Link to this definition">#</a><br /></dt>
+<dd><p>Determines the order relation between two covector bases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis_1</strong> – Pointer to the first covector basis.</p></li>
+<li><p><strong>basis_2</strong> – Pointer to the second covector basis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A value of type covector_basis_order_relation_t indicating the order</dt><dd><p>relation between the two bases:</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>COVECTOR_BASIS_ORDER_BEFORE: The first basis is ordered before the second.</p></li>
+<li><p>COVECTOR_BASIS_EQUAL: The two bases are equal.</p></li>
+<li><p>COVECTOR_BASIS_ORDER_AFTER: The first basis is ordered after the second.</p></li>
+<li><p>COVECTOR_BASIS_NOT_COMPARABLE: The bases are not comparable due to
+differing ranks or dimensions.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_is_zero">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_is_zero</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_is_zero" title="Link to this definition">#</a><br /></dt>
+<dd><p>Check whether the basis is the zero basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis</strong> – Basis to check.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-zero if the basis is zero (its dimension is zero), zero
+otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.covector_basis_hodge">
+<a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">covector_basis_hodge</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.covector_basis_t" title="covector_basis_t"><span class="n"><span class="pre">covector_basis_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">basis</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.covector_basis_hodge" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the Hodge dual of the covector basis.</p>
+<p>The result contains the complement of the basis bits within the
+dimension, with the sign adjusted according to the number of bit
+permutations performed. The dimension of the basis is preserved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis</strong> – Basis to compute the Hodge dual of. If the basis is zero,
+the zero basis is returned unchanged.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Hodge dual of the basis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="c_common.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Common Utilities</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="c_polynomials.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Polynomials</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_type_t"><code class="docutils literal notranslate"><span class="pre">basis_set_type_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_spec_t"><code class="docutils literal notranslate"><span class="pre">basis_spec_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_t"><code class="docutils literal notranslate"><span class="pre">basis_set_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_endpoint_set_t"><code class="docutils literal notranslate"><span class="pre">basis_endpoint_set_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_endpoint_values"><code class="docutils literal notranslate"><span class="pre">basis_endpoint_values()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_values_all"><code class="docutils literal notranslate"><span class="pre">basis_set_values_all()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_basis_values"><code class="docutils literal notranslate"><span class="pre">basis_set_basis_values()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_derivatives_all"><code class="docutils literal notranslate"><span class="pre">basis_set_derivatives_all()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_basis_derivatives"><code class="docutils literal notranslate"><span class="pre">basis_set_basis_derivatives()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_create"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_get_basis_set"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_get_basis_set()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_get_basis_sets"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_get_basis_sets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_get_basis_endpoints"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_get_basis_endpoints()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_release_basis_endpoints"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_release_basis_endpoints()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_release_basis_set"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_release_basis_set()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_destroy"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_destroy()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_release_unused_basis_sets"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_release_unused_basis_sets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_release_all_basis_sets"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_release_all_basis_sets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_set_registry_get_sets"><code class="docutils literal notranslate"><span class="pre">basis_set_registry_get_sets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_compute_at_point_prepare"><code class="docutils literal notranslate"><span class="pre">basis_compute_at_point_prepare()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_compute_at_point_values"><code class="docutils literal notranslate"><span class="pre">basis_compute_at_point_values()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_compute_at_point_derivatives"><code class="docutils literal notranslate"><span class="pre">basis_compute_at_point_derivatives()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_compute_outer_product_basis_required_memory"><code class="docutils literal notranslate"><span class="pre">basis_compute_outer_product_basis_required_memory()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.basis_compute_outer_product_basis"><code class="docutils literal notranslate"><span class="pre">basis_compute_outer_product_basis()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.bernstein_basis_create"><code class="docutils literal notranslate"><span class="pre">bernstein_basis_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.lagrange_basis_roots"><code class="docutils literal notranslate"><span class="pre">lagrange_basis_roots()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.lagrange_basis_create"><code class="docutils literal notranslate"><span class="pre">lagrange_basis_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.generate_lagrange_roots"><code class="docutils literal notranslate"><span class="pre">generate_lagrange_roots()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.legendre_basis_create"><code class="docutils literal notranslate"><span class="pre">legendre_basis_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.@anonymous_01337bf2c569bf4ebce75481b61cf0cb"><code class="docutils literal notranslate"><span class="pre">@anonymous_01337bf2c569bf4ebce75481b61cf0cb</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_t"><code class="docutils literal notranslate"><span class="pre">covector_basis_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.COVECTOR_BASIS_ZERO"><code class="docutils literal notranslate"><span class="pre">COVECTOR_BASIS_ZERO</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_has_component"><code class="docutils literal notranslate"><span class="pre">covector_basis_has_component()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_wedge"><code class="docutils literal notranslate"><span class="pre">covector_basis_wedge()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_rank"><code class="docutils literal notranslate"><span class="pre">covector_basis_rank()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_create"><code class="docutils literal notranslate"><span class="pre">covector_basis_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_create_u8"><code class="docutils literal notranslate"><span class="pre">covector_basis_create_u8()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_apply_contra_basis"><code class="docutils literal notranslate"><span class="pre">covector_basis_apply_contra_basis()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_determine_order"><code class="docutils literal notranslate"><span class="pre">covector_basis_determine_order()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_is_zero"><code class="docutils literal notranslate"><span class="pre">covector_basis_is_zero()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.covector_basis_hodge"><code class="docutils literal notranslate"><span class="pre">covector_basis_hodge()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/c_basis.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Jan Roth.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

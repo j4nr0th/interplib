@@ -27,52 +27,60 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source/integration';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Basis Functions" href="basis_functions.html" />
-    <link rel="prev" title="Documentation for Exported Types and Functions" href="index.html" />
+    <link rel="prev" title="Mathematical Background" href="math_background.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -98,7 +106,7 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -168,11 +176,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -245,33 +260,62 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="degrees_of_freedom.html">Degrees of Freedom</a></li>
 <li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
 <li class="toctree-l1"><a class="reference internal" href="domain_types.html">Domain Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh Topology</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="c_api.html">C API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_basis.html">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_topology.html">Topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_constraints.html">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
 </ul>
 </div>
 </nav></div>
@@ -338,6 +382,56 @@
 forms over a domain. As such numerical integration is one of the cornerstones of
 this module. For an example of the different integration rules and their relative
 performance see <a class="reference internal" href="../auto_examples/plot_integration_rules.html#sphx-glr-auto-examples-plot-integration-rules-py"><span class="std std-ref">Integration Rules</span></a>.</p>
+<section id="quadrature-rules">
+<h2>Quadrature rules<a class="headerlink" href="#quadrature-rules" title="Link to this heading">#</a></h2>
+<p>All integration is done with tensor products of one-dimensional quadrature
+rules on the reference interval <span class="math notranslate nohighlight">\([-1, +1]\)</span> (see
+<a class="reference internal" href="math_background.html#fdg-math-background"><span class="std std-ref">Mathematical Background</span></a> for the reference-domain conventions). A
+one-dimensional rule of <em>order</em> <span class="math notranslate nohighlight">\(o\)</span> has <span class="math notranslate nohighlight">\(o + 1\)</span> nodes
+<span class="math notranslate nohighlight">\(\xi_i\)</span> and weights <span class="math notranslate nohighlight">\(w_i\)</span>, and approximates</p>
+<div class="math notranslate nohighlight">
+\[\int_{-1}^{+1} f(\xi)\,\mathrm{d}\xi \approx
+\sum_{i = 0}^{o} w_i\, f(\xi_i) .\]</div>
+<p>On an <span class="math notranslate nohighlight">\(N\)</span>-dimensional tensor-product grid the integral becomes</p>
+<div class="math notranslate nohighlight">
+\[\int_{[-1, +1]^N} f(\vec{\xi})\,\mathrm{d}\vec{\xi} \approx
+\sum_{i_1} \cdots \sum_{i_N}
+\left(\prod_{j = 1}^{N} w^{(j)}_{i_j}\right)
+f\!\left(\xi^{(1)}_{i_1}, \dots, \xi^{(N)}_{i_N}\right),\]</div>
+<p>where the rule used in dimension <span class="math notranslate nohighlight">\(j\)</span> is selected by the
+<span class="math notranslate nohighlight">\(j\)</span>-th <a class="reference internal" href="#fdg.IntegrationSpecs" title="fdg.IntegrationSpecs"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpecs</span></code></a>. The weight of a grid point is the
+product of the one-dimensional weights, which is what
+<a class="reference internal" href="#fdg.IntegrationSpace.weights" title="fdg.IntegrationSpace.weights"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IntegrationSpace.weights()</span></code></a> returns.</p>
+<p>Two rule families are provided (<a class="reference internal" href="#fdg.IntegrationMethod" title="fdg.IntegrationMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationMethod</span></code></a>):</p>
+<p><strong>Gauss-Legendre</strong> (<code class="docutils literal notranslate"><span class="pre">&quot;gauss&quot;</span></code>). The <span class="math notranslate nohighlight">\(o + 1\)</span> nodes are the roots of
+the Legendre polynomial <span class="math notranslate nohighlight">\(P_{o+1}\)</span> on <span class="math notranslate nohighlight">\([-1, +1]\)</span>, computed by
+Newton iteration, and the weights are</p>
+<div class="math notranslate nohighlight">
+\[w_i = \frac{2}{(o + 1)^2\, P_{o}\!\left(\xi_i\right)^2}
+\left(1 - \xi_i^2\right) .\]</div>
+<p>The rule is exact for polynomials of degree up to
+<span class="math notranslate nohighlight">\(2(o + 1) - 1 = 2o + 1\)</span>, which is the value reported by
+<a class="reference internal" href="#fdg.IntegrationSpecs.accuracy" title="fdg.IntegrationSpecs.accuracy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IntegrationSpecs.accuracy</span></code></a>. The one- and two-point rules are
+hard-coded: <span class="math notranslate nohighlight">\((\xi, w) = (0, 2)\)</span> and
+<span class="math notranslate nohighlight">\(\left(\pm 1/\sqrt{3}, 1\right)\)</span>.</p>
+<p><strong>Gauss-Lobatto</strong> (<code class="docutils literal notranslate"><span class="pre">&quot;gauss-lobatto&quot;</span></code>). The nodes include the endpoints
+<span class="math notranslate nohighlight">\(\pm 1\)</span>; the remaining <span class="math notranslate nohighlight">\(o - 1\)</span> interior nodes are the roots of
+<span class="math notranslate nohighlight">\(P'_{o}\)</span> (the derivative of the Legendre polynomial of degree
+<span class="math notranslate nohighlight">\(o\)</span>). The endpoint weights are <span class="math notranslate nohighlight">\(2 / (o(o + 1))\)</span> and the
+interior weights are</p>
+<div class="math notranslate nohighlight">
+\[w_i = \frac{2}{o(o + 1)\, P_{o}\!\left(\xi_i\right)^2} .\]</div>
+<p>The rule is exact for polynomials of degree up to
+<span class="math notranslate nohighlight">\(2(o + 1) - 3 = 2o - 1\)</span>. The degenerate one-node rule
+<span class="math notranslate nohighlight">\((\xi, w) = (0, 2)\)</span> coincides with the one-point Gauss rule and also
+integrates degree 1 exactly, so its accuracy is 1.</p>
+<p>Because an <span class="math notranslate nohighlight">\(o\)</span>-th order rule has <span class="math notranslate nohighlight">\(o + 1\)</span> nodes, the <em>accuracy</em>
+<span class="math notranslate nohighlight">\(a\)</span> needed to integrate a given polynomial degree exactly
+determines the smallest sufficient order: <span class="math notranslate nohighlight">\(o = \lceil (a - 1)/2
+\rceil\)</span> for Gauss-Legendre and <span class="math notranslate nohighlight">\(o = \lceil (a + 1)/2 \rceil\)</span> for
+Gauss-Lobatto. This is the mapping used by the integration rule registry
+when a rule for a requested accuracy is created.</p>
+</section>
 <section id="integration-specifications">
 <h2>Integration Specifications<a class="headerlink" href="#integration-specifications" title="Link to this heading">#</a></h2>
 <p>The way the method of integration is specified in <span class="math notranslate nohighlight">\(N\)</span>-dimensional space
@@ -345,23 +439,23 @@ is by “outer-product” grid, where for each dimension the method (as given by
 integration is specified using <a class="reference internal" href="#fdg.IntegrationSpecs" title="fdg.IntegrationSpecs"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpecs</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.IntegrationMethod">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/enum_type.html#IntegrationMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.IntegrationMethod" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/enum_type.html#IntegrationMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.IntegrationMethod" title="Link to this definition">#</a></dt>
 <dd><p>Methods of integration which are supported.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="fdg.IntegrationMethod.GAUSS">
-<span class="sig-name descname"><span class="pre">GAUSS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gauss'</span></em><a class="headerlink" href="#fdg.IntegrationMethod.GAUSS" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">GAUSS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gauss'</span></span><a class="headerlink" href="#fdg.IntegrationMethod.GAUSS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="fdg.IntegrationMethod.GAUSS_LOBATTO">
-<span class="sig-name descname"><span class="pre">GAUSS_LOBATTO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gauss-lobatto'</span></em><a class="headerlink" href="#fdg.IntegrationMethod.GAUSS_LOBATTO" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">GAUSS_LOBATTO</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gauss-lobatto'</span></span><a class="headerlink" href="#fdg.IntegrationMethod.GAUSS_LOBATTO" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.IntegrationSpecs">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationSpecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'gauss'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gauss-lobatto'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gauss'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fdg.IntegrationSpecs" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationSpecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'gauss'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gauss-lobatto'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gauss'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fdg.IntegrationSpecs" title="Link to this definition">#</a></dt>
 <dd><p>Type that describes an integration rule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -373,7 +467,7 @@ integration is specified using <a class="reference internal" href="#fdg.Integrat
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.IntegrationSpecs.nodes">
-<span class="sig-name descname"><span class="pre">nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpecs.nodes" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpecs.nodes" title="Link to this definition">#</a></dt>
 <dd><p>Get the integration nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -390,7 +484,7 @@ integration is specified using <a class="reference internal" href="#fdg.Integrat
 
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.IntegrationSpecs.weights">
-<span class="sig-name descname"><span class="pre">weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpecs.weights" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpecs.weights" title="Link to this definition">#</a></dt>
 <dd><p>Get the integration weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -445,7 +539,7 @@ Instead, they are stored in <a class="reference internal" href="#fdg.Integration
 however any number of new registries can be created.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.IntegrationRegistry">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationRegistry</span></span><a class="headerlink" href="#fdg.IntegrationRegistry" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationRegistry</span></span><a class="headerlink" href="#fdg.IntegrationRegistry" title="Link to this definition">#</a></dt>
 <dd><p>Registry for integration rules.</p>
 <p>This registry contains all available integration rules and caches them for
 efficient retrieval.</p>
@@ -465,7 +559,7 @@ efficient retrieval.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="fdg.DEFAULT_INTEGRATION_REGISTRY">
-<span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></em><a class="headerlink" href="#fdg.DEFAULT_INTEGRATION_REGISTRY" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;fdg._fdg.IntegrationRegistry&gt;</span></span><a class="headerlink" href="#fdg.DEFAULT_INTEGRATION_REGISTRY" title="Link to this definition">#</a></dt>
 <dd><p>Registry for integration rules.</p>
 <p>This registry contains all available integration rules and caches them for
 efficient retrieval.</p>
@@ -479,7 +573,7 @@ efficient retrieval.</p>
 for each dimension (given as <a class="reference internal" href="#fdg.IntegrationSpecs" title="fdg.IntegrationSpecs"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpecs</span></code></a>) are bundled together into <a class="reference internal" href="#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationSpace</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.IntegrationSpace">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*specs</span> <span class="pre">:</span> <span class="pre">IntegrationSpecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fdg.IntegrationSpace" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">IntegrationSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationSpecs" title="fdg.IntegrationSpecs"><span class="pre">IntegrationSpecs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fdg.IntegrationSpace" title="Link to this definition">#</a></dt>
 <dd><p>Integration space defined with integration rules.</p>
 <p>Integration space defined by tensor product of integration rules in each
 dimension. Integration rule for each dimension are defined by an
@@ -491,7 +585,7 @@ IntegrationSpecs object.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.IntegrationSpace.nodes">
-<span class="sig-name descname"><span class="pre">nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpace.nodes" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpace.nodes" title="Link to this definition">#</a></dt>
 <dd><p>Get the integration nodes of the space.</p>
 <dl class="simple">
 <dt>registry<span class="classifier">fdg.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY</span></dt><dd><p>Registry used to retrieve the integration rules.</p>
@@ -509,7 +603,7 @@ IntegrationSpecs object.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.IntegrationSpace.weights">
-<span class="sig-name descname"><span class="pre">weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpace.weights" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.IntegrationSpace.weights" title="Link to this definition">#</a></dt>
 <dd><p>Get the integration weights of the space.</p>
 <dl class="simple">
 <dt>registry<span class="classifier">fdg.IntegrationRegistry, default: DEFAULT_INTEGRATION_REGISTRY</span></dt><dd><p>Registry used to retrieve the integration rules.</p>
@@ -574,12 +668,12 @@ IntegrationSpecs object.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="math_background.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Documentation for Exported Types and Functions</p>
+        <p class="prev-next-title">Mathematical Background</p>
       </div>
     </a>
     <a class="right-next"
@@ -608,8 +702,9 @@ IntegrationSpecs object.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quadrature-rules">Quadrature rules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integration-specifications">Integration Specifications</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.IntegrationMethod"><code class="docutils literal notranslate"><span class="pre">IntegrationMethod</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.IntegrationMethod.GAUSS"><code class="docutils literal notranslate"><span class="pre">IntegrationMethod.GAUSS</span></code></a></li>
@@ -647,13 +742,13 @@ IntegrationSpecs object.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/source/integration.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/integration.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -668,8 +763,8 @@ IntegrationSpecs object.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -689,7 +784,7 @@ IntegrationSpecs object.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -703,7 +798,7 @@ IntegrationSpecs object.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

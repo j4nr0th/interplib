@@ -27,30 +27,33 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source/degrees_of_freedom';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Space Map" href="space_map.html" />
@@ -58,20 +61,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -97,7 +106,7 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -167,11 +176,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -244,33 +260,62 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Degrees of Freedom</a></li>
 <li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
 <li class="toctree-l1"><a class="reference internal" href="domain_types.html">Domain Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh Topology</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
 <li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
 <li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="c_api.html">C API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_basis.html">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_topology.html">Topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_constraints.html">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
 </ul>
 </div>
 </nav></div>
@@ -339,14 +384,61 @@ the <a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.Degree
 object is created by specifying the <a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg.FunctionSpace"><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionSpace</span></code></a> and optionally values of the
 corresponding DoFs.</p>
 <p>This type can be used to reconstruct the values of the function or its gradients,
-thought they are never cached. The only exceptions are the partially cached methods
+though they are never cached. The only exceptions are the partially cached methods
 <a class="reference internal" href="#fdg.DegreesOfFreedom.reconstruct_at_integration_points" title="fdg.DegreesOfFreedom.reconstruct_at_integration_points"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DegreesOfFreedom.reconstruct_at_integration_points()</span></code></a> and
 <a class="reference internal" href="#fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points" title="fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DegreesOfFreedom.reconstruct_derivative_at_integration_points()</span></code></a>, which make use
-of <a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasisRegistry</span></code></a> and <a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationRegistry</span></code></a> to cache values of basis
-functions at integration points.</p>
+of <a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasisRegistry</span></code></a> and <a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegrationRegistry</span></code></a> to cache values of
+basis functions at integration points. Boundary projections at the reference
+endpoints additionally use the basis registry’s integration-independent endpoint
+cache.</p>
+<section id="reconstruction">
+<h2>Reconstruction<a class="headerlink" href="#reconstruction" title="Link to this heading">#</a></h2>
+<p>For a tensor-product basis <span class="math notranslate nohighlight">\(\psi_{i_1 \dots i_N}(\vec{\xi}) =
+\prod_k b^k_{i_k}(\xi_k)\)</span> (see <a class="reference internal" href="basis_functions.html#fdg-basis-functions"><span class="std std-ref">Basis Functions</span></a>) the value of
+the function with degrees of freedom <span class="math notranslate nohighlight">\(c_{i_1 \dots i_N}\)</span> at a point
+<span class="math notranslate nohighlight">\(\vec{\xi}\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[f(\vec{\xi}) = \sum_{i_1, \dots, i_N}
+c_{i_1 \dots i_N}
+\prod_{k = 1}^{N} b^k_{i_k}(\xi_k) .\]</div>
+<p>Evaluating the one-dimensional basis values (and, for the gradient, the
+derivatives) at the nodes of an integration space and contracting with the
+DoFs gives the reconstructed values at all integration points at once;
+this is what the two cached methods do. Because the one-dimensional bases
+are polynomial of degree <span class="math notranslate nohighlight">\(o_k\)</span>, the reconstructed function is a
+polynomial of degree <span class="math notranslate nohighlight">\(o_k\)</span> in each reference coordinate, and a
+derivative along dimension <span class="math notranslate nohighlight">\(k\)</span> lowers the achievable order in that
+dimension by one.</p>
+</section>
+<section id="derivatives-and-projections">
+<h2>Derivatives and projections<a class="headerlink" href="#derivatives-and-projections" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#fdg.DegreesOfFreedom.derivative" title="fdg.DegreesOfFreedom.derivative"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DegreesOfFreedom.derivative()</span></code></a> applies the one-dimensional
+incidence operator along the given reference dimension (see
+<a class="reference internal" href="incidence.html#fdg-incidence"><span class="std std-ref">Exterior Derivative</span></a>) to the DoFs, producing the DoFs of the partial
+derivative <span class="math notranslate nohighlight">\(\partial f / \partial \xi_k\)</span> in the space whose order
+is lowered by one in that dimension.</p></li>
+<li><p><a class="reference internal" href="#fdg.DegreesOfFreedom.plane_projection" title="fdg.DegreesOfFreedom.plane_projection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DegreesOfFreedom.plane_projection()</span></code></a> evaluates the basis functions
+of dimension <span class="math notranslate nohighlight">\(k\)</span> at the coordinate <span class="math notranslate nohighlight">\(x\)</span>, i.e. it restricts the
+function to the plane <span class="math notranslate nohighlight">\(\xi_k = x\)</span> and returns the DoFs of the restriction
+on that plane. At <span class="math notranslate nohighlight">\(x = -1\)</span> or <span class="math notranslate nohighlight">\(x = +1\)</span>, the endpoint basis values
+are retrieved from the integration-independent <a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasisRegistry</span></code></a> cache.
+This is the operation behind <a class="reference internal" href="space_map.html#fdg.SpaceMap.boundary" title="fdg.SpaceMap.boundary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SpaceMap.boundary()</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="#fdg.DegreesOfFreedom.reverse_orientation" title="fdg.DegreesOfFreedom.reverse_orientation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DegreesOfFreedom.reverse_orientation()</span></code></a> maps the reference
+coordinate <span class="math notranslate nohighlight">\(\xi_k \in [-1, +1]\)</span> to <span class="math notranslate nohighlight">\(-\xi_k\)</span>, i.e. it reverses
+the orientation of the element along dimension <span class="math notranslate nohighlight">\(k\)</span>. The DoFs are
+relabeled so that the represented function is unchanged: for nodal
+(Lagrange, Bernstein) bases the nodal values are reversed, for the
+Legendre basis the coefficients of odd order are negated, since
+<span class="math notranslate nohighlight">\(P_k(-\xi) = (-1)^k P_k(\xi)\)</span>.</p></li>
+<li><p><a class="reference internal" href="#fdg.DegreesOfFreedom.lagrange_projection" title="fdg.DegreesOfFreedom.lagrange_projection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DegreesOfFreedom.lagrange_projection()</span></code></a> re-expresses the function
+in a Lagrange basis of the given (or the smallest sufficient) orders by
+interpolation of nodal values, which is used when the function must be
+sampled at its nodal points.</p></li>
+</ul>
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.DegreesOfFreedom">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">DegreesOfFreedom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fdg.DegreesOfFreedom" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">DegreesOfFreedom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.FunctionSpace" title="fdg.FunctionSpace"><span class="pre">FunctionSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fdg.DegreesOfFreedom" title="Link to this definition">#</a></dt>
 <dd><p>Degrees of freedom associated with a function space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -374,8 +466,50 @@ functions at integration points.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="fdg.DegreesOfFreedom.lagrange_projection">
+<span class="sig-name descname"><span class="pre">lagrange_projection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_BASIS_REGISTRY</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.lagrange_projection" title="Link to this definition">#</a></dt>
+<dd><p>Compute projection of degrees of freedom with Lagrange basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orders</strong> (<em>array_like</em>) – Orders in each dimension. If nothing is given, then orders are taken to be
+same as needed to exactly represent the degrees of freedom.</p></li>
+<li><p><strong>integration_registry</strong> (<a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><em>IntegrationRegistry</em></a><em>, </em><em>default: DEFAULT_INTEGRATION_REGISTRY</em>) – Registry used to retrieve the integration rules.</p></li>
+<li><p><strong>basis_registry</strong> (<a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><em>BasisRegistry</em></a><em>, </em><em>default: DEFAULT_BASIS_REGISTRY</em>) – Registry used to retrieve the basis specifications.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Degrees of freedom using Lagrange basis of specified orders.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.DegreesOfFreedom">DegreesOfFreedom</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.DegreesOfFreedom.plane_projection">
+<span class="sig-name descname"><span class="pre">plane_projection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.plane_projection" title="Link to this definition">#</a></dt>
+<dd><p>Compute the projection of degrees of freedom on a plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Index of the dimension that is fixed.</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Position of the plane in that dimension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Degrees of freedom on the specified plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.DegreesOfFreedom">DegreesOfFreedom</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="fdg.DegreesOfFreedom.reconstruct_at_integration_points">
-<span class="sig-name descname"><span class="pre">reconstruct_at_integration_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integration_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_BASIS_REGISTRY</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.reconstruct_at_integration_points" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">reconstruct_at_integration_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integration_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_BASIS_REGISTRY</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.reconstruct_at_integration_points" title="Link to this definition">#</a></dt>
 <dd><p>Reconstruct the function at the integration points of the given space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -399,7 +533,7 @@ integration points.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points">
-<span class="sig-name descname"><span class="pre">reconstruct_derivative_at_integration_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integration_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_BASIS_REGISTRY</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">reconstruct_derivative_at_integration_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integration_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationSpace" title="fdg.IntegrationSpace"><span class="pre">IntegrationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="integration.html#fdg.IntegrationRegistry" title="fdg.IntegrationRegistry"><span class="pre">IntegrationRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_INTEGRATION_REGISTRY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="basis_functions.html#fdg.BasisRegistry" title="fdg.BasisRegistry"><span class="pre">BasisRegistry</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_BASIS_REGISTRY</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)"><span class="pre">numpy.double</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points" title="Link to this definition">#</a></dt>
 <dd><p>Reconstruct the derivative of the function in given dimension.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -419,6 +553,25 @@ integration points.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fdg.DegreesOfFreedom.reverse_orientation">
+<span class="sig-name descname"><span class="pre">reverse_orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a></span></span><a class="headerlink" href="#fdg.DegreesOfFreedom.reverse_orientation" title="Link to this definition">#</a></dt>
+<dd><p>Reverse the orientation of DoFs.</p>
+<p>Maps the domain of basis functions for dimension <code class="docutils literal notranslate"><span class="pre">idim</span></code> from <span class="math notranslate nohighlight">\([-1, +1]\)</span>
+to <span class="math notranslate nohighlight">\([+1, -1]\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>idim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Index of the dimension on which the orientation should be reversed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Degrees of freedom with reversed orientation on the specified dimension.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg.DegreesOfFreedom">DegreesOfFreedom</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -462,7 +615,7 @@ integration points.</p></li>
 <dd><p>Values of the degrees of freedom.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.typing.NDArray[<a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.4)">numpy.double</a>]</p>
+<dd class="field-odd"><p>numpy.typing.NDArray[<a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.double" title="(in NumPy v2.5)">numpy.double</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -473,7 +626,7 @@ integration points.</p></li>
 <a class="reference internal" href="#fdg.reconstruct" title="fdg.reconstruct"><code class="xref py py-func docutils literal notranslate"><span class="pre">reconstruct()</span></code></a> is provided.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="fdg.reconstruct">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">reconstruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.4)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/degrees_of_freedom.html#reconstruct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.reconstruct" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">fdg.</span></span><span class="sig-name descname"><span class="pre">reconstruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dof</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fdg.DegreesOfFreedom" title="fdg._fdg.DegreesOfFreedom"><span class="pre">DegreesOfFreedom</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fdg/degrees_of_freedom.html#reconstruct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fdg.reconstruct" title="Link to this definition">#</a></dt>
 <dd><p>Reconstruct function values at given locations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -489,6 +642,7 @@ Each array corresponds to a dimension.</p>
 </dl>
 </dd></dl>
 
+</section>
 </section>
 
 
@@ -536,30 +690,37 @@ Each array corresponds to a dimension.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.derivative"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.derivative()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.reconstruct_at_integration_points"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.reconstruct_at_integration_points()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.reconstruct_derivative_at_integration_points()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.function_space"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.function_space</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.n_dofs"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.n_dofs</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.shape"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.shape</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.values"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.values</span></code></a></li>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstruction">Reconstruction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#derivatives-and-projections">Derivatives and projections</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.derivative"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.derivative()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.lagrange_projection"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.lagrange_projection()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.plane_projection"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.plane_projection()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.reconstruct_at_integration_points"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.reconstruct_at_integration_points()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.reconstruct_derivative_at_integration_points"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.reconstruct_derivative_at_integration_points()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.reverse_orientation"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.reverse_orientation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.function_space"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.function_space</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.n_dofs"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.n_dofs</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.shape"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.shape</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.DegreesOfFreedom.values"><code class="docutils literal notranslate"><span class="pre">DegreesOfFreedom.values</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.reconstruct"><code class="docutils literal notranslate"><span class="pre">reconstruct</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fdg.reconstruct"><code class="docutils literal notranslate"><span class="pre">reconstruct</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/source/degrees_of_freedom.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/degrees_of_freedom.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -574,8 +735,8 @@ Each array corresponds to a dimension.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -595,7 +756,7 @@ Each array corresponds to a dimension.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -609,7 +770,7 @@ Each array corresponds to a dimension.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

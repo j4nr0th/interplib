@@ -1,0 +1,1312 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Topology &#8212; fdg 0.0.1a documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'source/c_topology';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Constraints" href="c_constraints.html" />
+    <link rel="prev" title="Matrices" href="c_matrices.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">fdg 0.0.1a documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="degrees_of_freedom.html">Degrees of Freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_types.html">Domain Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh Topology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="c_api.html">C API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_basis.html">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Topology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_constraints.html">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Documentation for Exported Types and Functions</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="c_api.html" class="nav-link">C API</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Topology</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="topology">
+<h1>Topology<a class="headerlink" href="#topology" title="Link to this heading">#</a></h1>
+<p>Topological mesh handling: collections of n-dimensional objects, their
+boundaries, immersion of objects into elements, and iteration over element
+boundaries.</p>
+<p>The mesh stores, for every dimension <span class="math notranslate nohighlight">\(d = 0, \dots, N\)</span>, the objects
+of that dimension (points, lines, faces, …) and how each object is
+immersed into the elements that contain it. A collection of dimension
+<span class="math notranslate nohighlight">\(d\)</span> objects stores the boundary IDs of every object: object
+<span class="math notranslate nohighlight">\(j\)</span> has <span class="math notranslate nohighlight">\(2d\)</span> boundary slots, slot <span class="math notranslate nohighlight">\(i\)</span> being the
+boundary perpendicular to axis <span class="math notranslate nohighlight">\(i\)</span> at its <em>start</em> and slot
+<span class="math notranslate nohighlight">\(i + d\)</span> the boundary at its <em>end</em>. An immersion record stores, for
+each occurrence of an object in an element, a signed one-based
+orientation: the fixed axes identify where the object sits in the element
+(negative = at the start side of the axis, positive = at the end), and the
+remaining entries map the object’s axes to the element axes, with negative
+entries reversing the direction. The shared- and boundary-object iteration
+functions in <code class="file docutils literal notranslate"><span class="pre">mesh.h</span></code> drive the assembly of the
+<a class="reference internal" href="boundary_constraints.html#fdg-boundary-constraints"><span class="std std-ref">Boundary Constraints</span></a> trace constraints: constraining the shared
+objects dimension by dimension, from highest to lowest, ensures no degree
+of freedom is constrained more than once.</p>
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.topo_status_t">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_status_t</span></span></span><a class="headerlink" href="#c.topo_status_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Enum with success and error codes for topological functions.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_status_to_str">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">topo_status_to_str</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">status</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_status_to_str" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the name of the status value (such as “TOPO_SUCCESS”, for example).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status</strong> – Status value to get the string for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Statically allocated string with the name of the status value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_status_msg">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">topo_status_msg</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">status</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_status_msg" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the description of what the status value is describing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status</strong> – Status value to get the message for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Statically allocated string with the message explaining the meaning of the status value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.topo_obj_collection_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_collection_t</span></span></span><a class="headerlink" href="#c.topo_obj_collection_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Collection of n-dimensional topological objects.</p>
+<p>The elements themselves are defined by their boundaries. Additional
+information that is also needed, such as IDs of the elements they are in,
+is also provided.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.topo_obj_immersion_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></span><a class="headerlink" href="#c.topo_obj_immersion_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Specification of how m-dimensional objects are immersed in n-dimensional space.</p>
+<p>This information is what n-dimensional elements they are contained within, what are the fixed element axis
+of these objects, and how their local axes map to those of the element.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_boundary_count">
+<span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_boundary_count</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_boundary_count" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of boundaries the topological object has (hint: it is two times more than dimensions).</p>
+<p>This cool function multiplies by 2, but it is here because the code is a lot clearer when there’s a proper name
+for this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – [in] Dimensionality of the topological object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of boundaries the object has.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_common_boundary">
+<span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_common_boundary</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">collection</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">id_1</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">id_2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_common_boundary" title="Link to this definition">#</a><br /></dt>
+<dd><p>Find the common boundary of two objects from the same collection. The orientation of the boundary returned is as
+it is within the first object. If the first object has reversed orientation, then the returned boundary has
+its orientation reversed as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>collection</strong> – [in] Collection the two objects belong to.</p></li>
+<li><p><strong>id_1</strong> – [in] ID of the first object.</p></li>
+<li><p><strong>id_2</strong> – [in] ID of the second object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>UINT64_MAX if the two share no boundary, otherwise an ID of the shared boundary, with the orientation
+as in the object with ID of <code class="docutils literal notranslate"><span class="pre">id_1</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_common_boundary_index">
+<span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_common_boundary_index</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">collection</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">id_1</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">id_2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_common_boundary_index" title="Link to this definition">#</a><br /></dt>
+<dd><p>Find the index of the common boundary of two objects from the same collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>collection</strong> – [in] Collection the two objects belong to.</p></li>
+<li><p><strong>id_1</strong> – [in] ID of the first object.</p></li>
+<li><p><strong>id_2</strong> – [in] ID of the second object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Index of the common boundary in the element with ID <code class="docutils literal notranslate"><span class="pre">id_1</span></code>, UINT64_MAX if there is no common boundary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_create_immersion_info">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_create_immersion_info</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">npts</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">collections</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_create_immersion_info" title="ndim"><span class="n"><span class="pre">ndim</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span>, <a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">immersions</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#c.topo_obj_create_immersion_info" title="ndim"><span class="n"><span class="pre">ndim</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_create_immersion_info" title="Link to this definition">#</a><br /></dt>
+<dd><p>Determine immersion information from topological description of elements in terms of boundaries. These
+boundaries are in turn again described by their boundaries, and so on until 0-D objects (points).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – [in] Number of dimensions of the space all objects are immersed in.</p></li>
+<li><p><strong>npts</strong> – [in] Number of points in the mesh which do not have their own collection.</p></li>
+<li><p><strong>collections</strong> – [in] Collections of objects going from 1-D (lines) to ndim-D (elements themselves).</p></li>
+<li><p><strong>allocator</strong> – [in] Allocator to use to create the immersions in.</p></li>
+<li><p><strong>immersions</strong> – [out] Array, which receives computed immersion information for objects from 0-D to (ndim-1)-D</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS if successful, otherwise an error code.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_immersions_free">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_immersions_free</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">immersions</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_immersions_free" title="ndim"><span class="n"><span class="pre">ndim</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_immersions_free" title="Link to this definition">#</a><br /></dt>
+<dd><p>Release all memory for immersions and clear them.</p>
+<p>The immersions must have been created by topo_obj_create_immersion_info
+using the same allocator. After the call, the immersion structures are
+zeroed out and all pointers into them are invalid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – Number of dimensions (and immersions).</p></li>
+<li><p><strong>immersions</strong> – Immersions to release.</p></li>
+<li><p><strong>allocator</strong> – Allocator with which the memory for immersions was allocated.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_boundary_immersion_create">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_boundary_immersion_create</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">idim</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">collection</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">bdim</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">fixed_axes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n"><span class="pre">parent_orientation</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_boundary_immersion_create" title="ndim"><span class="n"><span class="pre">ndim</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">boundaries</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_boundary_immersion_create" title="ndim"><span class="n"><span class="pre">ndim</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n"><span class="pre">orient_arr</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_boundary_immersion_create" title="ndim"><span class="n"><span class="pre">ndim</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_boundary_immersion_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create immersion information (position in the element and its relative orientation) for a boundary of an object from
+a collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – [in] Number of dimensions of the space everything is immersed in.</p></li>
+<li><p><strong>idim</strong> – [in] Dimension of the boundary objects.</p></li>
+<li><p><strong>collection</strong> – [in] Collection the object is from.</p></li>
+<li><p><strong>bdim</strong> – [in] Index/dimension of the boundary in question.</p></li>
+<li><p><strong>fixed_axes</strong> – [in] Number of axes indices used for identifying the boundary.</p></li>
+<li><p><strong>parent_orientation</strong> – [in] The first (ndim-idim) entries identify the parent within the element, with the
+remaining idim specifying how its axes map to those of the parent.</p></li>
+<li><p><strong>boundaries</strong> – [in] Array of 1-based indices of other boundaries in the same topological object.</p></li>
+<li><p><strong>orient_arr</strong> – [out] Array that receives the specification of the boundary in the element as the first
+(ndim-idim) entries and the mapping of its local axes to those of the element as the final idim entries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS if successful, TOPO_NO_COMMON_BOUNDARY if there are boundaries that do not share a boundary
+among each other.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_immersion_of_object">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_immersion_of_object</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">immersion</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">object_id</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_cnt</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_ids</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_orientations</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_immersion_of_object" title="Link to this definition">#</a><br /></dt>
+<dd><p>Immersion information with IDs of elements an object is contained in.</p>
+<p>Information for each element consists of two parts:
+- element IDs,
+- orientation.</p>
+<blockquote>
+<div><p>Orientation data consists of <code class="docutils literal notranslate"><span class="pre">n</span></code> 1-based, signed indices. If the object has <code class="docutils literal notranslate"><span class="pre">m</span></code> dimensions, then
+the first <code class="docutils literal notranslate"><span class="pre">n-m</span></code> entries specify the position of the object within the element. A negative number
+means it is at the start of the boundary, while a positive number means it is at the end of it.
+The remaining <code class="docutils literal notranslate"><span class="pre">m</span></code> entries describe the mapping between its own local coordinates and those of the
+element.</p>
+<p>As such, when one iterates over different elements the object is in, the element ID array should
+be iterated one integer at a time, while the orientation array should instead advance <code class="docutils literal notranslate"><span class="pre">n</span></code> entries
+at a time.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>immersion</strong> – <strong>[in]</strong> Immersion info of objects.</p></li>
+<li><p><strong>object_id</strong> – <strong>[in]</strong> ID of the object to get the immersion for.</p></li>
+<li><p><strong>p_cnt</strong> – <strong>[out]</strong> Pointer to the location where the size of the output array is stored.</p></li>
+<li><p><strong>p_ids</strong> – <strong>[out]</strong> Pointer to the location where the element array pointer is stored.</p></li>
+<li><p><strong>p_orientations</strong> – <strong>[out]</strong> Pointer to the location where the orientation array pointer is stored.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_boundary_orientation">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_boundary_orientation</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">immersion</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">parent_dims</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">object_id</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_id</span></span>, <span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_boundary_orientation" title="parent_dims"><span class="n"><span class="pre">parent_dims</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_boundary_orientation" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the orientation of one boundary object within an element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>immersion</strong> – Immersion information for codimension-one objects.</p></li>
+<li><p><strong>parent_dims</strong> – Number of dimensions in the parent elements.</p></li>
+<li><p><strong>object_id</strong> – Boundary object ID.</p></li>
+<li><p><strong>element_id</strong> – Parent element ID.</p></li>
+<li><p><strong>orientation</strong> – Receives the parent-dimension orientation record.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS if the object is in the element, otherwise TOPO_NO_COMMON_BOUNDARY.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_obj_find_common_boundary">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_obj_find_common_boundary</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">immersion</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">parent_dims</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_id_1</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_id_2</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p_object_id</span></span>, <span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n"><span class="pre">orientations</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_find_common_boundary" title="parent_dims"><span class="n"><span class="pre">parent_dims</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_obj_find_common_boundary" title="Link to this definition">#</a><br /></dt>
+<dd><p>Find the unique immersed boundary object shared by two elements.</p>
+<p>The output orientations contain one parent-dimension orientation record for each element, in element ID order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>immersion</strong> – Immersion information for codimension-one objects.</p></li>
+<li><p><strong>parent_dims</strong> – Number of dimensions in the parent elements.</p></li>
+<li><p><strong>element_id_1</strong> – ID of the first element.</p></li>
+<li><p><strong>element_id_2</strong> – ID of the second element.</p></li>
+<li><p><strong>p_object_id</strong> – Receives the shared boundary object ID.</p></li>
+<li><p><strong>orientations</strong> – Receives the two orientation records, with the first record at offset zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS, TOPO_NO_COMMON_BOUNDARY, or TOPO_MULTIPLE_COMMON_BOUNDARIES.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.topo_bnd_iter_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_bnd_iter_t</span></span></span><a class="headerlink" href="#c.topo_bnd_iter_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Type with info and work memory needed to iterate over a boundary.
+The boundary is in an element with ndim dimensions and has mdim free axes.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_reorder_with_orientation">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_reorder_with_orientation</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">mdim</span></span>, <a class="reference internal" href="#c.topo_bnd_iter_t" title="topo_bnd_iter_t"><span class="n"><span class="pre">topo_bnd_iter_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">bnd_iter</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">in</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">restrict</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_reorder_with_orientation" title="Link to this definition">#</a><br /></dt>
+<dd><p>Reorder the input array associated with an object based on the specified orientation of the axes. Work arrays must be
+provided.</p>
+<p>The input array is laid out with the axes in the order of the non-fixed
+axes of the boundary; the output array is laid out in the element’s frame
+of reference, with the reordered and possibly reversed axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – Total number of dimensions of the topological space.</p></li>
+<li><p><strong>mdim</strong> – Number of non-fixed axes of the section the array represents.</p></li>
+<li><p><strong>bnd_iter</strong> – Arrays with input data and working memory. Must contain an
+<cite>orientation</cite> array of <cite>ndim</cite> entries, <cite>sizes</cite> of <cite>ndim</cite> entries,
+and work arrays <cite>offsets</cite> of <cite>mdim</cite> and <cite>strides</cite> of <cite>ndim</cite>
+entries. The work arrays are overwritten.</p></li>
+<li><p><strong>in</strong> – Input array that is to be reordered.</p></li>
+<li><p><strong>out</strong> – Destination array, which receives the reordering. Must not
+alias <cite>in</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_iterate_boundary">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_iterate_boundary</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">mdim</span></span>, <a class="reference internal" href="#c.topo_bnd_iter_t" title="topo_bnd_iter_t"><span class="n"><span class="pre">topo_bnd_iter_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">bnd_iter_1</span></span>, <a class="reference internal" href="#c.topo_bnd_iter_t" title="topo_bnd_iter_t"><span class="n"><span class="pre">topo_bnd_iter_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">bnd_iter_2</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n"><span class="pre">skip_edges</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">idx_bnd</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">idx_1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">idx_2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="p"><span class="pre">)</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_iterate_boundary" title="Link to this definition">#</a><br /></dt>
+<dd><p>Call a specific function with degree of freedom indices for a boundary with two different orientations.</p>
+<p>The callback is invoked once per position of the boundary, with the index
+of the boundary DoF itself as well as the corresponding DoF indices in
+both elements, followed by the user-provided pointer. The iteration stops
+as soon as either side runs out of positions, so both elements must have
+boundary sections of equal size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – Total number of dimensions of the topological space.</p></li>
+<li><p><strong>mdim</strong> – Number of non-fixed axes of the section the array represents.</p></li>
+<li><p><strong>bnd_iter_1</strong> – Arrays with input data and working memory for element 1.
+Must satisfy the same preconditions as in topo_reorder_with_orientation.</p></li>
+<li><p><strong>bnd_iter_2</strong> – Arrays with input data and working memory for element 2.
+Must satisfy the same preconditions as in topo_reorder_with_orientation.</p></li>
+<li><p><strong>skip_edges</strong> – When non-zero, edges (any axis being at min or max value) are skipped.</p></li>
+<li><p><strong>callback</strong> – Callback function that is called on for iterations. It accepts the index of DoFs for the boundary
+itself, then for the first and second element, as well as user-provided pointer.</p></li>
+<li><p><strong>user_data</strong> – Pointer passed to the callback function for each iteration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.topo_mesh">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh</span></span></span><a class="headerlink" href="#c.topo_mesh" title="Link to this definition">#</a><br /></dt>
+<dd><p>Topological mesh built from connected hypercube elements.</p>
+<p>The mesh holds the complete topology of a set of hypercube elements: the
+collections of all topological objects of every dimension, from the lines up
+to the elements themselves, and the immersion information of all objects of
+every dimension, from the points up to the element boundaries. The mesh has
+no geometry; the elements are identified solely through their topology.</p>
+<p>The primary use is the generation of continuity constraints between
+neighboring elements: iterate over boundary objects shared by multiple
+elements (see <a class="reference internal" href="#c.topo_mesh_iterate_shared_all" title="topo_mesh_iterate_shared_all"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared_all</span></code></a>) and assemble trace
+constraints on each of them.</p>
+<p>The mesh can be built in three ways:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#c.topo_mesh_create_from_corners" title="topo_mesh_create_from_corners"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_create_from_corners</span></code></a> builds the collections from the corner
+points of every element (the caller names the shared points by giving the
+same point ID as a corner of every element it is in);</p></li>
+<li><p><a class="reference internal" href="#c.topo_mesh_create_from_collections" title="topo_mesh_create_from_collections"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_create_from_collections</span></code></a> builds the immersions from the given
+collections using <a class="reference internal" href="#c.topo_obj_create_immersion_info" title="topo_obj_create_immersion_info"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_obj_create_immersion_info</span></code></a>;</p></li>
+<li><p><a class="reference internal" href="#c.topo_mesh_create" title="topo_mesh_create"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_create</span></code></a> accepts fully built collections and immersions and
+only stores them in the mesh.</p></li>
+</ul>
+<p>All three constructors take ownership of the passed arrays on success, so
+the caller must not free them afterwards; every array must have been
+allocated with the same allocator, and <a class="reference internal" href="#c.topo_mesh_free" title="topo_mesh_free"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_free</span></code></a> releases all of
+the memory it owns with it.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.topo_mesh_shared_object_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_shared_object_t</span></span></span><a class="headerlink" href="#c.topo_mesh_shared_object_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Information about one topological object of a mesh.</p>
+<p>Passed to the callback of <a class="reference internal" href="#c.topo_mesh_iterate_shared" title="topo_mesh_iterate_shared"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared</span></code></a>,
+<a class="reference internal" href="#c.topo_mesh_iterate_shared_all" title="topo_mesh_iterate_shared_all"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared_all</span></code></a>, <a class="reference internal" href="#c.topo_mesh_iterate_boundary" title="topo_mesh_iterate_boundary"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_boundary</span></code></a> and
+<a class="reference internal" href="#c.topo_mesh_iterate_boundary_all" title="topo_mesh_iterate_boundary_all"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_boundary_all</span></code></a>. The shared objects are contained in at
+least two elements; the boundary objects lie on the outer boundary of the
+mesh (and may be contained in one or several elements, for example a point
+in the middle of a boundary edge of a two-dimensional mesh).</p>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.topo_mesh_callback_t">
+<span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_callback_t</span></span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_mesh_shared_object_t" title="topo_mesh_shared_object_t"><span class="n"><span class="pre">topo_mesh_shared_object_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">object</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#c.topo_mesh_callback_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Callback invoked for each object during iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param mesh<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The mesh that is being iterated over.</p>
+</dd>
+<dt class="field-even">Param object<span class="colon">:</span></dt>
+<dd class="field-even"><p>Information about the object.</p>
+</dd>
+<dt class="field-odd">Param user_data<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Opaque pointer passed through from the iteration function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.topo_mesh_pair_callback_t">
+<span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_pair_callback_t</span></span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">mdim</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">object_id</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_id_1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">orientation_1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_id_2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">orientation_2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#c.topo_mesh_pair_callback_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Callback invoked for each consecutive pair of elements containing a shared object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param mesh<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The mesh being iterated.</p>
+</dd>
+<dt class="field-even">Param mdim<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dimension of the shared object.</p>
+</dd>
+<dt class="field-odd">Param object_id<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ID of the shared object.</p>
+</dd>
+<dt class="field-even">Param element_id_1<span class="colon">:</span></dt>
+<dd class="field-even"><p>First element ID in the pair.</p>
+</dd>
+<dt class="field-odd">Param orientation_1<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Orientation of the object in the first element.</p>
+</dd>
+<dt class="field-even">Param element_id_2<span class="colon">:</span></dt>
+<dd class="field-even"><p>Second element ID in the pair.</p>
+</dd>
+<dt class="field-odd">Param orientation_2<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Orientation of the object in the second element.</p>
+</dd>
+<dt class="field-even">Param user_data<span class="colon">:</span></dt>
+<dd class="field-even"><p>Opaque pointer passed through from the iteration function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_create">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_create</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">point_count</span></span>, <a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">collections</span></span>, <a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">immersions</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span>, <span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_create" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a mesh from already computed collections and immersions.</p>
+<p>The mesh takes ownership of all passed arrays on success; each of them must
+have been allocated with <code class="docutils literal notranslate"><span class="pre">allocator</span></code> and must not be freed by the caller
+afterwards. On failure all the arrays stay with the caller.</p>
+<p>The collections describe the objects of every dimension from the lines up
+to the elements; the immersions describe the objects of every dimension
+from the points up to the element boundaries, in the layout produced by
+<a class="reference internal" href="#c.topo_obj_create_immersion_info" title="topo_obj_create_immersion_info"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_obj_create_immersion_info</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – [in] Number of dimensions of the space. Must be between 1 and 63.</p></li>
+<li><p><strong>point_count</strong> – [in] Number of points in the mesh. Must be positive.</p></li>
+<li><p><strong>collections</strong> – [in] Collections of the objects of dimensions 1 to ndim,
+transferred on success. Must have <code class="docutils literal notranslate"><span class="pre">ndim</span></code> entries.</p></li>
+<li><p><strong>immersions</strong> – [in] Immersions of the objects of dimensions 0 to ndim - 1,
+transferred on success. Must have <code class="docutils literal notranslate"><span class="pre">ndim</span></code> entries.</p></li>
+<li><p><strong>allocator</strong> – [in] Allocator used for all passed memory and the mesh.</p></li>
+<li><p><strong>out</strong> – [out] Receives the created mesh. On failure it is left unmodified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if an argument is
+invalid, TOPO_FAILED_ALLOC if a memory allocation fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_create_from_collections">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_create_from_collections</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">point_count</span></span>, <a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">collections</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span>, <span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_create_from_collections" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a mesh from the collections of the topological objects.</p>
+<p>The mesh computes the immersion information from the collections using
+<a class="reference internal" href="#c.topo_obj_create_immersion_info" title="topo_obj_create_immersion_info"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_obj_create_immersion_info</span></code></a>, then stores both. On success it takes
+ownership of the passed collections; on failure the collections stay with
+the caller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – [in] Number of dimensions of the space. Must be between 1 and 63.</p></li>
+<li><p><strong>point_count</strong> – [in] Number of points in the mesh. Must be positive.</p></li>
+<li><p><strong>collections</strong> – [in] Collections of the objects of dimensions 1 to ndim,
+transferred on success. Must have <code class="docutils literal notranslate"><span class="pre">ndim</span></code> entries and be consistently
+oriented; the last entry holds the elements.</p></li>
+<li><p><strong>allocator</strong> – [in] Allocator used for all passed memory and the mesh.</p></li>
+<li><p><strong>out</strong> – [out] Receives the created mesh. On failure it is left unmodified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if an argument is
+invalid, TOPO_SIZE_OVERFLOW, TOPO_FAILED_ALLOC or a topology error
+code if the collections are inconsistent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_create_from_corners">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_create_from_corners</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">ndim</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_count</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">point_count</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">corners</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span>, <span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_create_from_corners" title="Link to this definition">#</a><br /></dt>
+<dd><p>Create a mesh from the corner points of every hypercube element.</p>
+<p>The caller provides, for every element, the IDs of its <code class="docutils literal notranslate"><span class="pre">2^ndim</span></code> corner
+points, in the element’s own frame: the corner with local mixed-radix
+index <code class="docutils literal notranslate"><span class="pre">k</span></code> (bit <code class="docutils literal notranslate"><span class="pre">a</span></code> of <code class="docutils literal notranslate"><span class="pre">k</span></code> set = the corner lies on the positive side of
+element axis <code class="docutils literal notranslate"><span class="pre">a</span></code>) has its point ID at <code class="docutils literal notranslate"><span class="pre">corners[element</span> <span class="pre">*</span> <span class="pre">2^ndim</span> <span class="pre">+</span> <span class="pre">k]</span></code>.
+A point that belongs to several elements is shared by giving its ID as a
+corner of each of them.</p>
+<p>The mesh merges the topological objects implied by the corner points: two
+objects are merged when they are made of the same set of corner points. The
+point IDs must come from a consistent axis-aligned gluing: for every object
+the corners must embed it identically in all of the elements it is in. The
+input is validated as far as the merging machinery allows; inconsistent
+inputs surface as errors from the immersion computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> – [in] Number of dimensions of the space. Must be between 1 and 63.</p></li>
+<li><p><strong>element_count</strong> – [in] Number of elements of the mesh. Must be positive.</p></li>
+<li><p><strong>point_count</strong> – [in] Number of points in the mesh. Must be greater than the
+largest corner point ID.</p></li>
+<li><p><strong>corners</strong> – [in] Corner point IDs, <code class="docutils literal notranslate"><span class="pre">element_count</span> <span class="pre">*</span> <span class="pre">2^ndim</span></code> entries.</p></li>
+<li><p><strong>allocator</strong> – [in] Allocator used for all memory and the mesh.</p></li>
+<li><p><strong>out</strong> – [out] Receives the created mesh. On failure it is left unmodified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if an argument is
+invalid, TOPO_SIZE_OVERFLOW or TOPO_FAILED_ALLOC on failure, or a
+topology error code if the corner data is inconsistent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_free">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_free</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">cutl_allocator_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">allocator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_free" title="Link to this definition">#</a><br /></dt>
+<dd><p>Release all memory owned by the mesh and free the mesh itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to free. May be NULL, in which case this function does nothing.</p></li>
+<li><p><strong>allocator</strong> – Allocator with which the mesh and all its memory was allocated.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_ndim">
+<span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_ndim</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_ndim" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the number of dimensions of the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of dimensions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_point_count">
+<span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_point_count</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_point_count" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the number of points in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of points in the mesh.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_element_count">
+<span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_element_count</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_element_count" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the number of elements of the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of elements (objects of the highest dimension).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_collections">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_collection_t" title="topo_obj_collection_t"><span class="n"><span class="pre">topo_obj_collection_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_collections</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_collections" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the collections of topological objects of the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array with <code class="docutils literal notranslate"><span class="pre">topo_mesh_ndim(mesh)</span></code> collections, owned by the mesh.
+Entry <code class="docutils literal notranslate"><span class="pre">collections[d]</span></code> holds the objects of dimension <code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">+</span> <span class="pre">1</span></code>,
+so the last entry holds the elements themselves.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_immersions">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><span class="n"><span class="pre">topo_obj_immersion_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_immersions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_immersions" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the immersion information of the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array with <code class="docutils literal notranslate"><span class="pre">topo_mesh_ndim(mesh)</span></code> immersions, owned by the mesh.
+Entry <code class="docutils literal notranslate"><span class="pre">immersions[d]</span></code> holds the immersion of the objects of
+dimension <code class="docutils literal notranslate"><span class="pre">d</span></code>, where the objects of dimension zero are the points.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_element_object">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_element_object</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">element_id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_element_object" title="Link to this definition">#</a><br /></dt>
+<dd><p>Look up the global ID of the object at a given position within one element.</p>
+<p>The position is specified with one signed, 1-based axis index per element
+axis, following the immersion orientation convention (<a class="reference internal" href="#c.topo_obj_immersion_t" title="topo_obj_immersion_t"><code class="xref any c c-struct docutils literal notranslate"><span class="pre">topo_obj_immersion_t</span></code></a>):
+entry <code class="docutils literal notranslate"><span class="pre">j</span></code> is zero when the object spans element axis <code class="docutils literal notranslate"><span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">-(j</span> <span class="pre">+</span> <span class="pre">1)</span></code>
+when the object is perpendicular to the axis at its start and <code class="docutils literal notranslate"><span class="pre">+(j</span> <span class="pre">+</span> <span class="pre">1)</span></code>
+when it is perpendicular to the axis at its end. The dimension of the found
+object is the number of free (zero) axes; a fully specified position
+(no zero entries) identifies a point.</p>
+<p>For example, <code class="docutils literal notranslate"><span class="pre">(-1,</span> <span class="pre">+2,</span> <span class="pre">-3)</span></code> in three dimensions identifies the point at
+the corner reached by following element axis 0 to its start, axis 1 to its
+end and axis 2 to its start.</p>
+<p>The object is found by descending the boundary chains of the collections:
+starting at the element, each fixed axis crosses from the current object
+into the boundary perpendicular to it at the requested side. The lookup
+takes time proportional to the number of fixed axes and needs no storage
+beyond the collections themselves.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to query.</p></li>
+<li><p><strong>element_id</strong> – [in] ID of the element. Must be in
+[0, topo_mesh_element_count(mesh)).</p></li>
+<li><p><strong>axis</strong> – [in] Position of the object within the element, one entry per
+element axis. Entry <code class="docutils literal notranslate"><span class="pre">j</span></code> must be zero, <code class="docutils literal notranslate"><span class="pre">-(j</span> <span class="pre">+</span> <span class="pre">1)</span></code> or <code class="docutils literal notranslate"><span class="pre">+(j</span> <span class="pre">+</span> <span class="pre">1)</span></code>;
+at least one entry must be nonzero.</p></li>
+<li><p><strong>out</strong> – [out] Receives the global ID of the object. For points this is a
+point ID; otherwise it is an index into the collection of the
+respective object dimension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if the element ID or
+an axis entry is invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_iterate_shared">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_iterate_shared</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">mdim</span></span>, <a class="reference internal" href="#c.topo_mesh_callback_t" title="topo_mesh_callback_t"><span class="n"><span class="pre">topo_mesh_callback_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">callback</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_iterate_shared" title="Link to this definition">#</a><br /></dt>
+<dd><p>Iterate over all objects of one dimension that are shared by at least two
+elements.</p>
+<p>The callback is invoked once per shared object of the given dimension, with
+the element IDs sorted in ascending order. To build continuity constraints
+without over-constraining, pair the consecutive elements of each shared
+object and constrain only the interior of the object (skipping its own
+boundaries).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to iterate over.</p></li>
+<li><p><strong>mdim</strong> – [in] Dimension of the objects to iterate over. Must be in
+[0, ndim).</p></li>
+<li><p><strong>callback</strong> – [in] Callback invoked for each shared object.</p></li>
+<li><p><strong>user_data</strong> – Pointer passed to the callback.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if the arguments are
+invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_iterate_shared_all">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_iterate_shared_all</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <a class="reference internal" href="#c.topo_mesh_callback_t" title="topo_mesh_callback_t"><span class="n"><span class="pre">topo_mesh_callback_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">callback</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_iterate_shared_all" title="Link to this definition">#</a><br /></dt>
+<dd><p>Iterate over all shared objects of the mesh, from dimension <code class="docutils literal notranslate"><span class="pre">ndim</span> <span class="pre">-</span> <span class="pre">1</span></code>
+down to dimension zero.</p>
+<p>This is a convenience wrapper around <a class="reference internal" href="#c.topo_mesh_iterate_shared" title="topo_mesh_iterate_shared"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared</span></code></a> in the
+order required for continuity constraints: constraining every boundary
+object dimension by dimension, from the highest to the lowest, ensures that
+no degree of freedom is constrained more than once.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to iterate over.</p></li>
+<li><p><strong>callback</strong> – [in] Callback invoked for each shared object.</p></li>
+<li><p><strong>user_data</strong> – Pointer passed to the callback.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if the arguments are
+invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_iterate_shared_pairs">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_iterate_shared_pairs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <a class="reference internal" href="#c.topo_mesh_pair_callback_t" title="topo_mesh_pair_callback_t"><span class="n"><span class="pre">topo_mesh_pair_callback_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">callback</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_iterate_shared_pairs" title="Link to this definition">#</a><br /></dt>
+<dd><p>Iterate over consecutive element pairs of all shared objects, from dimension
+<code class="docutils literal notranslate"><span class="pre">ndim</span> <span class="pre">-</span> <span class="pre">1</span></code> down to dimension zero.</p>
+<p>Each object contained in elements <code class="docutils literal notranslate"><span class="pre">[e0,</span> <span class="pre">...,</span> <span class="pre">eN]</span></code> invokes the callback for
+<code class="docutils literal notranslate"><span class="pre">(e0,</span> <span class="pre">e1)</span></code>, …, <code class="docutils literal notranslate"><span class="pre">(eN-1,</span> <span class="pre">eN)</span></code>. This produces an acyclic spanning path
+through every shared object’s element occurrences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to iterate over.</p></li>
+<li><p><strong>callback</strong> – Callback invoked for every consecutive pair.</p></li>
+<li><p><strong>user_data</strong> – Pointer passed to the callback.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if an argument is invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_iterate_boundary">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_iterate_boundary</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">mdim</span></span>, <a class="reference internal" href="#c.topo_mesh_callback_t" title="topo_mesh_callback_t"><span class="n"><span class="pre">topo_mesh_callback_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">callback</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_iterate_boundary" title="Link to this definition">#</a><br /></dt>
+<dd><p>Iterate over all objects of one dimension that lie on the outer boundary of
+the mesh.</p>
+<p>An object lies on the outer boundary of the mesh when it is contained in a
+boundary face: an object of dimension <code class="docutils literal notranslate"><span class="pre">ndim</span> <span class="pre">-</span> <span class="pre">1</span></code> that is in exactly one
+element. Objects of dimension <code class="docutils literal notranslate"><span class="pre">ndim</span> <span class="pre">-</span> <span class="pre">1</span></code> on the boundary are therefore in
+exactly one element; lower-dimensional objects can be in several elements
+and still lie on the boundary, for example a point in the middle of a
+boundary edge of a two-dimensional mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to iterate over.</p></li>
+<li><p><strong>mdim</strong> – [in] Dimension of the objects to iterate over. Must be in
+[0, ndim).</p></li>
+<li><p><strong>callback</strong> – [in] Callback invoked for each boundary object.</p></li>
+<li><p><strong>user_data</strong> – Pointer passed to the callback.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if the arguments are
+invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.topo_mesh_iterate_boundary_all">
+<a class="reference internal" href="#c.topo_status_t" title="topo_status_t"><span class="n"><span class="pre">topo_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">topo_mesh_iterate_boundary_all</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">topo_mesh_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">mesh</span></span>, <a class="reference internal" href="#c.topo_mesh_callback_t" title="topo_mesh_callback_t"><span class="n"><span class="pre">topo_mesh_callback_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">callback</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">user_data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.topo_mesh_iterate_boundary_all" title="Link to this definition">#</a><br /></dt>
+<dd><p>Iterate over all boundary objects of the mesh, from dimension <code class="docutils literal notranslate"><span class="pre">ndim</span> <span class="pre">-</span> <span class="pre">1</span></code>
+down to dimension zero.</p>
+<p>This is a convenience wrapper around <a class="reference internal" href="#c.topo_mesh_iterate_boundary" title="topo_mesh_iterate_boundary"><code class="xref any c c-func docutils literal notranslate"><span class="pre">topo_mesh_iterate_boundary</span></code></a> that
+iterates every object dimension in descending order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – Mesh to iterate over.</p></li>
+<li><p><strong>callback</strong> – [in] Callback invoked for each boundary object.</p></li>
+<li><p><strong>user_data</strong> – Pointer passed to the callback.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TOPO_SUCCESS on success, TOPO_INVALID_ARGUMENT if the arguments are
+invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="c_matrices.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Matrices</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="c_constraints.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Constraints</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_status_t"><code class="docutils literal notranslate"><span class="pre">topo_status_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_status_to_str"><code class="docutils literal notranslate"><span class="pre">topo_status_to_str()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_status_msg"><code class="docutils literal notranslate"><span class="pre">topo_status_msg()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_collection_t"><code class="docutils literal notranslate"><span class="pre">topo_obj_collection_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_immersion_t"><code class="docutils literal notranslate"><span class="pre">topo_obj_immersion_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_boundary_count"><code class="docutils literal notranslate"><span class="pre">topo_obj_boundary_count()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_common_boundary"><code class="docutils literal notranslate"><span class="pre">topo_obj_common_boundary()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_common_boundary_index"><code class="docutils literal notranslate"><span class="pre">topo_obj_common_boundary_index()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_create_immersion_info"><code class="docutils literal notranslate"><span class="pre">topo_obj_create_immersion_info()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_immersions_free"><code class="docutils literal notranslate"><span class="pre">topo_obj_immersions_free()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_boundary_immersion_create"><code class="docutils literal notranslate"><span class="pre">topo_obj_boundary_immersion_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_immersion_of_object"><code class="docutils literal notranslate"><span class="pre">topo_obj_immersion_of_object()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_boundary_orientation"><code class="docutils literal notranslate"><span class="pre">topo_obj_boundary_orientation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_obj_find_common_boundary"><code class="docutils literal notranslate"><span class="pre">topo_obj_find_common_boundary()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_bnd_iter_t"><code class="docutils literal notranslate"><span class="pre">topo_bnd_iter_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_reorder_with_orientation"><code class="docutils literal notranslate"><span class="pre">topo_reorder_with_orientation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_iterate_boundary"><code class="docutils literal notranslate"><span class="pre">topo_iterate_boundary()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh"><code class="docutils literal notranslate"><span class="pre">topo_mesh</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_shared_object_t"><code class="docutils literal notranslate"><span class="pre">topo_mesh_shared_object_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_callback_t"><code class="docutils literal notranslate"><span class="pre">topo_mesh_callback_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_pair_callback_t"><code class="docutils literal notranslate"><span class="pre">topo_mesh_pair_callback_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_create"><code class="docutils literal notranslate"><span class="pre">topo_mesh_create()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_create_from_collections"><code class="docutils literal notranslate"><span class="pre">topo_mesh_create_from_collections()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_create_from_corners"><code class="docutils literal notranslate"><span class="pre">topo_mesh_create_from_corners()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_free"><code class="docutils literal notranslate"><span class="pre">topo_mesh_free()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_ndim"><code class="docutils literal notranslate"><span class="pre">topo_mesh_ndim()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_point_count"><code class="docutils literal notranslate"><span class="pre">topo_mesh_point_count()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_element_count"><code class="docutils literal notranslate"><span class="pre">topo_mesh_element_count()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_collections"><code class="docutils literal notranslate"><span class="pre">topo_mesh_collections()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_immersions"><code class="docutils literal notranslate"><span class="pre">topo_mesh_immersions()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_element_object"><code class="docutils literal notranslate"><span class="pre">topo_mesh_element_object()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_iterate_shared"><code class="docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_iterate_shared_all"><code class="docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared_all()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_iterate_shared_pairs"><code class="docutils literal notranslate"><span class="pre">topo_mesh_iterate_shared_pairs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_iterate_boundary"><code class="docutils literal notranslate"><span class="pre">topo_mesh_iterate_boundary()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.topo_mesh_iterate_boundary_all"><code class="docutils literal notranslate"><span class="pre">topo_mesh_iterate_boundary_all()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/c_topology.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Jan Roth.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

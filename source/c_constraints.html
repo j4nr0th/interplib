@@ -1,0 +1,1075 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Constraints &#8212; fdg 0.0.1a documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=8c8a9e14"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'source/c_constraints';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reconstruction" href="c_reconstruction.html" />
+    <link rel="prev" title="Topology" href="c_topology.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">fdg 0.0.1a documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Documentation for Exported Types and Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="math_background.html">Mathematical Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="covector_basis.html">Covector Basis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="degrees_of_freedom.html">Degrees of Freedom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="space_map.html">Space Map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_types.html">Domain Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh Topology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_types.html"><span class="math notranslate nohighlight">\(k\)</span>-form Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kform_transformations.html">Transforming <span class="math notranslate nohighlight">\(k\)</span>-forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inner_product.html">Inner Product Mass Matrix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="incidence.html">Exterior Derivative</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interior_product.html">Interior Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary_constraints.html">Boundary Constraints</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="c_api.html">C API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="c_common.html">Common Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_basis.html">Basis Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_polynomials.html">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_integration.html">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_matrices.html">Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_topology.html">Topology</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="c_reconstruction.html">Reconstruction</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Documentation for Exported Types and Functions</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="c_api.html" class="nav-link">C API</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Constraints</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="constraints">
+<h1>Constraints<a class="headerlink" href="#constraints" title="Link to this heading">#</a></h1>
+<p>Assembly of trace constraints for differential forms on element interfaces,
+in both reference space and physical space, including the packed
+row representation of the resulting constraint matrices.</p>
+<p>A trace constraint equates, for each test degree of freedom on a shared
+face, the traces of the element <span class="math notranslate nohighlight">\(k\)</span>-forms on both sides of the
+interface. In reference space the coefficient of a side is the basis inner
+product over the face quadrature, signed by the element orientation and
+with the two sides entering with opposite signs. In physical space the
+coefficients additionally carry the pullback of the physical <span class="math notranslate nohighlight">\(k\)</span>-form
+(through the face map’s tangential pullback, see
+<a class="reference internal" href="space_map.html#fdg-space-map"><span class="std std-ref">Space Map</span></a>) and the unsigned surface measure
+<span class="math notranslate nohighlight">\(|\det J_{\text{face}}|\)</span>. The rows are returned in a packed
+representation (row offsets, component, local DoF, coefficient) so that
+callers can assemble their own global sparse matrices. The mathematical
+construction is described in <a class="reference internal" href="boundary_constraints.html#fdg-boundary-constraints"><span class="std std-ref">Boundary Constraints</span></a>.</p>
+<p>The single-side physical-space assembly also provides a boundary <em>load</em>:
+<a class="reference internal" href="#c.constraint_physical_side_load" title="constraint_physical_side_load"><code class="xref c c-func docutils literal notranslate"><span class="pre">constraint_physical_side_load()</span></code></a> integrates the components of a
+<span class="math notranslate nohighlight">\(k\)</span>-form datum (element-frame components sampled at the canonical face
+points) against the trace of the element <span class="math notranslate nohighlight">\((k-1)\)</span>-form basis on a
+codimension-1 face, for every datum degree <span class="math notranslate nohighlight">\(k = 1, \dots, n\)</span>.  At
+<span class="math notranslate nohighlight">\(k = n\)</span> this is the weak Dirichlet boundary condition of the mixed
+formulation.  Like the trace assembly it needs no surface weights or
+pullback, because the load is a metric-free chain integral
+(see <a class="reference internal" href="boundary_constraints.html#fdg-boundary-constraints"><span class="std std-ref">Boundary Constraints</span></a>).</p>
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.constraint_status_t">
+<span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_status_t</span></span></span><a class="headerlink" href="#c.constraint_status_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Status and error codes returned by the constraint functions.</p>
+<p>A value of CONSTRAINT_SUCCESS means the operation completed successfully;
+any other value is an error and describes why the operation failed.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_kform_spec_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></span><a class="headerlink" href="#c.constraint_kform_spec_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Specification of the test k-form space on the boundary face.</p>
+<p>The basis specifications are given for the canonical face axes, in the
+order the axes appear in the face.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_element_side_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_element_side_t</span></span></span><a class="headerlink" href="#c.constraint_element_side_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Specification of one side (element) of the interface.</p>
+<p>The side has more dimensions than the test space: the first
+<cite>ndim - test ndim</cite> fixed axes are normal to the face, and the remaining
+axes span the face itself.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_quadrature_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_quadrature_t</span></span></span><a class="headerlink" href="#c.constraint_quadrature_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>One-dimensional quadrature rule along a single canonical face axis.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_face_quadrature_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_face_quadrature_t</span></span></span><a class="headerlink" href="#c.constraint_face_quadrature_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Tensor-product quadrature rule over a face.</p>
+<p>The total number of points is the product of the node counts of the
+individual axes and is cached in <cite>point_count</cite>.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_trace_pullback_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_trace_pullback_t</span></span></span><a class="headerlink" href="#c.constraint_trace_pullback_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Sampled pullback of the physical k-form onto the face.</p>
+<p>The values are laid out so that the component for physical component
+<cite>p</cite> at point <cite>i</cite> of component <cite>c</cite> is stored at
+<cite>values[c * physical_component_count * point_count + p * point_count + i]</cite>.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_physical_batch_item_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_batch_item_t</span></span></span><a class="headerlink" href="#c.constraint_physical_batch_item_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>One two-sided physical trace assembly item in a batch.</p>
+<p>All items passed to the batch functions use the same test specification;
+their side, quadrature, metric, and pullback data may differ.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_trace_basis_values_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_trace_basis_values_t</span></span></span><a class="headerlink" href="#c.constraint_trace_basis_values_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Precomputed tensor-product basis values for trace assembly.</p>
+<p>Values are laid out by component, then point, then local degree of freedom:
+<code class="docutils literal notranslate"><span class="pre">values[offsets[c]</span> <span class="pre">*</span> <span class="pre">point_count</span> <span class="pre">+</span> <span class="pre">point</span> <span class="pre">*</span> <span class="pre">dofs[c]</span> <span class="pre">+</span> <span class="pre">dof]</span></code>. The offsets
+array has <code class="docutils literal notranslate"><span class="pre">component_count</span> <span class="pre">+</span> <span class="pre">1</span></code> entries and stores cumulative DoF counts.</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_entry_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_entry_t</span></span></span><a class="headerlink" href="#c.constraint_entry_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Single non-zero entry of an assembled constraint matrix row.</p>
+<p>The entry couples one degree of freedom of the test space (the row) with
+one degree of freedom of an element side (the column).</p>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.constraint_rows_view_t">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_rows_view_t</span></span></span><a class="headerlink" href="#c.constraint_rows_view_t" title="Link to this definition">#</a><br /></dt>
+<dd><p>Read-only view of an assembled constraint matrix in packed row form.</p>
+<p>The rows are indexed by the degrees of freedom of the test space, in the
+same order as the offsets computed by constraint_kform_component_offsets.
+The entries of row <cite>i</cite> are <cite>entries[row_offsets[i] .. row_offsets[i + 1])</cite>.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_status_to_str">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">constraint_status_to_str</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">status</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_status_to_str" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the name of a constraint status value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status</strong> – Status value to get the name for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Statically allocated string with the name of the status value,
+such as “CONSTRAINT_SUCCESS”, or “Unknown” for values outside of
+the enum.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_status_msg">
+<span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">constraint_status_msg</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">status</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_status_msg" title="Link to this definition">#</a><br /></dt>
+<dd><p>Get the description of a constraint status value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status</strong> – Status value to get the message for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Statically allocated string with a short description of what the
+status value means, or “Unknown” for values outside of the enum.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_kform_component_count">
+<a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_kform_component_count</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_kform_component_count" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of k-form components of the test space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec</strong> – Specification of the test space. The specification is
+validated; on failure the outputs are left unmodified.</p></li>
+<li><p><strong>out_count</strong> – Receives the number of components, which is the binomial
+coefficient C(ndim, order).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
+<cite>spec</cite> or <cite>out_count</cite> is null, CONSTRAINT_INVALID_DIMENSION if
+<cite>ndim</cite> exceeds 255, or CONSTRAINT_INVALID_ORDER if the order
+exceeds the dimension or a basis order is zero or the basis type
+is invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_kform_component_dof_count">
+<a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_kform_component_dof_count</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">component</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_kform_component_dof_count" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of degrees of freedom of one k-form component.</p>
+<p>For a component with active axes (those in the wedge product) the basis
+order along the active axes is reduced by one, so a component of order
+<cite>order</cite> has <cite>prod_i (order_i + (active_i ? 0 : 1))</cite> degrees of freedom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec</strong> – Specification of the test space, validated as in
+constraint_kform_component_count.</p></li>
+<li><p><strong>component</strong> – Index of the component, in the range
+[0, C(ndim, order)).</p></li>
+<li><p><strong>out_count</strong> – Receives the number of degrees of freedom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
+<cite>out_count</cite> is null or <cite>component</cite> is out of range,
+CONSTRAINT_INVALID_DIMENSION, CONSTRAINT_INVALID_ORDER, or
+CONSTRAINT_SIZE_OVERFLOW if the count does not fit in a size_t.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_kform_component_offsets">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_kform_component_offsets</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">offset_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_component_offsets" title="offset_count"><span class="n"><span class="pre">offset_count</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_kform_component_offsets" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the cumulative offsets of the components into a flattened DoF array.</p>
+<p>Fills <cite>offsets[0..component_count]</cite> with the start index of each
+component in the flattened array of all test degrees of freedom; the last
+entry holds the total number of degrees of freedom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec</strong> – Specification of the test space, validated as in
+constraint_kform_component_count.</p></li>
+<li><p><strong>offset_count</strong> – Number of entries available in <cite>offsets</cite>. Must be at
+least the number of components plus one.</p></li>
+<li><p><strong>offsets</strong> – Array of <cite>offset_count</cite> entries which receives the
+offsets.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
+<cite>offset_count</cite> is too small, otherwise the validation or overflow
+errors of the functions above.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_reference_required">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_reference_required</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">sides</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_reference_required" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of rows and entries of a reference-space L2 trace constraint matrix.</p>
+<p>The reference-space constraint equates, for each test degree of freedom,
+the trace basis coefficients on both sides of the interface. This
+function reports the sizes needed by constraint_reference_assemble
+without assembling the matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the test space.</p></li>
+<li><p><strong>sides</strong> – Array of 2 element side specifications. Each side must have
+more dimensions than the test space, with valid basis
+specifications and a valid orientation permutation.</p></li>
+<li><p><strong>out_row_count</strong> – Receives the number of rows, one per test degree of
+freedom.</p></li>
+<li><p><strong>out_entry_count</strong> – Receives the number of entries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, otherwise the validation error of
+the specifications or CONSTRAINT_SIZE_OVERFLOW if a required size
+does not fit in a size_t. On failure the outputs are unmodified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_reference_assemble">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_reference_assemble</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">sides</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_quadrature_t" title="constraint_quadrature_t"><span class="n"><span class="pre">constraint_quadrature_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">quadrature</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offset_capacity</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offsets</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_reference_assemble" title="row_offset_capacity"><span class="n"><span class="pre">row_offset_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">entry_capacity</span></span>, <a class="reference internal" href="#c.constraint_entry_t" title="constraint_entry_t"><span class="n"><span class="pre">constraint_entry_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_reference_assemble" title="entry_capacity"><span class="n"><span class="pre">entry_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_reference_assemble" title="Link to this definition">#</a><br /></dt>
+<dd><p>Assemble a reference-space L2 trace constraint matrix into caller-owned packed rows.</p>
+<p>The assembled matrix has one row per test degree of freedom. Each row
+contains entries coupling to the degrees of freedom of the two element
+sides, with the coefficient of side 0 being the basis inner product over
+the face quadrature and the coefficient of side 1 its negative.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the test space.</p></li>
+<li><p><strong>sides</strong> – Array of 2 element side specifications, as validated by
+constraint_reference_required.</p></li>
+<li><p><strong>quadrature</strong> – Tensor-product quadrature rule over the canonical face,
+with one <cite>constraint_quadrature_t</cite> per test dimension. Each axis
+must have a positive node count with valid nodes and weights.</p></li>
+<li><p><strong>row_offset_capacity</strong> – Number of entries available in <cite>row_offsets</cite>.</p></li>
+<li><p><strong>row_offsets</strong> – Array which receives the packed row offsets. Must have
+room for <cite>row_count + 1</cite> entries, where <cite>row_count</cite> is as reported
+by constraint_reference_required. <cite>row_offsets[0]</cite> is set to 0.</p></li>
+<li><p><strong>entry_capacity</strong> – Number of entries available in <cite>entries</cite>.</p></li>
+<li><p><strong>entries</strong> – Array which receives the packed entries.</p></li>
+<li><p><strong>out_row_count</strong> – Receives the number of rows written.</p></li>
+<li><p><strong>out_entry_count</strong> – Receives the number of entries written.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
+the provided capacities are smaller than the required sizes,
+otherwise the validation errors of the inputs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_required">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_required</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">sides</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_required" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of rows and entries of a physical-space trace constraint matrix.</p>
+<p>The physical-space constraint pairs the test degrees of freedom with the
+element degrees of freedom through the pullback of the physical k-form
+and the unsigned face measure, for both sides of the interface. This
+function reports the sizes needed by constraint_physical_assemble without
+assembling the matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the test space.</p></li>
+<li><p><strong>sides</strong> – Array of 2 element side specifications.</p></li>
+<li><p><strong>out_row_count</strong> – Receives the number of rows, one per test degree of
+freedom.</p></li>
+<li><p><strong>out_entry_count</strong> – Receives the number of entries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, otherwise the validation error of
+the specifications or CONSTRAINT_SIZE_OVERFLOW. On failure the
+outputs are unmodified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_side_required">
+<a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_side_required</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">side</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_side_required" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of rows and entries of a single-side physical-space trace constraint.</p>
+<p>Same as constraint_physical_required, but for one side only; the
+resulting rows couple only to the degrees of freedom of that single side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the test space.</p></li>
+<li><p><strong>side</strong> – Element side specification.</p></li>
+<li><p><strong>out_row_count</strong> – Receives the number of rows, one per test degree of
+freedom.</p></li>
+<li><p><strong>out_entry_count</strong> – Receives the number of entries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, otherwise the validation error of
+the specifications or CONSTRAINT_SIZE_OVERFLOW. On failure the
+outputs are unmodified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_side_assemble">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_side_assemble</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">side</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_face_quadrature_t" title="constraint_face_quadrature_t"><span class="n"><span class="pre">constraint_face_quadrature_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">quadrature</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">surface_weights</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_trace_pullback_t" title="constraint_trace_pullback_t"><span class="n"><span class="pre">constraint_trace_pullback_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">pullback</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offset_capacity</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offsets</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_side_assemble" title="row_offset_capacity"><span class="n"><span class="pre">row_offset_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">entry_capacity</span></span>, <a class="reference internal" href="#c.constraint_entry_t" title="constraint_entry_t"><span class="n"><span class="pre">constraint_entry_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_side_assemble" title="entry_capacity"><span class="n"><span class="pre">entry_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_side_assemble" title="Link to this definition">#</a><br /></dt>
+<dd><p>Assemble a single-side physical-space trace constraint matrix.</p>
+<p>The assembled matrix has one row per test degree of freedom, with entries
+coupling to the degrees of freedom of the given element side, weighted by
+the face quadrature, the unsigned face measure (<cite>surface_weights</cite>) and
+the sampled pullback of the physical k-form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the test space.</p></li>
+<li><p><strong>side</strong> – Element side specification.</p></li>
+<li><p><strong>quadrature</strong> – Tensor-product quadrature rule over the face. Its
+<cite>point_count</cite> must match the product of the axis node counts.</p></li>
+<li><p><strong>surface_weights</strong> – Array of <cite>point_count</cite> unsigned face measures, one
+per quadrature point.</p></li>
+<li><p><strong>pullback</strong> – Sampled pullback of the physical k-form; only used when
+the form order is non-zero. Must have <cite>point_count</cite> points. May be
+null for order zero.</p></li>
+<li><p><strong>row_offset_capacity</strong> – Number of entries available in <cite>row_offsets</cite>.</p></li>
+<li><p><strong>row_offsets</strong> – Array which receives the packed row offsets. Must have
+room for <cite>row_count + 1</cite> entries. <cite>row_offsets[0]</cite> is set to 0.</p></li>
+<li><p><strong>entry_capacity</strong> – Number of entries available in <cite>entries</cite>.</p></li>
+<li><p><strong>entries</strong> – Array which receives the packed entries, all with
+<cite>side</cite> set to 0.</p></li>
+<li><p><strong>out_row_count</strong> – Receives the number of rows written.</p></li>
+<li><p><strong>out_entry_count</strong> – Receives the number of entries written.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
+the provided capacities are smaller than the required sizes,
+otherwise the validation errors of the inputs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_side_assemble_precomputed">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_side_assemble_precomputed</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">side</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_face_quadrature_t" title="constraint_face_quadrature_t"><span class="n"><span class="pre">constraint_face_quadrature_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">quadrature</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">surface_weights</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_trace_pullback_t" title="constraint_trace_pullback_t"><span class="n"><span class="pre">constraint_trace_pullback_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">pullback</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_trace_basis_values_t" title="constraint_trace_basis_values_t"><span class="n"><span class="pre">constraint_trace_basis_values_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_basis</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_trace_basis_values_t" title="constraint_trace_basis_values_t"><span class="n"><span class="pre">constraint_trace_basis_values_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">element_basis</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offset_capacity</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offsets</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_side_assemble_precomputed" title="row_offset_capacity"><span class="n"><span class="pre">row_offset_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">entry_capacity</span></span>, <a class="reference internal" href="#c.constraint_entry_t" title="constraint_entry_t"><span class="n"><span class="pre">constraint_entry_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_side_assemble_precomputed" title="entry_capacity"><span class="n"><span class="pre">entry_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_side_assemble_precomputed" title="Link to this definition">#</a><br /></dt>
+<dd><p>Assemble a physical trace using caller-precomputed basis values.</p>
+<p>This has the same output and sign conventions as
+<a class="reference internal" href="#c.constraint_physical_side_assemble" title="constraint_physical_side_assemble"><code class="xref any c c-func docutils literal notranslate"><span class="pre">constraint_physical_side_assemble</span></code></a>, but obtains both the test and
+element trace basis values from registry-independent precomputed tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_basis</strong> – Precomputed values for the canonical test components.</p></li>
+<li><p><strong>element_basis</strong> – Precomputed values for all element components of the
+traced form.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_side_load">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_side_load</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">side</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_face_quadrature_t" title="constraint_face_quadrature_t"><span class="n"><span class="pre">constraint_face_quadrature_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">quadrature</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">datum_values</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">value_count</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">surface_weights</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_side_load" title="value_count"><span class="n"><span class="pre">value_count</span></span></a><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_side_load" title="Link to this definition">#</a><br /></dt>
+<dd><dl class="simple">
+<dt>Assemble the physical-space boundary load of one element face for a</dt><dd><p>general k-form datum.</p>
+</dd>
+</dl>
+<p>Computes the chain integral of the components of a k-form datum (element
+frame, k = test_spec-&gt;order + 1) against the trace of the element
+(k-1)-form basis on a codimension-1 boundary face. For each face component
+J (element-frame axes J_e) the only contributing datum component is
+I = J_e U {a} with a the fixed normal axis:</p>
+<p><code class="docutils literal notranslate"><span class="pre">values[j]</span> <span class="pre">=</span> <span class="pre">s</span> <span class="pre">*</span> <span class="pre">o</span> <span class="pre">*</span> <span class="pre">(-1)^{|{i</span> <span class="pre">in</span> <span class="pre">J_e</span> <span class="pre">:</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">a}|}</span> <span class="pre">*</span> <span class="pre">sum_p</span> <span class="pre">w_p</span> <span class="pre">u_I(g_p)</span> <span class="pre">B_j(g_p)</span></code>
+(chain integral), or, with <code class="docutils literal notranslate"><span class="pre">surface_weights</span> <span class="pre">!=</span> <span class="pre">NULL</span></code>, the same sum with
+each weight multiplied by <code class="docutils literal notranslate"><span class="pre">surface_weights[p]</span></code> (surface-measure pairing).</p>
+<p>Here <code class="docutils literal notranslate"><span class="pre">s</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span></code> are the side and index of the fixed normal axis, <code class="docutils literal notranslate"><span class="pre">o</span></code>
+is the orientation sign of the mapped component, <code class="docutils literal notranslate"><span class="pre">w_p</span></code> are the reference
+face quadrature weights. When provided, <code class="docutils literal notranslate"><span class="pre">surface_weights[p]</span></code> is the
+absolute mapped face Jacobian determinant at the same point. <code class="docutils literal notranslate"><span class="pre">u_I(g_p)</span></code> is
+the sampled element-frame component of the datum at the canonical face points
+and <code class="docutils literal notranslate"><span class="pre">B_j</span></code> is the element basis of the traced component. At k equal to the element dimension
+(single datum component) the sign reduces to the outward orientation
+<code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">*</span> <span class="pre">(-1)^a</span></code> of the previous scalar-chain-integral behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the (k-1)-form test space on the face.</p></li>
+<li><p><strong>side</strong> – Element side specification with exactly one fixed normal axis.</p></li>
+<li><p><strong>quadrature</strong> – Tensor-product quadrature over the canonical face.</p></li>
+<li><p><strong>datum_values</strong> – Element-frame k-form components sampled at the canonical
+face quadrature points, laid out row-major as
+<code class="docutils literal notranslate"><span class="pre">[component</span> <span class="pre">*</span> <span class="pre">quadrature-&gt;point_count</span> <span class="pre">+</span> <span class="pre">point]</span></code> with
+<code class="docutils literal notranslate"><span class="pre">combination_total_count(side-&gt;ndim,</span> <span class="pre">test_spec-&gt;order</span> <span class="pre">+</span> <span class="pre">1)</span></code>
+component rows.</p></li>
+<li><p><strong>value_count</strong> – Length of the output array: the total number of element
+(k-1)-form degrees of freedom.</p></li>
+<li><p><strong>surface_weights</strong> – Mapped face Jacobian at the canonical points, or
+NULL to assemble the metric-free chain integral.</p></li>
+<li><p><strong>values</strong> – Output array, accumulated over the mapped components.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>CONSTRAINT_SUCCESS</cite> on success, or an error status.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_assemble">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_assemble</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_element_side_t" title="constraint_element_side_t"><span class="n"><span class="pre">constraint_element_side_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">sides</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_face_quadrature_t" title="constraint_face_quadrature_t"><span class="n"><span class="pre">constraint_face_quadrature_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">quadrature</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">surface_weights</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_trace_pullback_t" title="constraint_trace_pullback_t"><span class="n"><span class="pre">constraint_trace_pullback_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">pullbacks</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offset_capacity</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offsets</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_assemble" title="row_offset_capacity"><span class="n"><span class="pre">row_offset_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">entry_capacity</span></span>, <a class="reference internal" href="#c.constraint_entry_t" title="constraint_entry_t"><span class="n"><span class="pre">constraint_entry_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_assemble" title="entry_capacity"><span class="n"><span class="pre">entry_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_assemble" title="Link to this definition">#</a><br /></dt>
+<dd><p>Assemble a physical-space trace constraint matrix for both sides of the interface.</p>
+<p>Same as constraint_physical_side_assemble, but assembles the rows for
+both sides at once, with entries of side 0 weighted by +1 and entries of
+side 1 weighted by -1, so that the assembled equations express the
+equality of the traces of the two sides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_spec</strong> – Specification of the test space.</p></li>
+<li><p><strong>sides</strong> – Array of 2 element side specifications.</p></li>
+<li><p><strong>quadrature</strong> – Array of 2 face quadrature rules, one per side.</p></li>
+<li><p><strong>surface_weights</strong> – Array of 2 pointers to the unsigned face measures,
+one array per side.</p></li>
+<li><p><strong>pullbacks</strong> – Array of 2 sampled pullbacks of the physical k-form, one
+per side. Only used when the form order is non-zero.</p></li>
+<li><p><strong>row_offset_capacity</strong> – Number of entries available in <cite>row_offsets</cite>.</p></li>
+<li><p><strong>row_offsets</strong> – Array which receives the packed row offsets. Must have
+room for <cite>row_count + 1</cite> entries. <cite>row_offsets[0]</cite> is set to 0.</p></li>
+<li><p><strong>entry_capacity</strong> – Number of entries available in <cite>entries</cite>.</p></li>
+<li><p><strong>entries</strong> – Array which receives the packed entries.</p></li>
+<li><p><strong>out_row_count</strong> – Receives the number of rows written.</p></li>
+<li><p><strong>out_entry_count</strong> – Receives the number of entries written.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
+the provided capacities are smaller than the required sizes,
+otherwise the validation errors of the inputs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_batch_required">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_batch_required</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">item_count</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_batch_item_t" title="constraint_physical_batch_item_t"><span class="n"><span class="pre">constraint_physical_batch_item_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_batch_required" title="item_count"><span class="n"><span class="pre">item_count</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_batch_required" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute storage requirements for a batch of physical trace matrices.</p>
+<p>The same test space is used for every item. The output counts are the sums
+of the per-item row and entry counts, in batch order.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_physical_batch_assemble">
+<span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_physical_batch_assemble</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_kform_spec_t" title="constraint_kform_spec_t"><span class="n"><span class="pre">constraint_kform_spec_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">test_spec</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">item_count</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_batch_item_t" title="constraint_physical_batch_item_t"><span class="n"><span class="pre">constraint_physical_batch_item_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_batch_assemble" title="item_count"><span class="n"><span class="pre">item_count</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offset_capacity</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_offsets</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_batch_assemble" title="row_offset_capacity"><span class="n"><span class="pre">row_offset_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">entry_capacity</span></span>, <a class="reference internal" href="#c.constraint_entry_t" title="constraint_entry_t"><span class="n"><span class="pre">constraint_entry_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.constraint_physical_batch_assemble" title="entry_capacity"><span class="n"><span class="pre">entry_capacity</span></span></a><span class="p"><span class="pre">]</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_entry_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_physical_batch_assemble" title="Link to this definition">#</a><br /></dt>
+<dd><p>Assemble a batch of physical trace matrices into one packed matrix.</p>
+<p>Rows from each item are concatenated in input order. Within each item the
+entry side field remains zero or one and retains the usual +1/-1 signs.
+This keeps common test-space setup and dispatch at the caller’s batch
+boundary while allowing geometry and orientations to vary per item.</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_rows_required_offset_count">
+<a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_rows_required_offset_count</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_rows_required_offset_count" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the number of row offsets needed for a packed row representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_count</strong> – Number of rows.</p></li>
+<li><p><strong>out_count</strong> – Receives <cite>row_count + 1</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
+<cite>out_count</cite> is null, CONSTRAINT_SIZE_OVERFLOW if <cite>row_count</cite> is
+SIZE_MAX.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_rows_required_entry_capacity">
+<a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_rows_required_entry_capacity</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">row_count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">entries_per_row</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_rows_required_entry_capacity" title="Link to this definition">#</a><br /></dt>
+<dd><p>Compute the entry capacity needed for a packed row representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_count</strong> – Number of rows.</p></li>
+<li><p><strong>entries_per_row</strong> – Number of entries per row.</p></li>
+<li><p><strong>out_count</strong> – Receives <cite>row_count * entries_per_row</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
+<cite>out_count</cite> is null, CONSTRAINT_SIZE_OVERFLOW if the product does
+not fit in a size_t.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.constraint_rows_validate">
+<a class="reference internal" href="#c.constraint_status_t" title="constraint_status_t"><span class="n"><span class="pre">constraint_status_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">constraint_rows_validate</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.constraint_rows_view_t" title="constraint_rows_view_t"><span class="n"><span class="pre">constraint_rows_view_t</span></span></a><span class="w"> </span><span class="n"><span class="pre">view</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.constraint_rows_validate" title="Link to this definition">#</a><br /></dt>
+<dd><p>Validate a packed row representation of a constraint matrix.</p>
+<p>Checks that the offsets are non-decreasing, start at zero and end at the
+entry count, that the entries are non-null when the counts are non-zero,
+and that every entry references a valid side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view</strong> – View of the packed rows to validate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CONSTRAINT_SUCCESS if the representation is consistent,
+CONSTRAINT_INVALID_ARGUMENT otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="c_topology.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Topology</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="c_reconstruction.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Reconstruction</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_status_t"><code class="docutils literal notranslate"><span class="pre">constraint_status_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_kform_spec_t"><code class="docutils literal notranslate"><span class="pre">constraint_kform_spec_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_element_side_t"><code class="docutils literal notranslate"><span class="pre">constraint_element_side_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_quadrature_t"><code class="docutils literal notranslate"><span class="pre">constraint_quadrature_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_face_quadrature_t"><code class="docutils literal notranslate"><span class="pre">constraint_face_quadrature_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_trace_pullback_t"><code class="docutils literal notranslate"><span class="pre">constraint_trace_pullback_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_batch_item_t"><code class="docutils literal notranslate"><span class="pre">constraint_physical_batch_item_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_trace_basis_values_t"><code class="docutils literal notranslate"><span class="pre">constraint_trace_basis_values_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_entry_t"><code class="docutils literal notranslate"><span class="pre">constraint_entry_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_rows_view_t"><code class="docutils literal notranslate"><span class="pre">constraint_rows_view_t</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_status_to_str"><code class="docutils literal notranslate"><span class="pre">constraint_status_to_str()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_status_msg"><code class="docutils literal notranslate"><span class="pre">constraint_status_msg()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_kform_component_count"><code class="docutils literal notranslate"><span class="pre">constraint_kform_component_count()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_kform_component_dof_count"><code class="docutils literal notranslate"><span class="pre">constraint_kform_component_dof_count()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_kform_component_offsets"><code class="docutils literal notranslate"><span class="pre">constraint_kform_component_offsets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_reference_required"><code class="docutils literal notranslate"><span class="pre">constraint_reference_required()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_reference_assemble"><code class="docutils literal notranslate"><span class="pre">constraint_reference_assemble()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_required"><code class="docutils literal notranslate"><span class="pre">constraint_physical_required()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_side_required"><code class="docutils literal notranslate"><span class="pre">constraint_physical_side_required()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_side_assemble"><code class="docutils literal notranslate"><span class="pre">constraint_physical_side_assemble()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_side_assemble_precomputed"><code class="docutils literal notranslate"><span class="pre">constraint_physical_side_assemble_precomputed()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_side_load"><code class="docutils literal notranslate"><span class="pre">constraint_physical_side_load()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_assemble"><code class="docutils literal notranslate"><span class="pre">constraint_physical_assemble()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_batch_required"><code class="docutils literal notranslate"><span class="pre">constraint_physical_batch_required()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_physical_batch_assemble"><code class="docutils literal notranslate"><span class="pre">constraint_physical_batch_assemble()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_rows_required_offset_count"><code class="docutils literal notranslate"><span class="pre">constraint_rows_required_offset_count()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_rows_required_entry_capacity"><code class="docutils literal notranslate"><span class="pre">constraint_rows_required_entry_capacity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c.constraint_rows_validate"><code class="docutils literal notranslate"><span class="pre">constraint_rows_validate()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/source/c_constraints.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Jan Roth.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -131,7 +131,7 @@ This gives the forcing function:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-106
+.. GENERATED FROM PYTHON SOURCE LINES 94-110
 
 First the geometry of the space this will be solved on will be defined. For this case,
 we use the unit square, where the interior is deformed, while boundaries are the same.
@@ -143,10 +143,14 @@ determines the scale of deformation.
 .. math::
     :label: examples_nd_poisson_deformation
 
-    x_i = \xi_i + c \prod\limits_{j=1}^n \left( 1 - {x_j}^2 \right) \sin \pi x_j
+    x_i = \xi_i + c\, \xi_i \prod\limits_{j=1}^n \left( 1 - {\xi_j}^2 \right)
+
+The deformation is a polynomial in the reference coordinates, so the Lagrange
+geometry basis represents it exactly and the discretization error is not polluted
+by a geometry approximation.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-137
+.. GENERATED FROM PYTHON SOURCE LINES 111-141
 
 .. code-block:: Python
 
@@ -174,10 +178,10 @@ determines the scale of deformation.
             Input coordinate ``idx``, but somewhat.
         """
         base = x[idx]
-        d = np.full_like(base, c)
+        d = base.copy()
         for v in x:
-            d *= (1 - v**2) * np.sin(np.pi * v)
-        return base + d
+            d *= 1 - v**2
+        return base + c * d
 
 
 
@@ -187,13 +191,13 @@ determines the scale of deformation.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-141
+.. GENERATED FROM PYTHON SOURCE LINES 142-145
 
 Mappings for every coordinate are collected into a joined :class:`SpaceMap`,
 which is then used to map :math:`k`-form components between the reference domain
 and the physical domain.
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-166
+.. GENERATED FROM PYTHON SOURCE LINES 146-170
 
 .. code-block:: Python
 
@@ -228,7 +232,7 @@ and the physical domain.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 167-176
+.. GENERATED FROM PYTHON SOURCE LINES 171-180
 
 With these two utilities, we can start working on computing convergence
 of the FEM discretization in the :math:`L^2`-norm
@@ -240,7 +244,7 @@ results and another, finer, for computing the error.
 With these discretizations defined, we can use previously written functions to
 create the space mappings.
 
-.. GENERATED FROM PYTHON SOURCE LINES 177-192
+.. GENERATED FROM PYTHON SOURCE LINES 181-196
 
 .. code-block:: Python
 
@@ -266,7 +270,7 @@ create the space mappings.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 193-200
+.. GENERATED FROM PYTHON SOURCE LINES 197-204
 
 Along with the :class:`IntegrationSpace` objects to define integration we
 must define the discretization of the :math:`k`-forms using a :class:`FunctionSpace`
@@ -276,7 +280,7 @@ With base function space defined, we can define some :math:`k`-form
 specifications using :class:`KFormSpecs`. These do not contain any degrees of
 freedom themselves, but provide information about the order and function spaces.
 
-.. GENERATED FROM PYTHON SOURCE LINES 201-212
+.. GENERATED FROM PYTHON SOURCE LINES 205-216
 
 .. code-block:: Python
 
@@ -298,7 +302,7 @@ freedom themselves, but provide information about the order and function spaces.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 213-221
+.. GENERATED FROM PYTHON SOURCE LINES 217-225
 
 While for left side symmetry could be exploited, there's no harm to compute
 it in full for this example. To that end, we first compute the two mass
@@ -309,7 +313,7 @@ Now that we have the required blocks, we can assemble the system matrix.
 Alternatively we could have used Schur's complement to compute the solution,
 but for the sake of simplicity here we use the full dense solve.
 
-.. GENERATED FROM PYTHON SOURCE LINES 221-244
+.. GENERATED FROM PYTHON SOURCE LINES 225-248
 
 .. code-block:: Python
 
@@ -343,12 +347,12 @@ but for the sake of simplicity here we use the full dense solve.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 245-247
+.. GENERATED FROM PYTHON SOURCE LINES 249-251
 
 The right side of the Poisson equation can be computed from the "dual projection"
 of the manufactured source term on the function space.
 
-.. GENERATED FROM PYTHON SOURCE LINES 247-261
+.. GENERATED FROM PYTHON SOURCE LINES 251-265
 
 .. code-block:: Python
 
@@ -373,14 +377,14 @@ of the manufactured source term on the function space.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 262-266
+.. GENERATED FROM PYTHON SOURCE LINES 266-270
 
 From here we can split solution vector into degrees of freedom of individual
 :math:`k`-forms represented by :class:`KForm` objects.
 To compute the :math:`L^2` error, we need to reconstruct the computed solution,
 subtract the manufactured solution, then integrate the square of the error.
 
-.. GENERATED FROM PYTHON SOURCE LINES 266-298
+.. GENERATED FROM PYTHON SOURCE LINES 270-302
 
 .. code-block:: Python
 
@@ -423,12 +427,12 @@ subtract the manufactured solution, then integrate the square of the error.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 299-301
+.. GENERATED FROM PYTHON SOURCE LINES 303-305
 
 All the small building blocks discussed before can now be put together
 to form the error calculation function.
 
-.. GENERATED FROM PYTHON SOURCE LINES 301-328
+.. GENERATED FROM PYTHON SOURCE LINES 305-332
 
 .. code-block:: Python
 
@@ -466,12 +470,12 @@ to form the error calculation function.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 329-331
+.. GENERATED FROM PYTHON SOURCE LINES 333-335
 
 For this test, we will use Bernstein basis, Gauss integration rule, and the order
 difference of 1 between the lower and higher order integration rules.
 
-.. GENERATED FROM PYTHON SOURCE LINES 331-371
+.. GENERATED FROM PYTHON SOURCE LINES 335-375
 
 .. code-block:: Python
 
@@ -549,7 +553,7 @@ difference of 1 between the lower and higher order integration rules.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.235 seconds)
+   **Total running time of the script:** (0 minutes 0.885 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_poisson.py:
