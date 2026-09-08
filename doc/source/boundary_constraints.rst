@@ -78,6 +78,16 @@ For flattened element values ``u`` the value of row ``i`` is therefore
    r_i(u) = \sum_{j=row\_offsets_i}^{row\_offsets_{i+1}-1}
      coefficients_j\,u[components_j, local\_dofs_j].
 
+CSR conversion
+--------------
+
+For global element-major rows, :func:`packed_kform_constraints_to_csr` converts
+the packed representation to ``(data, indices, indptr)`` arrays accepted
+directly by ``scipy.sparse.csr_matrix``.  The column indices include the
+element offset and the flattened component offset, so callers do not need to
+materialize row indices or perform per-entry index arithmetic in Python.
+
+
 Boundary load
 -------------
 

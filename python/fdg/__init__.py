@@ -34,6 +34,9 @@ from fdg._fdg import incidence_kform_operator as incidence_kform_operator
 from fdg._fdg import incidence_matrix as incidence_matrix
 from fdg._fdg import incidence_operator as incidence_operator
 from fdg._fdg import (
+    packed_kform_constraints_to_csr as packed_kform_constraints_to_csr,
+)
+from fdg._fdg import (
     transform_contravariant_to_target as transform_contravariant_to_target,
 )
 from fdg._fdg import (

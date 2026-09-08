@@ -1752,6 +1752,30 @@ def incidence_operator(
     """
     ...
 
+def packed_kform_constraints_to_csr(
+    packed: tuple[
+        npt.NDArray[np.uintp],
+        npt.NDArray[np.uint64],
+        npt.NDArray[np.uint32],
+        npt.NDArray[np.uintp],
+        npt.NDArray[np.double],
+    ],
+    specs: KFormSpecs,
+    element_count: int,
+    /,
+) -> tuple[
+    npt.NDArray[np.double],
+    npt.NDArray[np.intp],
+    npt.NDArray[np.uintp],
+]:
+    """Convert packed global k-form rows to CSR constructor arrays.
+
+    Returns ``(data, indices, indptr)`` for direct use with
+    ``scipy.sparse.csr_matrix``. Columns use element-major numbering derived
+    from ``specs`` and ``element_count``.
+    """
+    ...
+
 def compute_mass_matrix(
     space_in: FunctionSpace,
     space_out: FunctionSpace,

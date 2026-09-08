@@ -292,6 +292,148 @@ static int create_pullback(const space_map_object *volume_face, const unsigned e
     *out = pullback;
     return 0;
 }
+static PyObject *packed_kform_constraints_to_csr(PyObject *module, PyObject *const *args, const Py_ssize_t nargs,
+                                                 const PyObject *kwnames)
+{
+    const interplib_module_state_t *const state = PyModule_GetState(module);
+    if (!state)
+        return NULL;
+
+    PyObject *packed_object;
+    PyObject *spec_object;
+    Py_ssize_t element_count;
+    if (parse_arguments_check(
+            (cpyutl_argument_t[]){
+                {.type = CPYARG_TYPE_PYTHON, .p_val = &packed_object},
+                {.type = CPYARG_TYPE_PYTHON, .p_val = &spec_object, .type_check = state->kform_specs_type},
+                {.type = CPYARG_TYPE_SSIZE, .p_val = &element_count},
+                {},
+            },
+            args, nargs, kwnames) < 0)
+        return NULL;
+    if (element_count < 0)
+    {
+        PyErr_SetString(PyExc_ValueError, "element_count must be non-negative.");
+        return NULL;
+    }
+    if (!PyTuple_Check(packed_object) || PyTuple_GET_SIZE(packed_object) != 5)
+    {
+        PyErr_SetString(PyExc_TypeError, "packed must contain five constraint arrays.");
+        return NULL;
+    }
+
+    PyArrayObject *arrays[5];
+    const int expected_types[] = {NPY_UINTP, NPY_UINT64, NPY_UINT32, NPY_UINTP, NPY_DOUBLE};
+    const char *const names[] = {"row_offsets", "element_ids", "components", "local_dofs", "coefficients"};
+    for (unsigned index = 0; index < 5; ++index)
+    {
+        PyObject *const object = PyTuple_GET_ITEM(packed_object, index);
+        if (!PyArray_Check(object) || PyArray_NDIM((PyArrayObject *)object) != 1 ||
+            PyArray_TYPE((PyArrayObject *)object) != expected_types[index])
+        {
+            PyErr_Format(PyExc_TypeError, "packed[%u] must be a one-dimensional %s array.", index, names[index]);
+            return NULL;
+        }
+        arrays[index] = (PyArrayObject *)object;
+    }
+
+    const size_t offset_count = (size_t)PyArray_SIZE(arrays[0]);
+    if (offset_count == 0)
+    {
+        PyErr_SetString(PyExc_ValueError, "packed row_offsets must contain at least one entry.");
+        return NULL;
+    }
+    const size_t entry_count = (size_t)PyArray_SIZE(arrays[1]);
+    for (unsigned index = 2; index < 5; ++index)
+    {
+        if ((size_t)PyArray_SIZE(arrays[index]) != entry_count)
+        {
+            PyErr_SetString(PyExc_ValueError, "packed entry arrays must have equal lengths.");
+            return NULL;
+        }
+    }
+    const size_t first_offset = *(const npy_uintp *)PyArray_GETPTR1(arrays[0], 0);
+    if (first_offset != 0)
+    {
+        PyErr_SetString(PyExc_ValueError, "packed row_offsets must start at zero.");
+        return NULL;
+    }
+    size_t previous_offset = first_offset;
+    for (size_t row = 1; row < offset_count; ++row)
+    {
+        const size_t offset = *(const npy_uintp *)PyArray_GETPTR1(arrays[0], (npy_intp)row);
+        if (previous_offset > offset)
+        {
+            PyErr_SetString(PyExc_ValueError, "packed row_offsets must be non-decreasing.");
+            return NULL;
+        }
+        previous_offset = offset;
+    }
+    if (previous_offset != entry_count)
+    {
+        PyErr_SetString(PyExc_ValueError, "packed row_offsets must end at the entry count.");
+        return NULL;
+    }
+
+    const kform_spec_object *const specs = (const kform_spec_object *)spec_object;
+    const unsigned component_count =
+        combination_total_count((uint8_t)Py_SIZE(specs->function_space), (uint8_t)specs->order);
+    const size_t dofs_per_element = specs->component_offsets[component_count];
+    const size_t element_count_size = (size_t)element_count;
+    if (dofs_per_element != 0 && element_count_size > SIZE_MAX / dofs_per_element)
+    {
+        PyErr_SetString(PyExc_OverflowError, "Global constraint column indices exceed the size limit.");
+        return NULL;
+    }
+    const size_t total_dofs = element_count_size * dofs_per_element;
+    if (total_dofs > (size_t)PY_SSIZE_T_MAX)
+    {
+        PyErr_SetString(PyExc_OverflowError, "Global constraint column indices exceed NumPy's index limit.");
+        return NULL;
+    }
+
+    const npy_intp entry_dims[1] = {(npy_intp)entry_count};
+    PyArrayObject *const column_array = (PyArrayObject *)PyArray_SimpleNew(1, entry_dims, NPY_INTP);
+    if (!column_array)
+        return NULL;
+    npy_intp *const columns = PyArray_DATA(column_array);
+    for (size_t entry = 0; entry < entry_count; ++entry)
+    {
+        const npy_uint64 element_id = *(const npy_uint64 *)PyArray_GETPTR1(arrays[1], (npy_intp)entry);
+        const npy_uint32 component = *(const npy_uint32 *)PyArray_GETPTR1(arrays[2], (npy_intp)entry);
+        const npy_uintp local_dof = *(const npy_uintp *)PyArray_GETPTR1(arrays[3], (npy_intp)entry);
+        if (element_id >= element_count_size || component >= component_count)
+        {
+            PyErr_SetString(PyExc_ValueError, "packed constraint entries reference an invalid element or component.");
+            Py_DECREF(column_array);
+            return NULL;
+        }
+        const size_t component_start = specs->component_offsets[component];
+        const size_t component_end = specs->component_offsets[component + 1];
+        if ((size_t)local_dof >= component_end - component_start)
+        {
+            PyErr_SetString(PyExc_ValueError, "packed constraint entries reference an invalid local DoF.");
+            Py_DECREF(column_array);
+            return NULL;
+        }
+        const size_t column = (size_t)element_id * dofs_per_element + component_start + local_dof;
+        columns[entry] = (npy_intp)column;
+    }
+
+    PyObject *const result = PyTuple_New(3);
+    if (!result)
+    {
+        Py_DECREF(column_array);
+        return NULL;
+    }
+    Py_INCREF(arrays[4]);
+    PyTuple_SET_ITEM(result, 0, (PyObject *)arrays[4]);
+    PyTuple_SET_ITEM(result, 1, (PyObject *)column_array);
+    Py_INCREF(arrays[0]);
+    PyTuple_SET_ITEM(result, 2, (PyObject *)arrays[0]);
+    return result;
+}
+
 static PyObject *compute_kform_boundary_constraints(PyObject *module, PyObject *const *args, const Py_ssize_t nargs,
                                                     const PyObject *kwnames)
 {
@@ -1136,6 +1278,14 @@ load_fail:
 }
 
 PyMethodDef constraint_methods[] = {
+    {
+        .ml_name = "packed_kform_constraints_to_csr",
+        .ml_meth = (void *)packed_kform_constraints_to_csr,
+        .ml_flags = METH_FASTCALL | METH_KEYWORDS,
+        .ml_doc =
+            "packed_kform_constraints_to_csr(packed, specs, element_count, /) -> "
+            "tuple[numpy.ndarray, ...]\nConvert packed global k-form rows to CSR data, indices, and indptr arrays.",
+    },
     {
         .ml_name = "compute_kform_boundary_constraints",
         .ml_meth = (void *)compute_kform_boundary_constraints,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import scipy.sparse
 from fdg import (
     BasisSpecs,
     BasisType,
@@ -12,6 +13,7 @@ from fdg import (
     BoundaryPairGroup,
     FunctionSpace,
     KFormSpecs,
+    packed_kform_constraints_to_csr,
 )
 from fdg.boundary_conditions import _component_relation
 
@@ -246,3 +248,44 @@ def test_boundary_trace_batch_matches_one_sided_assembly() -> None:
         np.testing.assert_allclose(batched_coefficients[start:end], local_coefficients)
         row += local_rows
     assert row == offsets.size - 1
+
+
+def test_packed_kform_constraints_to_csr() -> None:
+    """CSR arrays use element-major component and local-DoF numbering."""
+    base_space = FunctionSpace(
+        BasisSpecs(BasisType.LEGENDRE, 2), BasisSpecs(BasisType.LEGENDRE, 3)
+    )
+    specs = KFormSpecs(1, base_space)
+    packed = (
+        np.asarray([0, 3, 5], dtype=np.uintp),
+        np.asarray([1, 0, 1, 0, 1], dtype=np.uint64),
+        np.asarray([0, 1, 1, 0, 0], dtype=np.uint32),
+        np.asarray([2, 8, 3, 0, 7], dtype=np.uintp),
+        np.asarray([1.5, -2.0, 0.25, 3.0, -4.0], dtype=np.double),
+    )
+
+    data, indices, indptr = packed_kform_constraints_to_csr(packed, specs, 2)
+    np.testing.assert_allclose(data, packed[-1])
+    np.testing.assert_array_equal(indices, [19, 16, 28, 0, 24])
+    np.testing.assert_array_equal(indptr, [0, 3, 5])
+
+    matrix = scipy.sparse.csr_matrix((data, indices, indptr), shape=(2, 34))
+    expected = np.zeros((2, 34))
+    expected[0, [19, 16, 28]] = [1.5, -2.0, 0.25]
+    expected[1, [0, 24]] = [3.0, -4.0]
+    np.testing.assert_allclose(matrix.toarray(), expected)
+
+
+def test_packed_kform_constraints_to_csr_rejects_invalid_entries() -> None:
+    """Invalid packed element references fail before producing CSR indices."""
+    base_space = FunctionSpace(BasisSpecs(BasisType.LEGENDRE, 1))
+    specs = KFormSpecs(0, base_space)
+    packed = (
+        np.asarray([0, 1], dtype=np.uintp),
+        np.asarray([1], dtype=np.uint64),
+        np.asarray([0], dtype=np.uint32),
+        np.asarray([0], dtype=np.uintp),
+        np.asarray([1.0], dtype=np.double),
+    )
+    with pytest.raises(ValueError, match="invalid element"):
+        packed_kform_constraints_to_csr(packed, specs, 1)
