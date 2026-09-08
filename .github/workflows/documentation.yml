@@ -21,10 +21,12 @@ jobs:
           packages: libosmesa6-dev libgl1-mesa-dev
           version: 3.0      
       - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
       - name: Install the extension
         run: uv sync --group docs
       - name: Build the docs
-        run: uv run sphinx-build docs _build
+        run: uv run sphinx-build doc _build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
