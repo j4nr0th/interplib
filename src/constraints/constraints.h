@@ -1,3 +1,19 @@
+/**
+ * @file constraints.h
+ * @brief Trace-constraint assembly for tensor-product differential-form spaces.
+ *
+ * The API describes a k-form test space on a canonical interface and one or
+ * two higher-dimensional element sides. It assembles reference-space trace
+ * pairings, physical-space pairings, and boundary loads into packed sparse
+ * rows. All pointers supplied by the caller are borrowed; this module never
+ * allocates or frees caller-owned storage.
+ *
+ * Dimensions and component indices use the canonical axis order expected by
+ * the combination iterator. Basis functions are evaluated on [-1, 1]. Sizing
+ * outputs and output counts are committed only after their checks succeed;
+ * assembly buffers may be partially populated only where a function documents
+ * that behavior.
+ */
 #ifndef FDG_CONSTRAINTS_H
 #define FDG_CONSTRAINTS_H
 
@@ -6,284 +22,270 @@
 #include <stdint.h>
 
 /**
- * @brief Status and error codes returned by the constraint functions.
+ * @brief Status and error codes returned by constraint functions.
  *
- * A value of CONSTRAINT_SUCCESS means the operation completed successfully;
- * any other value is an error and describes why the operation failed.
+ * Every public operation returns one of these values. A successful operation
+ * returns @ref CONSTRAINT_SUCCESS; no exception or global error state is used.
+ * Values outside this enumeration are reported as "Unknown" by the
+ * status-string helpers.
  */
 typedef enum
 {
-    CONSTRAINT_SUCCESS = 0,       // The operation completed successfully.
-    CONSTRAINT_INVALID_ARGUMENT,  // An argument was invalid, such as a null pointer or an inconsistent specification.
-    CONSTRAINT_INVALID_DIMENSION, // A dimension was out of the supported range.
-    CONSTRAINT_INVALID_ORDER,     // A basis order or form degree was invalid.
-    CONSTRAINT_SIZE_OVERFLOW,     // A required size calculation overflowed the size_t range.
-    CONSTRAINT_INSUFFICIENT_STORAGE, // An output buffer was too small for the requested result.
+    CONSTRAINT_SUCCESS = 0,          /**< Operation completed successfully. */
+    CONSTRAINT_INVALID_ARGUMENT,     /**< Null, inconsistent, or out-of-range argument. */
+    CONSTRAINT_INVALID_DIMENSION,    /**< Dimension exceeds the supported range. */
+    CONSTRAINT_INVALID_ORDER,        /**< Form degree or basis order is invalid. */
+    CONSTRAINT_SIZE_OVERFLOW,        /**< A required size does not fit in size_t. */
+    CONSTRAINT_INSUFFICIENT_STORAGE, /**< A caller-provided output buffer is too small. */
 } constraint_status_t;
 
 /**
- * @brief Specification of the test k-form space on the boundary face.
+ * @brief Specification of the test k-form space on the canonical face.
  *
- * The basis specifications are given for the canonical face axes, in the
- * order the axes appear in the face.
+ * `basis_specs` has `ndim` entries, one for each canonical face axis. The form
+ * degree `order` must satisfy `0 <= order <= ndim`. For a non-scalar form
+ * (`order != 0`), every one-dimensional basis order must be non-zero because
+ * an active covector axis uses a basis of order one lower. For a scalar form,
+ * zero-order one-dimensional bases are permitted. The pointer is borrowed and
+ * may be null only when `ndim == 0`.
  */
 typedef struct
 {
-    // Number of dimensions of the boundary test space.
-    unsigned ndim;
-    // Differential form degree. This must not exceed ndim.
-    unsigned order;
-    // Basis specifications for the boundary axes, in canonical face order.
-    const basis_spec_t *basis_specs;
+    unsigned ndim;                   /**< Number of canonical face dimensions. */
+    unsigned order;                  /**< Differential-form degree; never greater than `ndim`. */
+    const basis_spec_t *basis_specs; /**< `ndim` basis specifications, in face-axis order. */
 } constraint_kform_spec_t;
 
 /**
- * @brief Specification of one side (element) of the interface.
+ * @brief Specification of one higher-dimensional element side.
  *
- * The side has more dimensions than the test space: the first
- * `ndim - test ndim` fixed axes are normal to the face, and the remaining
- * axes span the face itself.
+ * A side has strictly more dimensions than the test face. The first
+ * `ndim - test_ndim` entries of `orientation` identify the fixed element axes
+ * normal to the face; the remaining entries map canonical face axes to element
+ * axes. Entries are signed one-based axis numbers: the sign reverses the
+ * corresponding coordinate, and absolute values form a permutation of
+ * `1..ndim`. The fixed-axis absolute values must be in increasing order.
+ *
+ * `basis_specs` and `orientation` each have `ndim` entries and are borrowed.
  */
 typedef struct
 {
-    // Number of dimensions of the element.
-    unsigned ndim;
-    // Tensor-product basis specifications for the element axes.
-    const basis_spec_t *basis_specs;
-    // Signed one-based orientation: entry 0 is the fixed normal axis; entries 1..ndim-1
-    // map canonical face axes to element axes. Negative entries reverse orientation.
-    const int8_t *orientation;
+    unsigned ndim;                   /**< Number of dimensions of the element. */
+    const basis_spec_t *basis_specs; /**< `ndim` tensor-product element bases. */
+    const int8_t *orientation;       /**< Signed one-based fixed-axis/face-axis mapping. */
 } constraint_element_side_t;
 
 /**
- * @brief One-dimensional quadrature rule along a single canonical face axis.
+ * @brief One-dimensional quadrature rule along one canonical face axis.
+ *
+ * `nodes[0..count)` and `weights[0..count)` are borrowed arrays. A valid rule
+ * has a positive `count` and non-null arrays.
  */
 typedef struct
 {
-    // Number of quadrature points along one canonical face axis.
-    unsigned count;
-    const double *nodes;
-    const double *weights;
+    unsigned count;        /**< Number of nodes and weights on this axis. */
+    const double *nodes;   /**< Quadrature nodes in canonical coordinates. */
+    const double *weights; /**< Corresponding quadrature weights. */
 } constraint_quadrature_t;
 
 /**
- * @brief Tensor-product quadrature rule over a face.
+ * @brief Tensor-product quadrature rule over a canonical face.
  *
- * The total number of points is the product of the node counts of the
- * individual axes and is cached in `point_count`.
+ * `axes` has `ndim` entries. The flattened point index uses the last face axis
+ * as the fastest-changing index. `point_count` is caller-supplied and must
+ * equal the product of all axis counts when the rule is passed to assembly.
  */
 typedef struct
 {
-    unsigned ndim;
-    const constraint_quadrature_t *axes;
-    size_t point_count;
+    unsigned ndim;                       /**< Number of quadrature axes. */
+    const constraint_quadrature_t *axes; /**< `ndim` one-dimensional rules. */
+    size_t point_count;                  /**< Cached product of the axis node counts. */
 } constraint_face_quadrature_t;
 
 /**
- * @brief Sampled pullback of the physical k-form onto the face.
+ * @brief Sampled tangential pullback of a physical k-form on a face.
  *
- * The values are laid out so that the component for physical component
- * `p` at point `i` of component `c` is stored at
+ * Storage is `[element_component][physical_component][point]`; component `c`,
+ * physical component `p`, and point `i` are stored at
  * `values[c * physical_component_count * point_count + p * point_count + i]`.
+ * For a k-form trace, `physical_component_count` normally equals
+ * `C(element_ndim, k)`. Assembly requires the table to contain every component
+ * selected by the side orientation.
  */
 typedef struct
 {
-    // Number of physical k-form components in each sampled pullback.
-    unsigned physical_component_count;
-    // Number of face quadrature points in the sampled pullback.
-    size_t point_count;
-    // Values are indexed as [element component][physical component][point].
-    const double *values;
+    unsigned physical_component_count; /**< Number of physical components per element component. */
+    size_t point_count;                /**< Number of sampled face points. */
+    const double *values;              /**< Borrowed `[element component][physical component][point]` data. */
 } constraint_trace_pullback_t;
 
 /**
  * @brief One two-sided physical trace assembly item in a batch.
  *
- * All items passed to the batch functions use the same test specification;
- * their side, quadrature, metric, and pullback data may differ.
+ * All items in one batch share the test specification passed to the batch
+ * function. The two sides, quadrature rules, face measures, and pullbacks may
+ * differ between items. `sides`, `quadrature`, and `surface_weights` point to
+ * arrays of exactly two records/pointers; `pullbacks` likewise points to two
+ * records when the test form order is non-zero.
  */
 typedef struct
 {
-    // Two element side specifications, with entries weighted by +1 and -1.
-    const constraint_element_side_t *sides;
-    // Two canonical-face quadrature descriptions.
-    const constraint_face_quadrature_t *quadrature;
-    // Two unsigned face-measure arrays, one per side.
-    const double *surface_weights[2];
-    // Two sampled physical k-form pullbacks.
-    const constraint_trace_pullback_t *pullbacks;
+    const constraint_element_side_t *sides;         /**< Two element sides, weighted +1 and -1. */
+    const constraint_face_quadrature_t *quadrature; /**< Two canonical-face quadrature rules. */
+    const double *surface_weights[2];               /**< Two unsigned face-measure arrays. */
+    const constraint_trace_pullback_t *pullbacks;   /**< Two sampled physical k-form pullbacks. */
 } constraint_physical_batch_item_t;
 
 /**
- * @brief Precomputed tensor-product basis values for trace assembly.
+ * @brief Precomputed tensor-product trace basis values.
  *
- * Values are laid out by component, then point, then local degree of freedom:
- * ``values[offsets[c] * point_count + point * dofs[c] + dof]``. The offsets
- * array has ``component_count + 1`` entries and stores cumulative DoF counts.
+ * `component_offsets` has `component_count + 1` cumulative DoF offsets. If
+ * `dofs = offsets[c + 1] - offsets[c]`, the value of local DoF `dof` of
+ * component `c` at point `point` is stored at
+ * `values[offsets[c] * point_count + point * dofs + dof]`.
+ * Both arrays are borrowed; their shape must match the k-form specification
+ * and quadrature point count supplied to the consuming function.
  */
 typedef struct
 {
-    size_t component_count;
-    size_t point_count;
-    const size_t *component_offsets;
-    const double *values;
+    size_t component_count;          /**< Number of components represented by the table. */
+    size_t point_count;              /**< Number of points represented by the table. */
+    const size_t *component_offsets; /**< `component_count + 1` cumulative DoF offsets. */
+    const double *values;            /**< Component/point/DoF-major values. */
 } constraint_trace_basis_values_t;
 
 /**
- * @brief Single non-zero entry of an assembled constraint matrix row.
+ * @brief One non-zero entry of an assembled constraint-matrix row.
  *
- * The entry couples one degree of freedom of the test space (the row) with
- * one degree of freedom of an element side (the column).
+ * The row is implicit: the entry belongs to the row whose interval in
+ * `constraint_rows_view_t::row_offsets` contains its packed index.
  */
 typedef struct
 {
-    // 0 for the first element side, 1 for the second.
-    uint8_t side;
-    // Lexicographic k-form component index on the element side.
-    unsigned component;
-    // Flattened DoF index within that component.
-    size_t local_dof;
-    double coefficient;
+    uint8_t side;       /**< Element side: 0 for the first side, 1 for the second. */
+    unsigned component; /**< Lexicographic k-form component on that side. */
+    size_t local_dof;   /**< Flattened DoF index within `component`. */
+    double coefficient; /**< Matrix coefficient for this row/column pair. */
 } constraint_entry_t;
 
 /**
- * @brief Read-only view of an assembled constraint matrix in packed row form.
+ * @brief Read-only view of a packed sparse-row constraint matrix.
  *
- * The rows are indexed by the degrees of freedom of the test space, in the
- * same order as the offsets computed by constraint_kform_component_offsets.
- * The entries of row `i` are `entries[row_offsets[i] .. row_offsets[i + 1])`.
+ * Row `i` contains `entries[row_offsets[i] .. row_offsets[i + 1])`.
+ * `row_offsets` therefore has `row_count + 1` entries, starts at zero, and
+ * ends at `entry_count`. The arrays are borrowed and are not modified.
  */
 typedef struct
 {
-    // Number of rows and entries in the packed representation.
-    size_t row_count;
-    size_t entry_count;
-    const size_t *row_offsets;
-    const constraint_entry_t *entries;
+    size_t row_count;                  /**< Number of packed rows. */
+    size_t entry_count;                /**< Number of packed entries. */
+    const size_t *row_offsets;         /**< `row_count + 1` non-decreasing offsets. */
+    const constraint_entry_t *entries; /**< `entry_count` packed entries. */
 } constraint_rows_view_t;
 
 /**
- * @brief Get the name of a constraint status value.
- *
- * @param status Status value to get the name for.
- * @return Statically allocated string with the name of the status value,
- *         such as "CONSTRAINT_SUCCESS", or "Unknown" for values outside of
- *         the enum.
+ * @brief Return the symbolic name of a constraint status.
+ * @param status Status value to translate.
+ * @return Pointer to a static string such as `"CONSTRAINT_SUCCESS"`, or
+ *         `"Unknown"` for an out-of-range value.
  */
 const char *constraint_status_to_str(constraint_status_t status);
 
 /**
- * @brief Get the description of a constraint status value.
- *
- * @param status Status value to get the message for.
- * @return Statically allocated string with a short description of what the
- *         status value means, or "Unknown" for values outside of the enum.
+ * @brief Return the short human-readable message for a constraint status.
+ * @param status Status value to translate.
+ * @return Pointer to a static string such as `"Invalid dimension"`, or
+ *         `"Unknown"` for an out-of-range value.
  */
 const char *constraint_status_msg(constraint_status_t status);
 
 /**
- * @brief Compute the number of k-form components of the test space.
+ * @brief Count the k-form components in a test space.
  *
- * @param spec Specification of the test space. The specification is
- *        validated; on failure the outputs are left unmodified.
- * @param out_count Receives the number of components, which is the binomial
- *        coefficient C(ndim, order).
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
- *         `spec` or `out_count` is null, CONSTRAINT_INVALID_DIMENSION if
- *         `ndim` exceeds 255, or CONSTRAINT_INVALID_ORDER if the order
- *         exceeds the dimension or a basis order is zero or the basis type
- *         is invalid.
+ * The result is `C(spec->ndim, spec->order)`. Components use the same
+ * lexicographic combination order as the assembly routines.
+ *
+ * @param spec Test-space specification; it is fully validated.
+ * @param out_count Receives the component count.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INVALID_ARGUMENT` for a null
+ *         pointer, `CONSTRAINT_INVALID_DIMENSION` for a dimension above 255,
+ *         or `CONSTRAINT_INVALID_ORDER` for an invalid degree, basis order,
+ *         or basis type. `*out_count` is unchanged on failure.
  */
 constraint_status_t constraint_kform_component_count(const constraint_kform_spec_t *spec, size_t *out_count);
 
 /**
- * @brief Compute the number of degrees of freedom of one k-form component.
+ * @brief Count the local DoFs of one k-form component.
  *
- * For a component with active axes (those in the wedge product) the basis
- * order along the active axes is reduced by one, so a component of order
- * `order` has `prod_i (order_i + (active_i ? 0 : 1))` degrees of freedom.
+ * An active wedge axis contributes `basis_order` functions; an inactive axis
+ * contributes `basis_order + 1`. The returned product is local to the
+ * component, not its offset in the flattened array.
  *
- * @param spec Specification of the test space, validated as in
- *        constraint_kform_component_count.
- * @param component Index of the component, in the range
- *        [0, C(ndim, order)).
- * @param out_count Receives the number of degrees of freedom.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
- *         `out_count` is null or `component` is out of range,
- *         CONSTRAINT_INVALID_DIMENSION, CONSTRAINT_INVALID_ORDER, or
- *         CONSTRAINT_SIZE_OVERFLOW if the count does not fit in a size_t.
+ * @param spec Test-space specification, validated as above.
+ * @param component Component index in `[0, C(spec->ndim, spec->order))`.
+ * @param out_count Receives the local DoF count.
+ * @return `CONSTRAINT_SUCCESS`, a validation error, `CONSTRAINT_INVALID_ARGUMENT`
+ *         for an out-of-range component or null output, or
+ *         `CONSTRAINT_SIZE_OVERFLOW` if the product overflows `size_t`.
  */
 constraint_status_t constraint_kform_component_dof_count(const constraint_kform_spec_t *spec, unsigned component,
                                                          size_t *out_count);
 
 /**
- * @brief Compute the cumulative offsets of the components into a flattened DoF array.
+ * @brief Compute cumulative offsets for all k-form components.
  *
- * Fills `offsets[0..component_count]` with the start index of each
- * component in the flattened array of all test degrees of freedom; the last
- * entry holds the total number of degrees of freedom.
+ * On success, `offsets[c]` is the first flattened DoF of component `c`, and
+ * `offsets[component_count]` is the total DoF count. Extra output entries are
+ * not touched. If a late overflow is detected, earlier offsets may already
+ * have been written.
  *
- * @param spec Specification of the test space, validated as in
- *        constraint_kform_component_count.
- * @param offset_count Number of entries available in `offsets`. Must be at
- *        least the number of components plus one.
- * @param offsets Array of `offset_count` entries which receives the
- *        offsets.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
- *         `offset_count` is too small, otherwise the validation or overflow
- *         errors of the functions above.
+ * @param spec Test-space specification.
+ * @param offset_count Number of entries available in `offsets`.
+ * @param offsets Output array with at least `component_count + 1` entries.
+ * @return `CONSTRAINT_SUCCESS`, a validation/overflow error, or
+ *         `CONSTRAINT_INSUFFICIENT_STORAGE` when the array is too short.
  */
 constraint_status_t constraint_kform_component_offsets(const constraint_kform_spec_t *spec, size_t offset_count,
                                                        size_t offsets[const static offset_count]);
 
 /**
- * @brief Compute the number of rows and entries of a reference-space L2 trace constraint matrix.
+ * @brief Compute storage requirements for a two-sided reference trace matrix.
  *
- * The reference-space constraint equates, for each test degree of freedom,
- * the trace basis coefficients on both sides of the interface. This
- * function reports the sizes needed by constraint_reference_assemble
- * without assembling the matrix.
+ * There is one row per test-space DoF. Each row contains the trace pairing with
+ * the corresponding mapped component on each side.
  *
- * @param test_spec Specification of the test space.
- * @param sides Array of 2 element side specifications. Each side must have
- *        more dimensions than the test space, with valid basis
- *        specifications and a valid orientation permutation.
- * @param out_row_count Receives the number of rows, one per test degree of
- *        freedom.
- * @param out_entry_count Receives the number of entries.
- * @return CONSTRAINT_SUCCESS on success, otherwise the validation error of
- *         the specifications or CONSTRAINT_SIZE_OVERFLOW if a required size
- *         does not fit in a size_t. On failure the outputs are unmodified.
+ * @param test_spec Test-space specification on the canonical face.
+ * @param sides Two element-side descriptions.
+ * @param out_row_count Receives the number of rows.
+ * @param out_entry_count Receives the packed-entry count.
+ * @return `CONSTRAINT_SUCCESS`, a specification validation error, or
+ *         `CONSTRAINT_SIZE_OVERFLOW`. Outputs are unchanged on failure.
  */
 constraint_status_t constraint_reference_required(const constraint_kform_spec_t *test_spec,
                                                   const constraint_element_side_t sides[const static 2],
                                                   size_t *out_row_count, size_t *out_entry_count);
 
 /**
- * @brief Assemble a reference-space L2 trace constraint matrix into caller-owned packed rows.
+ * @brief Assemble a two-sided reference-space trace constraint matrix.
  *
- * The assembled matrix has one row per test degree of freedom. Each row
- * contains entries coupling to the degrees of freedom of the two element
- * sides, with the coefficient of side 0 being the basis inner product over
- * the face quadrature and the coefficient of side 1 its negative.
+ * Each test DoF produces a face L2 pairing with the mapped trace basis on both
+ * element sides. Side 0 is positive and side 1 negative; orientation
+ * reversals and component permutation parity are included in each coefficient.
  *
- * @param test_spec Specification of the test space.
- * @param sides Array of 2 element side specifications, as validated by
+ * @param test_spec Test-space specification.
+ * @param sides Two element-side descriptions accepted by
  *        constraint_reference_required.
- * @param quadrature Tensor-product quadrature rule over the canonical face,
- *        with one `constraint_quadrature_t` per test dimension. Each axis
- *        must have a positive node count with valid nodes and weights.
- * @param row_offset_capacity Number of entries available in `row_offsets`.
- * @param row_offsets Array which receives the packed row offsets. Must have
- *        room for `row_count + 1` entries, where `row_count` is as reported
- *        by constraint_reference_required. `row_offsets[0]` is set to 0.
- * @param entry_capacity Number of entries available in `entries`.
- * @param entries Array which receives the packed entries.
+ * @param quadrature One-dimensional rules for the face axes. The product of
+ *        their node counts determines the quadrature points; this pointer may
+ *        be null for a zero-dimensional face.
+ * @param row_offset_capacity Number of available `row_offsets` entries.
+ * @param row_offsets Output packed-row offsets with room for `row_count + 1`.
+ * @param entry_capacity Number of available `entries` records.
+ * @param entries Output packed entries.
  * @param out_row_count Receives the number of rows written.
  * @param out_entry_count Receives the number of entries written.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
- *         the provided capacities are smaller than the required sizes,
- *         otherwise the validation errors of the inputs.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INSUFFICIENT_STORAGE`, or an
+ *         input/quadrature/overflow error. Counts are written only on success.
  */
 constraint_status_t constraint_reference_assemble(const constraint_kform_spec_t *test_spec,
                                                   const constraint_element_side_t sides[const static 2],
@@ -294,74 +296,62 @@ constraint_status_t constraint_reference_assemble(const constraint_kform_spec_t 
                                                   size_t *out_row_count, size_t *out_entry_count);
 
 /**
- * @brief Compute the number of rows and entries of a physical-space trace constraint matrix.
+ * @brief Compute storage requirements for a two-sided physical trace matrix.
  *
- * The physical-space constraint pairs the test degrees of freedom with the
- * element degrees of freedom through the pullback of the physical k-form
- * and the unsigned face measure, for both sides of the interface. This
- * function reports the sizes needed by constraint_physical_assemble without
- * assembling the matrix.
+ * The row structure matches the reference count, but every side contributes
+ * all mapped face components because the physical pullback can couple them.
+ * Quadrature, surface measures, and pullback tables are not needed here.
  *
- * @param test_spec Specification of the test space.
- * @param sides Array of 2 element side specifications.
- * @param out_row_count Receives the number of rows, one per test degree of
- *        freedom.
- * @param out_entry_count Receives the number of entries.
- * @return CONSTRAINT_SUCCESS on success, otherwise the validation error of
- *         the specifications or CONSTRAINT_SIZE_OVERFLOW. On failure the
- *         outputs are unmodified.
+ * @param test_spec Test-space specification.
+ * @param sides Two element-side descriptions.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the packed-entry count.
+ * @return `CONSTRAINT_SUCCESS`, a validation error, or
+ *         `CONSTRAINT_SIZE_OVERFLOW`. Outputs are unchanged on failure.
  */
 constraint_status_t constraint_physical_required(const constraint_kform_spec_t *test_spec,
                                                  const constraint_element_side_t sides[const static 2],
                                                  size_t *out_row_count, size_t *out_entry_count);
 
 /**
- * @brief Compute the number of rows and entries of a single-side physical-space trace constraint.
+ * @brief Compute storage requirements for one side of a physical trace.
  *
- * Same as constraint_physical_required, but for one side only; the
- * resulting rows couple only to the degrees of freedom of that single side.
+ * This is the single-side counterpart of constraint_physical_required.
  *
- * @param test_spec Specification of the test space.
- * @param side Element side specification.
- * @param out_row_count Receives the number of rows, one per test degree of
- *        freedom.
- * @param out_entry_count Receives the number of entries.
- * @return CONSTRAINT_SUCCESS on success, otherwise the validation error of
- *         the specifications or CONSTRAINT_SIZE_OVERFLOW. On failure the
- *         outputs are unmodified.
+ * @param test_spec Test-space specification.
+ * @param side Element-side description.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the packed-entry count.
+ * @return `CONSTRAINT_SUCCESS`, a validation error, or
+ *         `CONSTRAINT_SIZE_OVERFLOW`. Outputs are unchanged on failure.
  */
 constraint_status_t constraint_physical_side_required(const constraint_kform_spec_t *test_spec,
                                                       const constraint_element_side_t *side, size_t *out_row_count,
                                                       size_t *out_entry_count);
 
 /**
- * @brief Assemble a single-side physical-space trace constraint matrix.
+ * @brief Assemble one side of a physical trace constraint matrix.
  *
- * The assembled matrix has one row per test degree of freedom, with entries
- * coupling to the degrees of freedom of the given element side, weighted by
- * the face quadrature, the unsigned face measure (`surface_weights`) and
- * the sampled pullback of the physical k-form.
+ * A coefficient is the tensor-product quadrature sum of test and element
+ * trace basis values, multiplied by the unsigned face measure and, for
+ * non-zero form order, the dot product of the two sampled tangential pullback
+ * components. All entries have `side == 0`.
  *
- * @param test_spec Specification of the test space.
- * @param side Element side specification.
- * @param quadrature Tensor-product quadrature rule over the face. Its
- *        `point_count` must match the product of the axis node counts.
- * @param surface_weights Array of `point_count` unsigned face measures, one
- *        per quadrature point.
- * @param pullback Sampled pullback of the physical k-form; only used when
- *        the form order is non-zero. Must have `point_count` points. May be
- *        null for order zero.
- * @param row_offset_capacity Number of entries available in `row_offsets`.
- * @param row_offsets Array which receives the packed row offsets. Must have
- *        room for `row_count + 1` entries. `row_offsets[0]` is set to 0.
- * @param entry_capacity Number of entries available in `entries`.
- * @param entries Array which receives the packed entries, all with
- *        `side` set to 0.
- * @param out_row_count Receives the number of rows written.
- * @param out_entry_count Receives the number of entries written.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
- *         the provided capacities are smaller than the required sizes,
- *         otherwise the validation errors of the inputs.
+ * @param test_spec Test-space specification.
+ * @param side Element-side specification.
+ * @param quadrature Face quadrature whose `point_count` equals the product of
+ *        its axis counts.
+ * @param surface_weights Unsigned face-measure values, one per point.
+ * @param pullback Sampled physical pullback; required for non-zero order and
+ *        ignored for order zero.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output packed row offsets with room for `row_count + 1`.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INSUFFICIENT_STORAGE`, or an
+ *         input/quadrature/overflow error. Counts are written only on success.
  */
 constraint_status_t constraint_physical_side_assemble(
     const constraint_kform_spec_t *test_spec, const constraint_element_side_t *side,
@@ -371,15 +361,30 @@ constraint_status_t constraint_physical_side_assemble(
     constraint_entry_t entries[const static entry_capacity], size_t *out_row_count, size_t *out_entry_count);
 
 /**
- * @brief Assemble a physical trace using caller-precomputed basis values.
+ * @brief Assemble one physical trace using precomputed basis values.
  *
- * This has the same output and sign conventions as
- * @ref constraint_physical_side_assemble, but obtains both the test and
- * element trace basis values from registry-independent precomputed tables.
+ * This has the same signs, row order, and coefficient definition as
+ * constraint_physical_side_assemble, but reads the test and element trace
+ * basis values from caller-precomputed tables. Tables must use the layout
+ * documented by constraint_trace_basis_values_t and have offsets consistent
+ * with the supplied specifications.
  *
- * @param test_basis Precomputed values for the canonical test components.
- * @param element_basis Precomputed values for all element components of the
- *        traced form.
+ * @param test_spec Test-space specification.
+ * @param side Element-side specification.
+ * @param quadrature Face quadrature matching both tables' point counts.
+ * @param surface_weights Unsigned face-measure values, one per point.
+ * @param pullback Sampled physical pullback, required for non-zero order.
+ * @param test_basis Precomputed canonical test trace values.
+ * @param element_basis Precomputed element trace values for all components.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output packed row offsets.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INSUFFICIENT_STORAGE`, or an
+ *         input/quadrature/table/overflow error. Counts are written only on
+ *         success.
  */
 constraint_status_t constraint_physical_side_assemble_precomputed(
     const constraint_kform_spec_t *test_spec, const constraint_element_side_t *side,
@@ -390,42 +395,31 @@ constraint_status_t constraint_physical_side_assemble_precomputed(
     constraint_entry_t entries[const static entry_capacity], size_t *out_row_count, size_t *out_entry_count);
 
 /**
- * @brief Assemble the physical-space boundary load of one element face for a
- *        general k-form datum.
+ * @brief Assemble a physical boundary load for a general k-form datum.
  *
- * Computes the chain integral of the components of a k-form datum (element
- * frame, k = test_spec->order + 1) against the trace of the element
- * (k-1)-form basis on a codimension-1 boundary face. For each face component
- * J (element-frame axes J_e) the only contributing datum component is
- * I = J_e U {a} with a the fixed normal axis:
+ * The test space has degree `k - 1` on a codimension-one face and
+ * `datum_values` contains element-frame k-form components at face quadrature
+ * points. For each face component, the routine selects the datum component
+ * obtained by adjoining the fixed normal axis and integrates it with the
+ * traced element basis. The result is added to `values`, not assigned, so the
+ * caller must zero that array before the first accumulation.
  *
- * ``values[j] = s * o * (-1)^{|{i in J_e : i < a}|} * sum_p w_p u_I(g_p) B_j(g_p)``
- * (chain integral), or, with ``surface_weights != NULL``, the same sum with
- * each weight multiplied by ``surface_weights[p]`` (surface-measure pairing).
+ * With `surface_weights == NULL` this is the metric-free chain integral. If
+ * supplied, each quadrature contribution is also multiplied by the unsigned
+ * mapped face measure.
  *
- * Here ``s`` and ``a`` are the side and index of the fixed normal axis, ``o``
- * is the orientation sign of the mapped component, ``w_p`` are the reference
- * face quadrature weights. When provided, ``surface_weights[p]`` is the
- * absolute mapped face Jacobian determinant at the same point. ``u_I(g_p)`` is
- * the sampled element-frame component of the datum at the canonical face points
- * and ``B_j`` is the element basis of the traced component. At k equal to the element dimension
- * (single datum component) the sign reduces to the outward orientation
- * ``s * (-1)^a`` of the previous scalar-chain-integral behavior.
- *
- * @param test_spec Specification of the (k-1)-form test space on the face.
- * @param side Element side specification with exactly one fixed normal axis.
- * @param quadrature Tensor-product quadrature over the canonical face.
- * @param datum_values Element-frame k-form components sampled at the canonical
- *        face quadrature points, laid out row-major as
- *        ``[component * quadrature->point_count + point]`` with
- *        ``combination_total_count(side->ndim, test_spec->order + 1)``
- *        component rows.
- * @param value_count Length of the output array: the total number of element
- *        (k-1)-form degrees of freedom.
- * @param surface_weights Mapped face Jacobian at the canonical points, or
- *        NULL to assemble the metric-free chain integral.
- * @param values Output array, accumulated over the mapped components.
- * @return `CONSTRAINT_SUCCESS` on success, or an error status.
+ * @param test_spec Test-space specification of degree `k - 1`.
+ * @param side Element side with exactly one fixed normal axis.
+ * @param quadrature Face quadrature with a consistent `point_count`.
+ * @param datum_values Values laid out as
+ *        `[datum_component * point_count + point]` for all `C(side->ndim, k)`
+ *        components.
+ * @param value_count Length of `values`; it must equal the total element trace
+ *        DoF count.
+ * @param surface_weights Optional unsigned face measures, one per point.
+ * @param values Output/accumulator for element trace DoFs.
+ * @return `CONSTRAINT_SUCCESS` or an input/quadrature/overflow error. The
+ *         accumulator may be partially updated if a later validation fails.
  */
 constraint_status_t constraint_physical_side_load(const constraint_kform_spec_t *test_spec,
                                                   const constraint_element_side_t *side,
@@ -435,30 +429,26 @@ constraint_status_t constraint_physical_side_load(const constraint_kform_spec_t 
                                                   double values[const static value_count]);
 
 /**
- * @brief Assemble a physical-space trace constraint matrix for both sides of the interface.
+ * @brief Assemble a two-sided physical trace constraint matrix.
  *
- * Same as constraint_physical_side_assemble, but assembles the rows for
- * both sides at once, with entries of side 0 weighted by +1 and entries of
- * side 1 weighted by -1, so that the assembled equations express the
- * equality of the traces of the two sides.
+ * Side 0 entries carry a positive sign and side 1 entries a negative sign, so
+ * each row expresses equality of the two physical traces. The two
+ * quadratures, surface-measure arrays, and pullback tables may differ.
  *
- * @param test_spec Specification of the test space.
- * @param sides Array of 2 element side specifications.
- * @param quadrature Array of 2 face quadrature rules, one per side.
- * @param surface_weights Array of 2 pointers to the unsigned face measures,
- *        one array per side.
- * @param pullbacks Array of 2 sampled pullbacks of the physical k-form, one
- *        per side. Only used when the form order is non-zero.
- * @param row_offset_capacity Number of entries available in `row_offsets`.
- * @param row_offsets Array which receives the packed row offsets. Must have
- *        room for `row_count + 1` entries. `row_offsets[0]` is set to 0.
- * @param entry_capacity Number of entries available in `entries`.
- * @param entries Array which receives the packed entries.
- * @param out_row_count Receives the number of rows written.
- * @param out_entry_count Receives the number of entries written.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INSUFFICIENT_STORAGE if
- *         the provided capacities are smaller than the required sizes,
- *         otherwise the validation errors of the inputs.
+ * @param test_spec Test-space specification.
+ * @param sides Two element-side specifications.
+ * @param quadrature Two face quadrature descriptions.
+ * @param surface_weights Two arrays of unsigned face measures.
+ * @param pullbacks Two sampled pullbacks; required for non-zero order.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output offsets with room for `row_count + 1` entries.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INSUFFICIENT_STORAGE`, or an
+ *         input/quadrature/pullback/overflow error. Counts are written only on
+ *         success.
  */
 constraint_status_t constraint_physical_assemble(
     const constraint_kform_spec_t *test_spec, const constraint_element_side_t sides[const static 2],
@@ -470,8 +460,17 @@ constraint_status_t constraint_physical_assemble(
 /**
  * @brief Compute storage requirements for a batch of physical trace matrices.
  *
- * The same test space is used for every item. The output counts are the sums
- * of the per-item row and entry counts, in batch order.
+ * Every item uses the same test specification. Returned counts are sums in
+ * input order, with overflow checked before either output is written. A
+ * zero-item batch is valid when the test specification is valid.
+ *
+ * @param test_spec Shared test-space specification.
+ * @param item_count Number of items in `items`.
+ * @param items Batch items; not dereferenced when the count is zero.
+ * @param out_row_count Receives the summed row count.
+ * @param out_entry_count Receives the summed entry count.
+ * @return `CONSTRAINT_SUCCESS`, an item/specification validation error, or
+ *         `CONSTRAINT_SIZE_OVERFLOW`. Outputs are unchanged on failure.
  */
 constraint_status_t constraint_physical_batch_required(
     const constraint_kform_spec_t *test_spec, size_t item_count,
@@ -479,12 +478,24 @@ constraint_status_t constraint_physical_batch_required(
     size_t *out_entry_count);
 
 /**
- * @brief Assemble a batch of physical trace matrices into one packed matrix.
+ * @brief Assemble a batch of two-sided physical trace matrices.
  *
- * Rows from each item are concatenated in input order. Within each item the
- * entry side field remains zero or one and retains the usual +1/-1 signs.
- * This keeps common test-space setup and dispatch at the caller's batch
- * boundary while allowing geometry and orientations to vary per item.
+ * Items are concatenated in input order. Row offsets are rebased to the
+ * combined entry array; each entry retains its item's side, component, local
+ * DoF, and usual +1/-1 side sign.
+ *
+ * @param test_spec Shared test-space specification.
+ * @param item_count Number of items in `items`.
+ * @param items Batch items in output order.
+ * @param row_offset_capacity Capacity of the combined row-offset array.
+ * @param row_offsets Output combined packed-row offsets.
+ * @param entry_capacity Capacity of the combined entry array.
+ * @param entries Output combined packed entries.
+ * @param out_row_count Receives the total row count.
+ * @param out_entry_count Receives the total entry count.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INSUFFICIENT_STORAGE`, or an
+ *         input/quadrature/pullback/overflow error. Earlier items may have
+ *         written output before a later item reports an error.
  */
 constraint_status_t constraint_physical_batch_assemble(
     const constraint_kform_spec_t *test_spec, size_t item_count,
@@ -493,39 +504,38 @@ constraint_status_t constraint_physical_batch_assemble(
     constraint_entry_t entries[const static entry_capacity], size_t *out_row_count, size_t *out_entry_count);
 
 /**
- * @brief Compute the number of row offsets needed for a packed row representation.
- *
+ * @brief Compute the number of offsets required for packed rows.
  * @param row_count Number of rows.
  * @param out_count Receives `row_count + 1`.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
- *         `out_count` is null, CONSTRAINT_SIZE_OVERFLOW if `row_count` is
- *         SIZE_MAX.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INVALID_ARGUMENT` for a null
+ *         output, or `CONSTRAINT_SIZE_OVERFLOW` when `row_count == SIZE_MAX`.
  */
 constraint_status_t constraint_rows_required_offset_count(size_t row_count, size_t *out_count);
 
 /**
- * @brief Compute the entry capacity needed for a packed row representation.
- *
+ * @brief Compute packed-entry capacity for a rectangular row structure.
  * @param row_count Number of rows.
- * @param entries_per_row Number of entries per row.
+ * @param entries_per_row Number of entries in each row.
  * @param out_count Receives `row_count * entries_per_row`.
- * @return CONSTRAINT_SUCCESS on success, CONSTRAINT_INVALID_ARGUMENT if
- *         `out_count` is null, CONSTRAINT_SIZE_OVERFLOW if the product does
- *         not fit in a size_t.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INVALID_ARGUMENT` for a null
+ *         output, or `CONSTRAINT_SIZE_OVERFLOW` when the product overflows
+ *         `size_t`.
  */
 constraint_status_t constraint_rows_required_entry_capacity(size_t row_count, size_t entries_per_row,
                                                             size_t *out_count);
 
 /**
- * @brief Validate a packed row representation of a constraint matrix.
+ * @brief Validate a packed sparse-row constraint representation.
  *
- * Checks that the offsets are non-decreasing, start at zero and end at the
- * entry count, that the entries are non-null when the counts are non-zero,
- * and that every entry references a valid side.
+ * For a non-empty row set, `row_offsets` must be non-null, start at zero, be
+ * non-decreasing, and end at `entry_count`. If entries exist, `entries` must
+ * be non-null and every entry must name side 0 or side 1. A zero-row view may
+ * omit `row_offsets`; callers should use an entry count of zero for such a
+ * view.
  *
- * @param view View of the packed rows to validate.
- * @return CONSTRAINT_SUCCESS if the representation is consistent,
- *         CONSTRAINT_INVALID_ARGUMENT otherwise.
+ * @param view Borrowed packed-row representation to inspect.
+ * @return `CONSTRAINT_SUCCESS` when consistent, or
+ *         `CONSTRAINT_INVALID_ARGUMENT` otherwise.
  */
 constraint_status_t constraint_rows_validate(constraint_rows_view_t view);
 

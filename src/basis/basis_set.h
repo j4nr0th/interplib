@@ -29,6 +29,19 @@ typedef enum
 } basis_set_type_t;
 
 /**
+ * @brief Check if a basis set type is valid.
+ *
+ * @param type The basis set type to check.
+ * @return Non-zero if the type is valid, zero otherwise.
+ */
+static inline int basis_set_type_is_valid(const basis_set_type_t type)
+{
+    // For readibility we use an if statement, compiler optimizes it.
+    return type == BASIS_LEGENDRE || type == BASIS_LAGRANGE_GAUSS_LOBATTO || type == BASIS_LAGRANGE_GAUSS ||
+           type == BASIS_LAGRANGE_UNIFORM || type == BASIS_LAGRANGE_CHEBYSHEV_GAUSS || type == BASIS_BERNSTEIN;
+}
+
+/**
  * @brief Specification of a 1D basis: its type and order.
  *
  * The order is the polynomial degree, so the basis has `order + 1` basis

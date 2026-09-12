@@ -1,3 +1,18 @@
+/**
+ * @file constraints.c
+ * @brief Implementation of reference and physical trace constraints.
+ *
+ * Assembly uses one canonical face coordinate system. Element-side
+ * orientations map that system to signed, one-based element axes; the helper
+ * functions below keep the mapping and its alternating k-form sign in one
+ * place. The public assembly routines first count rows and entries so caller
+ * buffers can be checked before the nested quadrature loops begin.
+ */
+
+/**
+ * The status macros keep the symbolic and human-readable lookup tables in
+ * lockstep without maintaining two independent switch structures.
+ */
 #include "constraints.h"
 #include "cutl/iterators/combination_iterator.h"
 #include <limits.h>
@@ -6,6 +21,11 @@
 #define CONSTRAINT_STATUS_CASE(stat)                                                                                   \
     case stat:                                                                                                         \
         return #stat
+/**
+ * @brief Translate a status code to its symbolic name.
+ * @param status Status value to translate.
+ * @return A static symbolic name, or `"Unknown"` for an out-of-range value.
+ */
 const char *constraint_status_to_str(const constraint_status_t status)
 {
     switch (status)
@@ -24,6 +44,11 @@ const char *constraint_status_to_str(const constraint_status_t status)
 #define CONSTRAINT_STATUS_MSG(stat, msg)                                                                               \
     case stat:                                                                                                         \
         return msg
+/**
+ * @brief Translate a status code to its short diagnostic message.
+ * @param status Status value to translate.
+ * @return A static message, or `"Unknown"` for an out-of-range value.
+ */
 const char *constraint_status_msg(const constraint_status_t status)
 {
     switch (status)
@@ -39,8 +64,21 @@ const char *constraint_status_msg(const constraint_status_t status)
 }
 #undef CONSTRAINT_STATUS_MSG
 
+/**
+ * @brief Validate the common k-form specification invariants.
+ *
+ * The combination iterator stores dimensions and form degree in `uint8_t`, so
+ * dimensions are bounded before any narrowing conversion. Non-scalar forms
+ * need a positive basis order on every axis because an active covector lowers
+ * that order by one during DoF counting and trace evaluation.
+ *
+ * @param spec Specification to inspect; may be null.
+ * @return The first applicable validation status.
+ */
 static constraint_status_t validate_kform_spec(const constraint_kform_spec_t *const spec)
 {
+    // Validate before narrowing to uint8_t for the combination iterator; this
+    // also guarantees later basis-order reductions cannot underflow.
     if (!spec)
         return CONSTRAINT_INVALID_ARGUMENT;
     if (spec->ndim > UINT8_MAX)
@@ -50,20 +88,46 @@ static constraint_status_t validate_kform_spec(const constraint_kform_spec_t *co
     if (spec->ndim != 0 && !spec->basis_specs)
         return CONSTRAINT_INVALID_ARGUMENT;
 
+    // Active axes use one lower polynomial order, so reject zero order only
+    // for non-scalar forms while still validating every basis family.
     for (unsigned idim = 0; idim < spec->ndim; ++idim)
     {
-        if ((spec->order != 0 && spec->basis_specs[idim].order == 0) || spec->basis_specs[idim].type <= BASIS_INVALID ||
-            spec->basis_specs[idim].type > BASIS_BERNSTEIN)
+        if ((spec->order != 0 && spec->basis_specs[idim].order == 0) ||
+            !basis_set_type_is_valid(spec->basis_specs[idim].type))
             return CONSTRAINT_INVALID_ORDER;
     }
     return CONSTRAINT_SUCCESS;
 }
+/**
+ * @brief Decode a component index into its sorted active-axis combination.
+ *
+ * `axes` receives the strictly increasing axis numbers used by the component's
+ * wedge product. Order-zero components have no axes; the one-element array is
+ * still present because standard C does not permit a zero-length array.
+ *
+ * @param ndim Number of element or face dimensions.
+ * @param order Form degree.
+ * @param component Lexicographic combination index.
+ * @param axes Output array with `order` logical entries, or one placeholder
+ *        entry when `order == 0`.
+ */
 static void component_axes(const unsigned ndim, const unsigned order, const unsigned component,
                            uint8_t axes[const static order == 0 ? 1 : order])
 {
     combination_set_to_index((uint8_t)ndim, (uint8_t)order, axes, component);
 }
 
+/**
+ * @brief Test whether a component contains one active covector axis.
+ *
+ * The active axes are sorted, but a linear scan keeps this helper independent
+ * of the combination representation and is negligible beside quadrature work.
+ *
+ * @param order Number of active axes.
+ * @param axes Sorted active-axis combination.
+ * @param axis Zero-based axis to search for.
+ * @return `true` when `axis` is active, otherwise `false`.
+ */
 static bool component_has_axis(const unsigned order, const uint8_t axes[const static order == 0 ? 1 : order],
                                const unsigned axis)
 {
@@ -75,13 +139,29 @@ static bool component_has_axis(const unsigned order, const uint8_t axes[const st
     return false;
 }
 
+/**
+ * @brief Validate one element-side mapping against a face test space.
+ *
+ * Besides checking pointers and basis types, this verifies that `orientation`
+ * is a signed one-based permutation. The fixed normal axes occupy the prefix;
+ * requiring their absolute values to increase makes the prefix canonical and
+ * prevents equivalent side descriptions from producing different signs.
+ *
+ * @param test_spec Validated face test-space specification.
+ * @param side Element-side specification to inspect.
+ * @return A validation status.
+ */
 static constraint_status_t validate_element_side(const constraint_kform_spec_t *const test_spec,
                                                  const constraint_element_side_t *const side)
 {
     if (!side || side->ndim <= test_spec->ndim || !side->basis_specs || !side->orientation)
         return CONSTRAINT_INVALID_ARGUMENT;
 
+    // This short-lived VLA is proportional to the validated element dimension;
+    // it avoids heap ownership in a helper used by every assembly entry point.
     bool used_axes[side->ndim];
+    // First validate basis metadata and initialize the occupancy map used to
+    // detect duplicate absolute axis numbers.
     for (unsigned i = 0; i < side->ndim; ++i)
     {
         used_axes[i] = false;
@@ -90,6 +170,8 @@ static constraint_status_t validate_element_side(const constraint_kform_spec_t *
             return CONSTRAINT_INVALID_ARGUMENT;
     }
 
+    // A signed permutation is checked by absolute value; its signs are
+    // meaningful only after the permutation itself is known to be valid.
     for (unsigned i = 0; i < side->ndim; ++i)
     {
         const int8_t mapped_axis = side->orientation[i];
@@ -99,6 +181,8 @@ static constraint_status_t validate_element_side(const constraint_kform_spec_t *
         used_axes[axis - 1] = true;
     }
 
+    // Fixed axes are canonicalized in increasing absolute order so their
+    // endpoint prefix has a deterministic orientation convention.
     const unsigned fixed_count = side->ndim - test_spec->ndim;
     for (unsigned i = 1; i < fixed_count; ++i)
     {
@@ -111,14 +195,34 @@ static constraint_status_t validate_element_side(const constraint_kform_spec_t *
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Map a face component's axes into an element component.
+ *
+ * The side orientation contributes one sign for every reversed mapped axis.
+ * Sorting the mapped axes into canonical element order contributes the
+ * permutation parity. Together these signs are the pullback sign of the
+ * covector component, while `out_component` is its combination index.
+ *
+ * @param side Validated element-side mapping.
+ * @param boundary_dim Number of canonical face dimensions.
+ * @param order Form degree being mapped.
+ * @param test_axes Sorted canonical face axes of the component.
+ * @param out_component Receives the mapped element component index.
+ * @param out_sign Receives `+1` or `-1`.
+ * @return `CONSTRAINT_SUCCESS`; callers must satisfy the documented
+ *         validation preconditions before calling this internal helper.
+ */
 static constraint_status_t mapped_component(const constraint_element_side_t *const side, const unsigned boundary_dim,
                                             const unsigned order,
                                             const uint8_t test_axes[const static order == 0 ? 1 : order],
                                             unsigned *const out_component, int *const out_sign)
 {
+    // The VLA is bounded by the validated form order and keeps this hot mapping
+    // path allocation-free; order zero still gets one harmless placeholder.
     uint8_t mapped_axes[order == 0 ? 1 : order];
     const unsigned fixed_count = side->ndim - boundary_dim;
     int sign = 1;
+    // Collect the mapped axes from the side's orientation and get the initial sign
     for (unsigned i = 0; i < order; ++i)
     {
         const int8_t mapping = side->orientation[fixed_count + test_axes[i]];
@@ -126,6 +230,9 @@ static constraint_status_t mapped_component(const constraint_element_side_t *con
         if (mapping < 0)
             sign = -sign;
     }
+    // Bubble sort the mapped axes to the canonical order and adjust the sign accordingly
+    // Sorting produces the canonical element-axis combination; each swap
+    // flips the alternating covector sign by one permutation transposition.
     for (unsigned i = 0; i < order; ++i)
     {
         for (unsigned j = i + 1; j < order; ++j)
@@ -140,15 +247,33 @@ static constraint_status_t mapped_component(const constraint_element_side_t *con
         }
     }
 
+    // Get the component index based on the element's mapped axes
     *out_component = combination_get_index(side->ndim, order, mapped_axes);
     *out_sign = sign;
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Unrank one axis of a lexicographically ordered combination.
+ *
+ * The combination index is partitioned by the first possible axis. The size
+ * of each partition is a binomial coefficient, so subtracting partitions
+ * locates the requested axis without allocating or materializing earlier
+ * combinations. `position` is zero-based. Invalid inputs are outside this
+ * helper's contract and produce `UINT_MAX` only as a defensive fallback.
+ *
+ * @param ndim Dimension of the combination universe.
+ * @param order Number of selected axes.
+ * @param index Lexicographic combination index.
+ * @param position Axis position to retrieve.
+ * @return The zero-based axis, or `UINT_MAX` for an invalid request.
+ */
 static unsigned combination_axis_at(const unsigned ndim, const unsigned order, const unsigned index,
                                     const unsigned position)
 {
     unsigned remaining = index;
+    // At each position, skip complete combination blocks until the residual
+    // index falls inside the block for the selected axis.
     unsigned minimum = 0;
     for (unsigned current = 0; current <= position; ++current)
     {
@@ -172,6 +297,22 @@ static unsigned combination_axis_at(const unsigned ndim, const unsigned order, c
     return UINT_MAX;
 }
 
+/**
+ * @brief Map a component index through a validated side orientation.
+ *
+ * This is the index-based counterpart of mapped_component. It computes the
+ * same pullback sign from reversed axes and permutation parity, then ranks the
+ * selected element axes directly in lexicographic order.
+ *
+ * @param side Validated element-side mapping.
+ * @param boundary_dim Number of canonical face dimensions.
+ * @param order Form degree.
+ * @param component Canonical face component index.
+ * @param out_component Receives the mapped element component index.
+ * @param out_sign Receives `+1` or `-1`.
+ * @return `CONSTRAINT_SUCCESS`, or `CONSTRAINT_INVALID_ARGUMENT` for an
+ *         invalid pointer, dimension, order, or component index.
+ */
 static constraint_status_t mapped_component_for_index(const constraint_element_side_t *const side,
                                                       const unsigned boundary_dim, const unsigned order,
                                                       const unsigned component, unsigned *const out_component,
@@ -184,6 +325,8 @@ static constraint_status_t mapped_component_for_index(const constraint_element_s
 
     const unsigned fixed_count = side->ndim - boundary_dim;
     int sign = 1;
+    // Reconstruct the alternating sign from reversed face axes and the
+    // permutation needed to put their mapped element axes in sorted order.
     for (unsigned first = 0; first < order; ++first)
     {
         const unsigned first_axis = combination_axis_at(boundary_dim, order, component, first);
@@ -202,6 +345,8 @@ static constraint_status_t mapped_component_for_index(const constraint_element_s
     }
 
     unsigned selected_count = 0;
+    // Rank the selected element axes directly. This avoids a temporary axis
+    // array and uses the same lexicographic ordering as combination_get_index.
     unsigned minimum = 0;
     unsigned mapped_index = 0;
     for (unsigned element_axis = 0; element_axis < side->ndim; ++element_axis)
@@ -233,6 +378,18 @@ static constraint_status_t mapped_component_for_index(const constraint_element_s
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Validate a precomputed trace-basis table.
+ *
+ * The offsets are checked against the DoF count of every component. This
+ * prevents the assembly loop from having to rediscover component boundaries
+ * and ensures each table uses the same component ordering as the spec.
+ *
+ * @param spec Specification represented by the table.
+ * @param values Table metadata and values to inspect.
+ * @param point_count Required number of points.
+ * @return A validation status.
+ */
 static constraint_status_t validate_trace_basis_values(const constraint_kform_spec_t *const spec,
                                                        const constraint_trace_basis_values_t *const values,
                                                        const size_t point_count)
@@ -258,6 +415,16 @@ static constraint_status_t validate_trace_basis_values(const constraint_kform_sp
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Validate the shared inputs of a two-sided trace operation.
+ *
+ * The count and assembly paths use this one gate so that they agree on side
+ * orientation, basis, and dimension invariants before calculating storage.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two element-side specifications.
+ * @return A validation status.
+ */
 static constraint_status_t constraint_reference_validate(const constraint_kform_spec_t *const test_spec,
                                                          const constraint_element_side_t sides[const static 2])
 {
@@ -278,6 +445,19 @@ static constraint_status_t constraint_reference_validate(const constraint_kform_
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Count rows and entries for a reference trace matrix.
+ *
+ * Reference pairing couples one mapped element component per side to each test
+ * component. This helper deliberately performs the same component/DoF
+ * traversal used by assembly, but only accumulates sizes and checks overflow.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two validated element-side specifications.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return A validation, overflow, or success status.
+ */
 static constraint_status_t constraint_reference_counts(const constraint_kform_spec_t *const test_spec,
                                                        const constraint_element_side_t sides[const static 2],
                                                        size_t *const out_row_count, size_t *const out_entry_count)
@@ -293,6 +473,8 @@ static constraint_status_t constraint_reference_counts(const constraint_kform_sp
 
     size_t row_count = 0;
     size_t entry_count = 0;
+    // Component order is the row-order contract shared by sizing and
+    // assembly; each component contributes all of its local test DoFs.
     for (unsigned test_component = 0; test_component < component_count; ++test_component)
     {
         size_t test_dof_count;
@@ -336,6 +518,18 @@ static constraint_status_t constraint_reference_counts(const constraint_kform_sp
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Public storage-query wrapper for reference assembly.
+ *
+ * This checks the output pointers before delegating to the shared reference
+ * counter, allowing callers to size both packed arrays without modifying them.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two element-side specifications.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return The status returned by constraint_reference_counts.
+ */
 constraint_status_t constraint_reference_required(const constraint_kform_spec_t *const test_spec,
                                                   const constraint_element_side_t sides[const static 2],
                                                   size_t *const out_row_count, size_t *const out_entry_count)
@@ -345,6 +539,20 @@ constraint_status_t constraint_reference_required(const constraint_kform_spec_t 
     return constraint_reference_counts(test_spec, sides, out_row_count, out_entry_count);
 }
 
+/**
+ * @brief Count storage for the two-sided physical trace matrix.
+ *
+ * Unlike reference pairing, physical pairing visits every face component on
+ * each side because the pullback dot product may couple components. The
+ * traversal mirrors physical assembly and checks every addition and product
+ * before accumulating it.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two element-side specifications.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return A validation, overflow, or success status.
+ */
 static constraint_status_t constraint_physical_counts(const constraint_kform_spec_t *const test_spec,
                                                       const constraint_element_side_t sides[const static 2],
                                                       size_t *const out_row_count, size_t *const out_entry_count)
@@ -360,6 +568,8 @@ static constraint_status_t constraint_physical_counts(const constraint_kform_spe
 
     size_t row_count = 0;
     size_t entry_count = 0;
+    // Physical coupling visits every face component on both sides, unlike the
+    // reference path which has one mapped component per side.
     for (unsigned test_component = 0; test_component < test_component_count; ++test_component)
     {
         size_t test_dof_count;
@@ -376,6 +586,8 @@ static constraint_status_t constraint_physical_counts(const constraint_kform_spe
             const constraint_element_side_t *const side = sides + side_index;
             const unsigned face_component_count =
                 combination_total_count((uint8_t)test_spec->ndim, (uint8_t)test_spec->order);
+            // The mapped component determines the column block whose DoFs
+            // can couple to this test row through the physical pullback.
             for (unsigned face_component = 0; face_component < face_component_count; ++face_component)
             {
                 uint8_t face_axes[test_spec->order == 0 ? 1 : test_spec->order];
@@ -408,6 +620,18 @@ static constraint_status_t constraint_physical_counts(const constraint_kform_spe
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Public storage-query wrapper for two-sided physical assembly.
+ *
+ * The wrapper validates output pointers before delegating to the shared count
+ * implementation so callers can use it safely during buffer sizing.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two element-side specifications.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return The status returned by constraint_physical_counts.
+ */
 constraint_status_t constraint_physical_required(const constraint_kform_spec_t *const test_spec,
                                                  const constraint_element_side_t sides[const static 2],
                                                  size_t *const out_row_count, size_t *const out_entry_count)
@@ -417,6 +641,18 @@ constraint_status_t constraint_physical_required(const constraint_kform_spec_t *
     return constraint_physical_counts(test_spec, sides, out_row_count, out_entry_count);
 }
 
+/**
+ * @brief Count storage for one side of a physical trace matrix.
+ *
+ * The single-side count is kept separate from the two-sided count because it
+ * is also used by precomputed-basis and boundary-load paths.
+ *
+ * @param test_spec Face test-space specification.
+ * @param side Element-side specification.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return A validation, overflow, or success status.
+ */
 static constraint_status_t constraint_physical_side_counts(const constraint_kform_spec_t *const test_spec,
                                                            const constraint_element_side_t *const side,
                                                            size_t *const out_row_count, size_t *const out_entry_count)
@@ -470,6 +706,15 @@ static constraint_status_t constraint_physical_side_counts(const constraint_kfor
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Public storage-query wrapper for one-sided physical assembly.
+ *
+ * @param test_spec Face test-space specification.
+ * @param side Element-side specification.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return The status returned by constraint_physical_side_counts.
+ */
 constraint_status_t constraint_physical_side_required(const constraint_kform_spec_t *const test_spec,
                                                       const constraint_element_side_t *const side,
                                                       size_t *const out_row_count, size_t *const out_entry_count)
@@ -479,6 +724,20 @@ constraint_status_t constraint_physical_side_required(const constraint_kform_spe
     return constraint_physical_side_counts(test_spec, side, out_row_count, out_entry_count);
 }
 
+/**
+ * @brief Decode one component-local DoF into tensor-product basis digits.
+ *
+ * Digits are produced by mixed-radix division, with the last element axis as
+ * the fastest-changing digit. Active form axes have one fewer basis function,
+ * so the radix is selected from the component's wedge combination.
+ *
+ * @param ndim Number of element axes.
+ * @param order Form degree.
+ * @param basis Element-axis basis specifications.
+ * @param component Component whose local DoF is being decoded.
+ * @param dof Local DoF index.
+ * @param digits Output array of `ndim` basis indices.
+ */
 static void decode_component_dof(const unsigned ndim, const unsigned order, const basis_spec_t basis[const static ndim],
                                  const unsigned component, size_t dof, unsigned digits[const static ndim])
 {
@@ -493,6 +752,18 @@ static void decode_component_dof(const unsigned ndim, const unsigned order, cons
     }
 }
 
+/**
+ * @brief Evaluate one one-dimensional basis function at a coordinate.
+ *
+ * Order-zero factors are constant one. Higher-order factors use the basis
+ * implementation's prepare/evaluate pair, keeping this helper independent of
+ * the concrete polynomial family.
+ *
+ * @param spec Basis type and order to evaluate.
+ * @param index Basis-function index.
+ * @param x Coordinate in the reference interval.
+ * @return The basis value at `x`.
+ */
 static double evaluate_basis_value(const basis_spec_t spec, const unsigned index, const double x)
 {
     const unsigned order = index == 0 && spec.order == 0 ? 0 : spec.order;
@@ -506,6 +777,19 @@ static double evaluate_basis_value(const basis_spec_t spec, const unsigned index
     return values[index];
 }
 
+/**
+ * @brief Validate quadrature axes and compute their tensor-product size.
+ *
+ * Point flattening throughout this file treats the final axis as the fastest
+ * varying axis. The product is accumulated with a pre-check so malformed
+ * rules cannot wrap a `size_t` count.
+ *
+ * @param ndim Number of axes.
+ * @param quadrature Axis rules; may be null only when `ndim == 0`.
+ * @param out_count Receives the product of all axis counts.
+ * @return `CONSTRAINT_SUCCESS`, `CONSTRAINT_INVALID_ARGUMENT`, or
+ *         `CONSTRAINT_SIZE_OVERFLOW`.
+ */
 static constraint_status_t quadrature_total_count(const unsigned ndim, const constraint_quadrature_t *quadrature,
                                                   size_t *const out_count)
 {
@@ -525,6 +809,13 @@ static constraint_status_t quadrature_total_count(const unsigned ndim, const con
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Evaluate the product of test and element trace bases at one point.
+ *
+ * This forward declaration lets the quadrature integrator appear before the
+ * pointwise basis implementation, while keeping pointwise multiplication in
+ * one helper.
+ */
 static double trace_basis_product_at_point(const constraint_kform_spec_t *test_spec,
                                            const constraint_element_side_t *side, unsigned test_component,
                                            const unsigned test_digits[const static test_spec->ndim],
@@ -532,6 +823,22 @@ static double trace_basis_product_at_point(const constraint_kform_spec_t *test_s
                                            const unsigned element_digits[const static side->ndim],
                                            const double face_nodes[const static test_spec->ndim]);
 
+/**
+ * @brief Integrate one test/element trace-basis product over a face.
+ *
+ * Tensor-product point indices are decoded in the same order as
+ * quadrature_total_count. Invalid quadrature metadata is represented by zero
+ * here; public callers validate it before relying on the resulting entries.
+ *
+ * @param test_spec Face test-space specification.
+ * @param side Element-side specification.
+ * @param quadrature Face-axis quadrature rules.
+ * @param test_component Test-space component.
+ * @param test_digits Test component-local DoF digits.
+ * @param element_component Mapped element component.
+ * @param element_digits Element component-local DoF digits.
+ * @return The quadrature-weighted inner product.
+ */
 static double trace_inner_product(const constraint_kform_spec_t *const test_spec,
                                   const constraint_element_side_t *const side,
                                   const constraint_quadrature_t *quadrature, const unsigned test_component,
@@ -564,6 +871,21 @@ static double trace_inner_product(const constraint_kform_spec_t *const test_spec
     return result;
 }
 
+/**
+ * @brief Evaluate one element k-form trace basis function on a face point.
+ *
+ * Fixed axes are placed at signed endpoints and face axes receive mapped
+ * canonical coordinates. Each element-axis factor uses the reduced basis order
+ * appropriate to whether that axis is active in the traced component.
+ *
+ * @param face_dim Number of canonical face dimensions.
+ * @param side Element-side mapping and bases.
+ * @param order Traced form degree.
+ * @param element_component Element component being evaluated.
+ * @param element_digits Local DoF digits of that component.
+ * @param face_nodes Canonical face coordinates.
+ * @return The element trace basis value.
+ */
 static double element_trace_basis_value(const unsigned face_dim, const constraint_element_side_t *const side,
                                         const unsigned order, const unsigned element_component,
                                         const unsigned element_digits[const static side->ndim],
@@ -574,11 +896,15 @@ static double element_trace_basis_value(const unsigned face_dim, const constrain
     component_axes(side->ndim, order, element_component, element_axes);
 
     double element_coordinates[side->ndim];
+    // Fixed axes are boundary coordinates of the element; their orientation
+    // sign selects the endpoint at which the face is embedded.
     for (unsigned fixed_axis = 0; fixed_axis < fixed_count; ++fixed_axis)
         element_coordinates[(unsigned)(side->orientation[fixed_axis] < 0 ? -side->orientation[fixed_axis]
                                                                          : side->orientation[fixed_axis]) -
                             1] = side->orientation[fixed_axis] < 0 ? -1.0 : 1.0;
 
+    // Remaining orientation entries map canonical face coordinates into the
+    // element frame and may reverse each coordinate independently.
     for (unsigned face_axis = 0; face_axis < face_dim; ++face_axis)
     {
         const int8_t mapping = side->orientation[fixed_count + face_axis];
@@ -587,6 +913,8 @@ static double element_trace_basis_value(const unsigned face_dim, const constrain
     }
 
     double value = 1.0;
+    // Active covector axes use the reduced one-dimensional basis order; all
+    // factors are multiplied to form the tensor-product trace basis.
     for (unsigned element_axis = 0; element_axis < side->ndim; ++element_axis)
     {
         const bool element_active = component_has_axis(order, element_axes, element_axis);
@@ -598,6 +926,22 @@ static double element_trace_basis_value(const unsigned face_dim, const constrain
     return value;
 }
 
+/**
+ * @brief Evaluate the test trace basis times the element trace basis.
+ *
+ * The element factor carries the face-to-element coordinate mapping; the test
+ * factor is evaluated directly in canonical face coordinates. Component
+ * orientation signs are applied by the assembly caller, not hidden here.
+ *
+ * @param test_spec Face test-space specification.
+ * @param side Element-side mapping and bases.
+ * @param test_component Test component.
+ * @param test_digits Test component-local DoF digits.
+ * @param element_component Mapped element component.
+ * @param element_digits Element component-local DoF digits.
+ * @param face_nodes Canonical face coordinates.
+ * @return Product of the two trace basis values.
+ */
 static double trace_basis_product_at_point(const constraint_kform_spec_t *const test_spec,
                                            const constraint_element_side_t *const side, const unsigned test_component,
                                            const unsigned test_digits[const static test_spec->ndim],
@@ -622,6 +966,20 @@ static double trace_basis_product_at_point(const constraint_kform_spec_t *const 
     return value;
 }
 
+/**
+ * @brief Take the physical-component dot product of two pullback samples.
+ *
+ * Values are strided by `point_count`, so this selects one point from two
+ * component blocks without copying either sampled vector.
+ *
+ * @param pullback Pullback table containing both element-component samples.
+ * @param first_component First element component.
+ * @param second_component Second element component.
+ * @param physical_component_count Number of physical components per sample.
+ * @param point_count Number of points in each sample block.
+ * @param point Point to compare.
+ * @return The Euclidean dot product at `point`.
+ */
 static double trace_pullback_dot(const constraint_trace_pullback_t *const pullback, const unsigned first_component,
                                  const unsigned second_component, const unsigned physical_component_count,
                                  const size_t point_count, const size_t point)
@@ -638,6 +996,27 @@ static double trace_pullback_dot(const constraint_trace_pullback_t *const pullba
     return result;
 }
 
+/**
+ * @brief Assemble the two-sided physical trace matrix.
+ *
+ * All validation and capacity checks occur before the row/entry loops. Each
+ * row then visits both sides and every face component; surface measure,
+ * pullback coupling, basis values, and the side signs are multiplied at the
+ * innermost point loop.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two element-side specifications.
+ * @param quadrature Two face quadrature descriptions.
+ * @param surface_weights Two unsigned face-measure arrays.
+ * @param pullbacks Two sampled physical pullback tables.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output packed row offsets.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count on success.
+ * @param out_entry_count Receives the entry count on success.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_physical_assemble(
     const constraint_kform_spec_t *const test_spec, const constraint_element_side_t sides[const static 2],
     const constraint_face_quadrature_t quadrature[const static 2], const double *const surface_weights[const static 2],
@@ -661,6 +1040,8 @@ constraint_status_t constraint_physical_assemble(
     if (row_offset_capacity < required_offsets || entry_capacity < required_entries)
         return CONSTRAINT_INSUFFICIENT_STORAGE;
 
+    // Scalar traces do not have a tangential pullback; non-zero forms require
+    // one sampled pullback table per side with the same point count as its rule.
     if (test_spec->order != 0)
     {
         for (unsigned side_index = 0; side_index < 2; ++side_index)
@@ -700,6 +1081,8 @@ constraint_status_t constraint_physical_assemble(
     size_t row = 0;
     size_t entry = 0;
     row_offsets[0] = 0;
+    // This nested order is the packed-row contract: component-major, then
+    // component-local DoF order, with one offset written after each row.
     for (unsigned test_component = 0; test_component < test_component_count; ++test_component)
     {
         uint8_t test_axes[test_spec->order == 0 ? 1 : test_spec->order];
@@ -722,6 +1105,8 @@ constraint_status_t constraint_physical_assemble(
                     mapped_component(side, test_spec->ndim, test_spec->order, test_axes, &test_element_component,
                                      &test_orientation_sign);
 
+                // Every mapped face component can couple through the physical
+                // pullback, so physical assembly visits all component blocks.
                 for (unsigned face_component = 0; face_component < face_component_count; ++face_component)
                 {
                     uint8_t face_axes[test_spec->order == 0 ? 1 : test_spec->order];
@@ -745,6 +1130,8 @@ constraint_status_t constraint_physical_assemble(
                                                         &point_count);
                         if (status != CONSTRAINT_SUCCESS)
                             return status;
+                        // Decode the flat tensor-product point index with the
+                        // final face axis as the fastest-changing coordinate.
                         for (size_t point = 0; point < point_count; ++point)
                         {
                             size_t remaining = point;
@@ -794,6 +1181,20 @@ constraint_status_t constraint_physical_assemble(
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Compute combined storage requirements for a physical batch.
+ *
+ * Each item is counted independently and totals are accumulated in input
+ * order with overflow checks. The count depends only on the spaces and sides,
+ * so quadrature contents are intentionally not inspected here.
+ *
+ * @param test_spec Shared face test-space specification.
+ * @param item_count Number of batch items.
+ * @param items Batch descriptors.
+ * @param out_row_count Receives the total row count.
+ * @param out_entry_count Receives the total entry count.
+ * @return A validation, overflow, or success status.
+ */
 constraint_status_t constraint_physical_batch_required(
     const constraint_kform_spec_t *const test_spec, const size_t item_count,
     const constraint_physical_batch_item_t items[const static item_count], size_t *const out_row_count,
@@ -833,6 +1234,24 @@ constraint_status_t constraint_physical_batch_required(
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Assemble a concatenated batch of physical trace matrices.
+ *
+ * The per-item assembler writes local rows first; this wrapper shifts each
+ * item's row offsets by the entry prefix accumulated from earlier items. The
+ * initial requirement query checks aggregate capacity before dispatch.
+ *
+ * @param test_spec Shared face test-space specification.
+ * @param item_count Number of batch items.
+ * @param items Batch descriptors in output order.
+ * @param row_offset_capacity Capacity of combined row offsets.
+ * @param row_offsets Output combined row offsets.
+ * @param entry_capacity Capacity of combined entries.
+ * @param entries Output combined entries.
+ * @param out_row_count Receives the total row count.
+ * @param out_entry_count Receives the total entry count.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_physical_batch_assemble(
     const constraint_kform_spec_t *const test_spec, const size_t item_count,
     const constraint_physical_batch_item_t items[const static item_count], const size_t row_offset_capacity,
@@ -857,6 +1276,8 @@ constraint_status_t constraint_physical_batch_assemble(
     size_t row = 0;
     size_t entry = 0;
     row_offsets[0] = 0;
+    // Each item is assembled into its own slice first; the entry prefix is
+    // then added to that item's local row offsets before advancing the slices.
     for (size_t item = 0; item < item_count; ++item)
     {
         size_t item_rows;
@@ -868,6 +1289,8 @@ constraint_status_t constraint_physical_batch_assemble(
         if (status != CONSTRAINT_SUCCESS)
             return status;
         row_offsets[row] = entry;
+        // The nested assembler starts its offsets at zero, so rebase every
+        // local row boundary by the global entry prefix.
         for (size_t local_row = 1; local_row <= item_rows; ++local_row)
             row_offsets[row + local_row] += entry;
         row += item_rows;
@@ -878,6 +1301,27 @@ constraint_status_t constraint_physical_batch_assemble(
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Assemble a one-sided physical trace matrix.
+ *
+ * This follows the same row/component traversal as the two-sided assembler but
+ * emits only side zero. The test-side orientation sign and candidate
+ * element-component orientation sign remain separate until each entry is
+ * written, making both parity contributions explicit.
+ *
+ * @param test_spec Face test-space specification.
+ * @param side Element-side specification.
+ * @param quadrature Face quadrature.
+ * @param surface_weights Unsigned face-measure values.
+ * @param pullback Sampled physical pullback for non-zero form order.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output packed row offsets.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_physical_side_assemble(
     const constraint_kform_spec_t *const test_spec, const constraint_element_side_t *const side,
     const constraint_face_quadrature_t *const quadrature, const double *const surface_weights,
@@ -1002,6 +1446,29 @@ constraint_status_t constraint_physical_side_assemble(
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Assemble a one-sided physical trace from precomputed basis tables.
+ *
+ * This table path preserves the direct assembler's row order, orientation
+ * signs, pullback dot products, and face-measure factors while replacing
+ * repeated basis evaluation with indexed table reads. Metadata is validated
+ * before output rows are written.
+ *
+ * @param test_spec Face test-space specification.
+ * @param side Element-side specification.
+ * @param quadrature Face quadrature matching both tables.
+ * @param surface_weights Unsigned face-measure values.
+ * @param pullback Sampled physical pullback for non-zero form order.
+ * @param test_basis Precomputed canonical test trace values.
+ * @param element_basis Precomputed element trace values.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output packed row offsets.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_physical_side_assemble_precomputed(
     const constraint_kform_spec_t *const test_spec, const constraint_element_side_t *const side,
     const constraint_face_quadrature_t *const quadrature, const double *const surface_weights,
@@ -1120,6 +1587,23 @@ constraint_status_t constraint_physical_side_assemble_precomputed(
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Assemble a boundary load from sampled element-frame k-form data.
+ *
+ * For each traced component, this selects the datum component containing the
+ * fixed normal axis, applies the wedge insertion sign, and accumulates its
+ * quadrature pairing with every element trace basis function. The accumulator
+ * is intentionally not cleared so multiple faces can contribute to one load.
+ *
+ * @param test_spec Face test-space specification of degree one below the datum.
+ * @param side Codimension-one element-side specification.
+ * @param quadrature Face quadrature.
+ * @param datum_values Sampled element-frame datum components.
+ * @param value_count Length of `values`.
+ * @param surface_weights Optional unsigned face measures.
+ * @param values Output accumulator.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_physical_side_load(const constraint_kform_spec_t *const test_spec,
                                                   const constraint_element_side_t *const side,
                                                   const constraint_face_quadrature_t *const quadrature,
@@ -1230,6 +1714,25 @@ constraint_status_t constraint_physical_side_load(const constraint_kform_spec_t 
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Assemble the two-sided reference-space trace matrix.
+ *
+ * After sizing and quadrature validation, each test DoF is paired with the
+ * mapped component on each side. The scalar face integral is shared by all
+ * entries of that component row, while side and orientation signs are applied
+ * when the packed entry is emitted.
+ *
+ * @param test_spec Face test-space specification.
+ * @param sides Two element-side specifications.
+ * @param quadrature Face-axis quadrature rules.
+ * @param row_offset_capacity Capacity of `row_offsets`.
+ * @param row_offsets Output packed row offsets.
+ * @param entry_capacity Capacity of `entries`.
+ * @param entries Output packed entries.
+ * @param out_row_count Receives the row count.
+ * @param out_entry_count Receives the entry count.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_reference_assemble(
     const constraint_kform_spec_t *const test_spec, const constraint_element_side_t sides[const static 2],
     const constraint_quadrature_t *quadrature, const size_t row_offset_capacity,
@@ -1315,6 +1818,16 @@ constraint_status_t constraint_reference_assemble(
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Count the validated specification's k-form components.
+ *
+ * The combination iterator supplies the binomial count and the public helper
+ * preserves its validation status rather than narrowing invalid dimensions.
+ *
+ * @param spec Test-space specification.
+ * @param out_count Receives `C(spec->ndim, spec->order)`.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_kform_component_count(const constraint_kform_spec_t *const spec, size_t *const out_count)
 {
     if (!out_count)
@@ -1327,6 +1840,18 @@ constraint_status_t constraint_kform_component_count(const constraint_kform_spec
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Count the local DoFs of one validated k-form component.
+ *
+ * The component combination determines which axes use reduced covector basis
+ * orders. The product is accumulated with an overflow check before output is
+ * committed.
+ *
+ * @param spec Test-space specification.
+ * @param component Component combination index.
+ * @param out_count Receives the local DoF count.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_kform_component_dof_count(const constraint_kform_spec_t *const spec,
                                                          const unsigned component, size_t *const out_count)
 {
@@ -1359,6 +1884,18 @@ constraint_status_t constraint_kform_component_dof_count(const constraint_kform_
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Build cumulative offsets for all component-local DoFs.
+ *
+ * The offset array is the shared indexing contract for packed values and
+ * precomputed basis tables. Each component count is checked before the running
+ * total advances, so a failure cannot publish an overflowing final offset.
+ *
+ * @param spec Test-space specification.
+ * @param offset_count Number of available offset entries.
+ * @param offsets Output cumulative offsets.
+ * @return A public constraint status.
+ */
 constraint_status_t constraint_kform_component_offsets(const constraint_kform_spec_t *const spec,
                                                        const size_t offset_count,
                                                        size_t offsets[const static offset_count])
@@ -1386,6 +1923,16 @@ constraint_status_t constraint_kform_component_offsets(const constraint_kform_sp
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Compute the packed-row offset-array length.
+ *
+ * A CSR-like row representation stores one sentinel after the final row, hence
+ * the required length is `row_count + 1`.
+ *
+ * @param row_count Number of rows.
+ * @param out_count Receives the required length.
+ * @return `CONSTRAINT_SUCCESS`, invalid output, or overflow.
+ */
 constraint_status_t constraint_rows_required_offset_count(const size_t row_count, size_t *const out_count)
 {
     if (!out_count)
@@ -1396,6 +1943,17 @@ constraint_status_t constraint_rows_required_offset_count(const size_t row_count
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Compute a rectangular packed-entry capacity.
+ *
+ * The multiplication is checked before it is performed so callers can size a
+ * flat entry buffer without relying on wrapped arithmetic.
+ *
+ * @param row_count Number of rows.
+ * @param entries_per_row Entries in each row.
+ * @param out_count Receives the product.
+ * @return `CONSTRAINT_SUCCESS`, invalid output, or overflow.
+ */
 constraint_status_t constraint_rows_required_entry_capacity(const size_t row_count, const size_t entries_per_row,
                                                             size_t *const out_count)
 {
@@ -1407,6 +1965,18 @@ constraint_status_t constraint_rows_required_entry_capacity(const size_t row_cou
     return CONSTRAINT_SUCCESS;
 }
 
+/**
+ * @brief Validate a packed row-offset and entry view.
+ *
+ * Validation is intentionally structural: offsets must describe contiguous,
+ * non-decreasing row intervals and entries may refer only to the two supported
+ * sides. It does not inspect component or local-DoF bounds because those
+ * require element specifications, which are not part of the view.
+ *
+ * @param view Packed row view to inspect.
+ * @return `CONSTRAINT_SUCCESS` when structurally valid, otherwise
+ *         `CONSTRAINT_INVALID_ARGUMENT`.
+ */
 constraint_status_t constraint_rows_validate(const constraint_rows_view_t view)
 {
     if (view.row_count != 0 && !view.row_offsets)
