@@ -8,78 +8,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-static double evaluate_basis_at_integration_point(const unsigned n_space_dim, const multidim_iterator_t *iter_int,
-                                                  const multidim_iterator_t *iter_basis,
-                                                  const basis_set_t *basis_sets[static n_space_dim])
-{
-    double basis_out = 1;
-    for (unsigned idim = 0; idim < n_space_dim; ++idim)
-    {
-        const size_t integration_point_idx = multidim_iterator_get_offset(iter_int, idim);
-
-        const size_t b_idx_out = multidim_iterator_get_offset(iter_basis, idim);
-        const double out_basis_val = basis_set_basis_values(basis_sets[idim], b_idx_out)[integration_point_idx];
-
-        basis_out *= out_basis_val;
-    }
-    return basis_out;
-}
-
-static double evaluate_basis_derivative_at_integration_point(const unsigned n_space_dim, const unsigned i_derivative,
-                                                             const multidim_iterator_t *iter_int,
-                                                             const multidim_iterator_t *iter_basis,
-                                                             const basis_set_t *basis_sets[static n_space_dim])
-{
-    double basis_out = 1;
-    for (unsigned idim = 0; idim < n_space_dim; ++idim)
-    {
-        const size_t integration_point_idx = multidim_iterator_get_offset(iter_int, idim);
-
-        const size_t b_idx_out = multidim_iterator_get_offset(iter_basis, idim);
-        double out_basis_val;
-        if (i_derivative == idim)
-        {
-            out_basis_val = basis_set_basis_derivatives(basis_sets[idim], b_idx_out)[integration_point_idx];
-        }
-        else
-        {
-            out_basis_val = basis_set_basis_values(basis_sets[idim], b_idx_out)[integration_point_idx];
-        }
-
-        basis_out *= out_basis_val;
-    }
-    return basis_out;
-}
-
-static double evaluate_kform_basis_at_integration_point(const unsigned n_space_dim, const multidim_iterator_t *iter_int,
-                                                        const multidim_iterator_t *iter_basis,
-                                                        const basis_set_t *basis_sets[static n_space_dim],
-                                                        const basis_set_t *basis_sets_lower[static n_space_dim],
-                                                        const unsigned order, const uint8_t derivatives[static order])
-{
-    double basis_out = 1;
-    for (unsigned idim = 0, iderivative = 0; idim < n_space_dim; ++idim)
-    {
-        const size_t integration_point_idx = multidim_iterator_get_offset(iter_int, idim);
-
-        const size_t b_idx_out = multidim_iterator_get_offset(iter_basis, idim);
-        double out_basis_val;
-
-        if (iderivative < order && derivatives[iderivative] == idim)
-        {
-            out_basis_val = basis_set_basis_values(basis_sets_lower[idim], b_idx_out)[integration_point_idx];
-            ++iderivative;
-        }
-        else
-        {
-            out_basis_val = basis_set_basis_values(basis_sets[idim], b_idx_out)[integration_point_idx];
-        }
-
-        basis_out *= out_basis_val;
-    }
-    return basis_out;
-}
-
 PyDoc_STRVAR(
     compute_mass_matrix_docstring,
     "compute_mass_matrix(space_in: FunctionSpace, space_out: FunctionSpace, integration: "
@@ -114,13 +42,13 @@ typedef struct
 {
     multidim_iterator_t *iter_in;
     multidim_iterator_t *iter_out;
-    multidim_iterator_t *iter_int;
     unsigned n_rules;
     const integration_rule_t **rules;
     unsigned n_dim_in;
     const basis_set_t **basis_in;
     unsigned n_dim_out;
     const basis_set_t **basis_out;
+    outer_product_pair_iterator_t *pair_iter;
     const double *determinant;
 } mass_matrix_resources_t;
 
@@ -138,8 +66,8 @@ static void mass_matrix_release_resources(mass_matrix_resources_t *resources,
         PyMem_Free(resources->iter_out);
     if (resources->iter_in)
         PyMem_Free(resources->iter_in);
-    if (resources->iter_int)
-        PyMem_Free(resources->iter_int);
+    if (resources->pair_iter)
+        PyMem_Free(resources->pair_iter);
     *resources = (mass_matrix_resources_t){};
 }
 
@@ -152,7 +80,6 @@ static int mass_matrix_create_resources(const function_space_object *space_in, c
     // Create iterators for function spaces and integration rules
     res.iter_in = function_space_iterator(space_in);
     res.iter_out = function_space_iterator(space_out);
-    res.iter_int = integration_specs_iterator(n_rules, p_rules);
     // Get integration rules and basis sets
     res.rules = python_integration_rules_get(n_rules, p_rules, integration_registry);
     res.n_rules = n_rules;
@@ -162,7 +89,10 @@ static int mass_matrix_create_resources(const function_space_object *space_in, c
     const Py_ssize_t n_basis_out = Py_SIZE(space_out);
     res.basis_out = res.rules ? python_basis_sets_get(n_basis_out, space_out->specs, res.rules, basis_registry) : NULL;
     res.n_dim_out = n_basis_out;
-    if (!res.iter_in || !res.iter_out || !res.iter_int || !res.rules || !res.basis_in || !res.basis_out)
+    res.pair_iter = PyMem_Malloc(outer_product_pair_iterator_data_size(n_rules));
+    if (res.pair_iter)
+        outer_product_pair_iterator_init(res.pair_iter, n_rules, res.basis_in, res.basis_out, res.rules, 0, 0);
+    if (!res.iter_in || !res.iter_out || !res.rules || !res.basis_in || !res.basis_out || !res.pair_iter)
     {
         mass_matrix_release_resources(&res, integration_registry, basis_registry);
         return -1;
@@ -314,43 +244,17 @@ static PyObject *compute_mass_matrix(PyObject *module, PyObject *const *args, co
         const size_t index_out = multidim_iterator_get_flat_index(resources.iter_out);
         CPYUTL_ASSERT(index_out < (size_t)dims[0], "Out index out of bounds.");
         const size_t index_in = multidim_iterator_get_flat_index(resources.iter_in);
-        CPYUTL_ASSERT(index_in < (size_t)dims[1], "In index out of bounds.");
-
-        multidim_iterator_t *const iterator_integration = resources.iter_int;
-        // integrate the respective basis
-        multidim_iterator_set_to_start(iterator_integration);
+        // Integrate the basis product over the shared integration points with the pair iterator
+        outer_product_pair_iterator_set_basis_indices(resources.pair_iter, multidim_iterator_offsets(resources.iter_in),
+                                                      multidim_iterator_offsets(resources.iter_out));
         double result = 0;
-        // Integrate the basis product
-        while (!multidim_iterator_is_at_end(iterator_integration))
+        for (;;)
         {
-            // Compute weight and basis values for these outer product basis and integration
-            double weight = resources.determinant
-                                ? resources.determinant[multidim_iterator_get_flat_index(iterator_integration)]
-                                : 1;
-            // double basis_in = 1, basis_out = 1;
-            // for (unsigned idim = 0; idim < n_space_dim; ++idim)
-            // {
-            //     const size_t integration_point_idx = multidim_iterator_get_offset(resources.iter_int, idim);
-            //     weight *= integration_rule_weights_const(resources.rules[idim])[integration_point_idx];
-            //     basis_in *= basis_set_basis_values(
-            //         resources.basis_in[idim],
-            //         multidim_iterator_get_offset(resources.iter_in, idim))[integration_point_idx];
-            //     basis_out *= basis_set_basis_values(
-            //         resources.basis_out[idim],
-            //         multidim_iterator_get_offset(resources.iter_out, idim))[integration_point_idx];
-            // }
-
-            weight *= calculate_integration_weight(n_space_dim, iterator_integration, resources.rules);
-
-            const double basis_in = evaluate_basis_at_integration_point(n_space_dim, iterator_integration,
-                                                                        resources.iter_in, resources.basis_in);
-
-            const double basis_out = evaluate_basis_at_integration_point(n_space_dim, iterator_integration,
-                                                                         resources.iter_out, resources.basis_out);
-
-            multidim_iterator_advance(iterator_integration, n_space_dim - 1, 1);
-            // Add the contributions to the result
-            result += weight * basis_in * basis_out;
+            const size_t ip = outer_product_pair_iterator_point_index(resources.pair_iter);
+            const double point_factor = resources.determinant ? resources.determinant[ip] : 1;
+            result += point_factor * outer_product_pair_iterator_current_value(resources.pair_iter);
+            if (!outer_product_pair_iterator_next_integration_point(resources.pair_iter))
+                break;
         }
 
         // Write the output
@@ -524,6 +428,8 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
     {
         return NULL;
     }
+    // The input side reads derivatives along idx_in; the output side reads plain values
+    outer_product_pair_iterator_set_derivative_masks(resources.pair_iter, 1u << idx_in, 0);
 
     const npy_intp dims[2] = {(npy_intp)multidim_iterator_total_size(resources.iter_out),
                               (npy_intp)multidim_iterator_total_size(resources.iter_in)};
@@ -547,32 +453,20 @@ static PyObject *compute_gradient_mass_matrix(PyObject *module, PyObject *const 
         const size_t index_in = multidim_iterator_get_flat_index(resources.iter_in);
         CPYUTL_ASSERT(index_in < (size_t)dims[1], "In index out of bounds.");
 
-        // integrate the respective basis
-        multidim_iterator_set_to_start(resources.iter_int);
+        // Integrate the basis derivative product over the shared integration points with the pair iterator
+        outer_product_pair_iterator_set_basis_indices(resources.pair_iter, multidim_iterator_offsets(resources.iter_in),
+                                                      multidim_iterator_offsets(resources.iter_out));
         double result = 0;
-        // Integrate the basis product
-        while (!multidim_iterator_is_at_end(resources.iter_int))
+        for (;;)
         {
-            const size_t integration_point_flat_idx = multidim_iterator_get_flat_index(resources.iter_int);
-            // Compute weight and basis values for these outer product basis and integration
-            const double *const local_inverse =
-                inverse_map ? inverse_map + inv_map_stride * integration_point_flat_idx : NULL;
-            double weight = resources.determinant ? resources.determinant[integration_point_flat_idx] *
-                                                        local_inverse[(size_t)idx_in * n_coords + idx_out]
-                                                  : 1;
-
-            weight *= calculate_integration_weight(n_space_dim, resources.iter_int, resources.rules);
-
-            // Chain rule for derivatives
-            const double basis_in = evaluate_basis_derivative_at_integration_point(
-                n_space_dim, idx_in, resources.iter_int, resources.iter_in, resources.basis_in);
-
-            const double basis_out = evaluate_basis_at_integration_point(n_space_dim, resources.iter_int,
-                                                                         resources.iter_out, resources.basis_out);
-
-            multidim_iterator_advance(resources.iter_int, n_space_dim - 1, 1);
-            // Add the contributions to the result
-            result += weight * basis_in * basis_out;
+            const size_t ip = outer_product_pair_iterator_point_index(resources.pair_iter);
+            const double *const local_inverse = inverse_map ? inverse_map + inv_map_stride * ip : NULL;
+            const double point_factor =
+                resources.determinant ? resources.determinant[ip] * local_inverse[(size_t)idx_in * n_coords + idx_out]
+                                      : 1;
+            result += point_factor * outer_product_pair_iterator_current_value(resources.pair_iter);
+            if (!outer_product_pair_iterator_next_integration_point(resources.pair_iter))
+                break;
         }
 
         // Write the output
@@ -690,14 +584,12 @@ PyDoc_STRVAR(
     "array\n"
     "    Mass matrix for inner product of two k-forms.\n");
 
-static void compute_kform_mass_matrix_block(
-    const unsigned n, const unsigned order_left, const uint8_t p_basis_components_left[static restrict order_left],
-    const unsigned order_right, const uint8_t p_basis_components_right[static restrict order_right],
-    multidim_iterator_t *iter_basis_left, multidim_iterator_t *iter_basis_right, multidim_iterator_t *iter_int_pts,
-    const double integration_weights[restrict], const basis_set_t *basis_sets_left[static n],
-    const basis_set_t *basis_sets_right[static n], const basis_set_t *basis_sets_left_lower[static n],
-    const basis_set_t *basis_sets_right_lower[static n], const size_t row_offset, const size_t col_offset,
-    const size_t row_stride, double ptr_mat_out[restrict])
+static void compute_kform_mass_matrix_block(const unsigned n, multidim_iterator_t *iter_basis_left,
+                                            multidim_iterator_t *iter_basis_right,
+                                            outer_product_pair_iterator_t *pair_iter,
+                                            const double integration_weights[restrict], const size_t row_offset,
+                                            const size_t col_offset, const size_t row_stride,
+                                            double ptr_mat_out[restrict])
 {
     size_t idx_left;
     // Loop over basis functions of the left k-form component
@@ -711,19 +603,15 @@ static void compute_kform_mass_matrix_block(
              multidim_iterator_advance(iter_basis_right, n - 1, 1), ++idx_right)
         {
             double integral_value = 0;
-            // Loop over all integration points
-            for (multidim_iterator_set_to_start(iter_int_pts); !multidim_iterator_is_at_end(iter_int_pts);
-                 multidim_iterator_advance(iter_int_pts, n - 1, 1))
+            // Sweep the shared integration points with the pair iterator
+            outer_product_pair_iterator_set_basis_indices(pair_iter, multidim_iterator_offsets(iter_basis_left),
+                                                          multidim_iterator_offsets(iter_basis_right));
+            for (;;)
             {
-                const size_t integration_pt_flat_idx = multidim_iterator_get_flat_index(iter_int_pts);
-                const double int_weight = integration_weights[integration_pt_flat_idx];
-                const double basis_value_left = evaluate_kform_basis_at_integration_point(
-                    n, iter_int_pts, iter_basis_left, basis_sets_left, basis_sets_left_lower, order_left,
-                    p_basis_components_left);
-                const double basis_value_right = evaluate_kform_basis_at_integration_point(
-                    n, iter_int_pts, iter_basis_right, basis_sets_right, basis_sets_right_lower, order_right,
-                    p_basis_components_right);
-                integral_value += int_weight * basis_value_left * basis_value_right;
+                integral_value += integration_weights[outer_product_pair_iterator_point_index(pair_iter)] *
+                                  outer_product_pair_iterator_current_value(pair_iter);
+                if (!outer_product_pair_iterator_next_integration_point(pair_iter))
+                    break;
             }
             ptr_mat_out[(row_offset + idx_left) * row_stride + (col_offset + idx_right)] = integral_value;
         }
@@ -1519,6 +1407,8 @@ static PyObject *compute_kform_interior_product_matrix(PyObject *module, PyObjec
     multidim_iterator_t *iter_basis_right, *iter_basis_left, *iter_int_pts;
     const integration_rule_t **integration_rules;
     const basis_set_t **basis_sets_left, **basis_sets_right, **basis_sets_left_lower, **basis_sets_right_lower;
+    const basis_set_t **merged_basis_left, **merged_basis_right;
+    outer_product_pair_iterator_t *pair_iter;
     basis_spec_t *lower_basis_buffer;
     double *restrict integration_weights;
     uint8_t *basis_components;
@@ -1532,6 +1422,9 @@ static PyObject *compute_kform_interior_product_matrix(PyObject *module, PyObjec
             {multidim_iterator_needed_memory(n), (void **)&iter_basis_right},
             {multidim_iterator_needed_memory(n), (void **)&iter_basis_left},
             {multidim_iterator_needed_memory(n), (void **)&iter_int_pts},
+            {outer_product_pair_iterator_data_size(n), (void **)&pair_iter},
+            {sizeof(basis_set_t *) * n, (void **)&merged_basis_left},
+            {sizeof(basis_set_t *) * n, (void **)&merged_basis_right},
             {sizeof(integration_rule_t *) * n, (void **)&integration_rules},
             {sizeof(basis_set_t *) * n, (void **)&basis_sets_left},
             {sizeof(basis_set_t *) * n, (void **)&basis_sets_left_lower},
@@ -1703,6 +1596,8 @@ static PyObject *compute_kform_interior_product_matrix(PyObject *module, PyObjec
 
     npy_double *restrict const ptr_mat_out = PyArray_DATA(array_out);
 
+    outer_product_pair_iterator_init(pair_iter, n, merged_basis_left, merged_basis_right, NULL, 0, 0);
+
     // Now compute numerical integrals
     size_t row_offset = 0;
     size_t basis_idx_left = 0;
@@ -1715,6 +1610,10 @@ static PyObject *compute_kform_interior_product_matrix(PyObject *module, PyObjec
     {
         // Set the iterator for basis functions of the left k-form component
         kform_basis_set_iterator(n, fn_left->specs, order - 1, p_basis_components_left, iter_basis_left);
+        for (unsigned i = 0; i < n; ++i)
+            merged_basis_left[i] = basis_sets_left[i];
+        for (unsigned i = 0; i < order - 1; ++i)
+            merged_basis_left[p_basis_components_left[i]] = basis_sets_left_lower[p_basis_components_left[i]];
 
         size_t col_offset = 0;
         size_t basis_idx_right = 0;
@@ -1733,10 +1632,16 @@ static PyObject *compute_kform_interior_product_matrix(PyObject *module, PyObjec
             // Set the iterator for basis functions of the right k-form component
             kform_basis_set_iterator(n, fn_right->specs, order, p_basis_components_right, iter_basis_right);
 
-            compute_kform_mass_matrix_block(n, order - 1, p_basis_components_left, order, p_basis_components_right,
-                                            iter_basis_left, iter_basis_right, iter_int_pts, integration_weights,
-                                            basis_sets_left, basis_sets_right, basis_sets_left_lower,
-                                            basis_sets_right_lower, row_offset, col_offset, col_cnt, ptr_mat_out);
+            // Both operands evaluate their component dimensions on the lower basis; merge the per-dimension
+            // basis sets accordingly and hand them to the pair iterator
+            for (unsigned i = 0; i < n; ++i)
+                merged_basis_right[i] = basis_sets_right[i];
+            for (unsigned i = 0; i < order; ++i)
+                merged_basis_right[p_basis_components_right[i]] = basis_sets_right_lower[p_basis_components_right[i]];
+            outer_product_pair_iterator_set_bases(pair_iter, merged_basis_left, merged_basis_right);
+
+            compute_kform_mass_matrix_block(n, iter_basis_left, iter_basis_right, pair_iter, integration_weights,
+                                            row_offset, col_offset, col_cnt, ptr_mat_out);
 
             const unsigned dofs_right = kform_basis_get_num_dofs(n, fn_right->specs, order, p_basis_components_right);
             col_offset += dofs_right;

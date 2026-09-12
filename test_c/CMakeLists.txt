@@ -28,6 +28,10 @@ add_executable(test_covector_basis basis/test_covector_basis.c)
 target_link_libraries(test_covector_basis PRIVATE test_common)
 add_test(NAME covector_basis COMMAND test_covector_basis)
 
+add_executable(test_outer_product_pair_iterator basis/test_outer_product_pair_iterator.c)
+target_link_libraries(test_outer_product_pair_iterator PRIVATE test_common)
+add_test(NAME outer_product_pair_iterator COMMAND test_outer_product_pair_iterator)
+
 # COMMON TESTS
 
 add_executable(test_rw_lock common/test_rw_lock.c)
